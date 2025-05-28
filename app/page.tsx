@@ -26,22 +26,6 @@ export default function Component() {
       categoria: "Seguridad",
       dificultad: "Intermedio",
     },
-    {
-      id: 3,
-      titulo: "Simulador de Ética IA",
-      descripcion: "Navega decisiones éticas complejas en el desarrollo de inteligencia artificial",
-      imagen: "/placeholder.svg?height=200&width=300",
-      categoria: "Ética",
-      dificultad: "Principiante",
-    },
-    {
-      id: 4,
-      titulo: "Laboratorio Forense Digital",
-      descripcion: "Analiza evidencia digital y resuelve casos complejos de cibercrimen",
-      imagen: "/placeholder.svg?height=200&width=300",
-      categoria: "Forense",
-      dificultad: "Avanzado",
-    },
   ]
 
   const cursos = [
@@ -100,7 +84,7 @@ export default function Component() {
           <nav className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Eye className="h-8 w-8 text-purple-400" />
-              <span className="text-xl font-bold text-white">TechGames</span>
+              <span className="text-xl font-bold text-white">TechCheck</span>
             </div>
             <div className="hidden md:flex items-center space-x-6">
               <Link href="#juegos" className="text-slate-300 hover:text-purple-400 transition-colors">
@@ -210,7 +194,7 @@ export default function Component() {
                     }`}
                     onClick={() => {
                       if (juego.esPrincipal) {
-                        window.open("/deepfake-investigation", "_blank")
+                        window.location.href = "/juego"
                       }
                     }}
                   >
@@ -381,7 +365,7 @@ export default function Component() {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <Eye className="h-6 w-6 text-purple-400" />
-              <span className="text-lg font-semibold text-white">TechGames</span>
+              <span className="text-lg font-semibold text-white">TechCheck</span>
             </div>
             <div className="flex space-x-6">
               <Link href="#" className="text-slate-400 hover:text-purple-400 transition-colors">
@@ -396,7 +380,7 @@ export default function Component() {
             </div>
           </div>
           <div className="mt-4 pt-4 border-t border-slate-800 text-center text-slate-500">
-            <p>&copy; 2024 TechGames. Todos los derechos reservados.</p>
+            <p>&copy; 2024 TechCheck. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
