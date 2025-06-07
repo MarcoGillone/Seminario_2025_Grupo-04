@@ -36,11 +36,6 @@ import {
   Skull,
   Scale,
   Monitor,
-  Coffee,
-  FileText,
-  Headphones,
-  Volume2,
-  VolumeX,
   Trophy,
   Star,
   Download,
@@ -178,10 +173,10 @@ const initialCases: MediaCase[] = [
   {
     id: "case2",
     type: "image",
-    title: "CEO haciendo declaraciones controvertidas",
+    title: "Trump acusado de ser un espía ruso",
     source: "Redes sociales",
     description:
-      "Video viral de un CEO de empresa tecnológica haciendo declaraciones que contradicen su posición pública",
+      "Foto que circula en redes sociales donde se ve a Donald Trump siendo arrestado por varios agentes de policía. La imagen ha sido compartida como evidencia de una supuesta conspiración internacional.",
     isDeepfake: true,
     difficulty: "hard",
     hints: [
@@ -250,7 +245,7 @@ const bossMessages = [
 ]
 
 export default function DeepfakeNewsroom() { // aca tienen que ir todos los componentes que queremos resaltar
-  const [timeLeft, setTimeLeft] = useState(300) // 1 hora en segundos
+  const [timeLeft, setTimeLeft] = useState(300) // Timer de 5 minutos
   const [currentCase, setCurrentCase] = useState<MediaCase | null>(null)
   const [emails, setEmails] = useState<Email[]>([])
   const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([])
@@ -733,7 +728,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   }
 
   const restartGame = () => {
-    setTimeLeft(3600)
+    setTimeLeft(300) // Timer de 5 minutos
     setCurrentCase(null)
     setMediaCases(initialCases)
     setSolvedCases([])
@@ -1001,7 +996,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
                   <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                   <Gamepad2 className="w-5 h-5 text-blue-400 ml-2" />
-                  <span className="text-white text-sm font-bold">🎮 DEEPFAKE ANALYST - Juan Carlos Rodriguez</span>
+                  <span className="text-white text-sm font-bold">DEEPFAKE ANALYST - Juan Carlos Rodriguez</span>
                 </div>
                 <div className="flex items-center gap-4 text-white">
                   <div className="flex items-center gap-2 bg-blue-600 px-3 py-1 rounded-full">
@@ -1012,21 +1007,17 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
                     <Zap className="w-4 h-4" />
                     <span className="text-sm font-bold">{playerStats.xp} XP</span>
                   </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setSoundEnabled(!soundEnabled)}
-                    className="text-white hover:bg-gray-700"
-                  >
-                    {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
-                  </Button>
-                  <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full">
-                    <Clock className="w-4 h-4" />
+                  <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full" id="timer-del-juego">
+                    <Clock className="w-4 h-4"/>
                     <span className="text-sm font-mono font-bold">{formatTime(timeLeft)}</span>
                   </div>
                 </div>
               </div>
 
+
+{/* ----------------------------------------------------------------------------------------------------------------------------------------------
+//                                      PANTALLA PRINCIPAL
+// ----------------------------------------------------------------------------------------------------------------------------------------------*/}
               {/* Pantalla principal */}
               <div className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 min-h-[600px] p-4">
                 {/* Barra de tareas */}
@@ -1505,28 +1496,28 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
-                              <Button variant="outline" className="w-full justify-start hover:bg-blue-50 border-blue-200">
+                              <Button variant="outline" className="w-full justify-start hover:bg-blue-50 border-blue-200" id="btn-analisis-metadatos">
                                 <Eye className="w-4 h-4 mr-2" />🔍 Análisis de Metadatos
                               </Button>
                               <Button
                                 onClick={() => {window.open("https://undetectable.ai/es/ai-image-detector", "_blank")}} 
                                 variant="outline"
                                 className="w-full justify-start hover:bg-purple-50 border-purple-200"
-                                data-tour="ai-tool-detect"
+                                data-tour="ai-tool-detect" id="btn-deteccion-artefactos"
                               >
-                                <Zap className="w-4 h-4 mr-2" />⚡ Detección de Artefactos
+                                <Zap className="w-4 h-4 mr-2" />⚡ Detección de Imágenes
                               </Button>
                               <Button
                                 variant="outline"
-                                className="w-full justify-start hover:bg-green-50 border-green-200"
+                                className="w-full justify-start hover:bg-green-50 border-green-200" id="btn-analisis-facial"
                               >
                                 <Target className="w-4 h-4 mr-2" />🎯 Análisis Facial
                               </Button>
                               <Button
                                 variant="outline"
-                                className="w-full justify-start hover:bg-orange-50 border-orange-200"
+                                className="w-full justify-start hover:bg-orange-50 border-orange-200" id="btn-sincronizacion"
                               >
-                                <Video className="w-4 h-4 mr-2" />🎬 Sincronización Audio-Video
+                                <Video className="w-4 h-4 mr-2" />🎬 Sincronización Audio-Video 
                               </Button>
                             </CardContent>
                           </Card>
@@ -1745,18 +1736,10 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
           </div>
 
           {/* Elementos del escritorio físico */}
-          <div className="fixed bottom-4 left-4 flex items-center gap-4 z-20">
+          <div className="fixed top-4 left-4 flex items-center gap-4 z-20">
             <Button onClick={() => (window.location.href = "/")}
-              className="cursor-pointer bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-white/30 hover:scale-110 transition-transform">
-              <Coffee className="w-6 h-6 text-amber-600" />
-            </Button>
-            
-            <Button onClick={()=>(window.location.href = "/")} className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-white/30 hover:scale-110 transition-transform">
-              <Headphones className="w-6 h-6 text-gray-600" />
-            </Button>
-            
-            <Button className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-white/30 hover:scale-110 transition-transform">
-              <FileText className="w-6 h-6 text-blue-600" />
+              className="cursor-pointer bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-white/30 hover:scale-110 transition-transform text-gray-700 font-semibold">
+              Volver al inicio
             </Button>
           </div>
         </div>

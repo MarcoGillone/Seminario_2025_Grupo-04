@@ -6,7 +6,7 @@ const pasos = [
     id: 'btn-comando',
     selector: '#btn-centro-de-comando',
     titulo: 'Centro de Comando',
-    descripcion: 'Acá accedés a las misiones pendientes, completadas y estadísticas generales del nivel.',
+    descripcion: 'Acá accedés a tus casos pendientes, completados y estadísticas generales del nivel.',
   },
   {
     id: 'mail',
@@ -27,11 +27,18 @@ const pasos = [
     descripcion: 'Interactuá con la IA para obtener consejos sobre el caso y herramientas de análisis.',
   },
   {
+    id: 'timer-del-juego',
+    selector: '#timer-del-juego',
+    titulo: 'Timer',
+    descripcion: 'Acá podés ver el tiempo restante que te queda para poder resolver los casos. ¡El tiempo corre!',
+  },
+  {
     id: 'centro-de-comando',
     selector: '#centro-de-comando',
     titulo: 'Centro de Comando',
-    descripcion: 'Acá accedés a las misiones pendientes, completadas y estadísticas generales del nivel.',
+    descripcion: 'Desde esta sección podés gestionar tus investigaciones: revisar casos activos, consultar los que ya resolviste y ver tu progreso general en el nivel.',
   },
+  
 ];
 
 const Tour = ({ onFinish }) => {
