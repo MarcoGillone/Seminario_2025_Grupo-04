@@ -465,35 +465,36 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
       {
         id: "email1",
         from: "fuente.anonima@protonmail.com",
-        subject: "🎯 MISIÓN: Material comprometedor",
+        subject: "🎯 MISIÓN: Ronaldo y Herbalife",
         content:
-          "Sen, adjunto material que requiere análisis inmediato. Su misión: verificar autenticidad antes de publicar. El futuro de la verdad está en sus manos.",
+          "Sen, detectamos una posible promoción de Herbalife por parte de Cristiano Ronaldo. Verificá autenticidad de la imagen. Hay sospechas de montaje.",
         timestamp: "10:30",
         hasAttachment: true,
-        caseId: "case1",
+        caseId: "case1", // Ronaldo y Herbalife
         isRead: false,
         priority: "normal",
       },
       {
         id: "email2",
-        from: "comando.central@newsroom.com",
-        subject: "⚡ OPERACIÓN: Deadline crítico",
+        from: "inteligencia.global@newsintel.org",
+        subject: "🛑 ALERTA: Trump detenido",
         content:
-          "Juan Carlos, necesitamos los resultados del análisis ASAP. La competencia ya está trabajando en esto. ¡No podemos perder esta batalla!",
-        timestamp: "09:15",
-        hasAttachment: false,
+          "Juan Carlos, circula una imagen de Trump siendo arrestado. Sospechamos deepfake. La difusión está aumentando. Necesitamos verificación urgente.",
+        timestamp: "09:45",
+        hasAttachment: true,
+        caseId: "case2", // Trump espía ruso
         isRead: false,
         priority: "urgent",
       },
       {
         id: "email3",
-        from: "aliados.reuters@news.com",
-        subject: "✅ INTEL: Material verificado",
+        from: "cinefilos.latam@filtrados.com",
+        subject: "🎬 Francella en Hollywood",
         content:
-          "JuanCa, adjuntamos material ya verificado por nuestro equipo. Pueden proceder con confianza. +100 XP por análisis correcto.",
-        timestamp: "08:45",
+          "JuanCa, nos llegó esta imagen de Francella como Rambo. ¿Real o montaje publicitario? Urge verificar antes de publicar en primicia.",
+        timestamp: "09:00",
         hasAttachment: true,
-        caseId: "case3",
+        caseId: "case3", // Francella-Rambo
         isRead: false,
         priority: "normal",
       },
@@ -1503,7 +1504,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
                                 onClick={() => {window.open("https://undetectable.ai/es/ai-image-detector", "_blank")}} 
                                 variant="outline"
                                 className="w-full justify-start hover:bg-purple-50 border-purple-200"
-                                data-tour="ai-tool-detect" id="btn-deteccion-artefactos"
+                                data-tour="ai-tool-detect" id="btn-deteccion-imagenes"
                               >
                                 <Zap className="w-4 h-4 mr-2" />⚡ Detección de Imágenes
                               </Button>
@@ -1788,10 +1789,12 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
           </button>
         )}
 
-        {mostrarTour && (
-          <Tour onFinish={() => setMostrarTour(false)} />
-        )}
-
+      {mostrarTour && (
+        <Tour 
+          onFinish={() => setMostrarTour(false)} 
+          setActiveWindow={setActiveWindow} 
+        />
+      )}
       </div>    
 
     </div>
