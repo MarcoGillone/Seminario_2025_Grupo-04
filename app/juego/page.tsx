@@ -1,7 +1,6 @@
 "use client"
 
-
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -9,7 +8,6 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Progress } from "@/components/ui/progress"
-import { useRouter } from "next/navigation";
 import {
   Mail,
   MessageCircle,
@@ -41,8 +39,6 @@ import {
   VolumeX,
   Trophy,
   Star,
-  Download,
-  Award,
   Shield,
   Gamepad2,
   Sparkles,
@@ -154,7 +150,7 @@ const whatsappContacts: WhatsAppContact[] = [
 ]
 
 const initialCases: MediaCase[] = [
-    {
+  {
     id: "case1",
     type: "image",
     title: "Cristiano Ronaldo promociona la controversial Herbalife",
@@ -165,11 +161,11 @@ const initialCases: MediaCase[] = [
     hints: [
       "Observa las sombras y la iluminación inconsistente",
       "Revisa la calidad de imagen alrededor del rostro",
-      "Los bordes del cabello parecen artificiales",  
+      "Los bordes del cabello parecen artificiales",
     ],
     mediaUrl: "img/CR7 Herbalife.jpg",
     realImageUrl: "img/CR7 Herbalife.jpg",
-    xpReward:100,
+    xpReward: 100,
     complexity: ["Iluminación básica", "Bordes simples"],
     level: 1,
   },
@@ -189,7 +185,7 @@ const initialCases: MediaCase[] = [
     ],
     mediaUrl: "img/Trump IA.jpg",
     realImageUrl: "img/Trump IA.jpg",
-    xpReward:100,
+    xpReward: 100,
     complexity: ["Iluminación básica", "Bordes simples"],
     level: 1,
   },
@@ -208,7 +204,7 @@ const initialCases: MediaCase[] = [
     ],
     mediaUrl: "img/Francella_Rambo.jpg",
     realImageUrl: "img/Francella_Rambo.jpg",
-    xpReward:100,
+    xpReward: 100,
     complexity: ["Iluminación básica", "Bordes simples"],
     level: 1,
   },
@@ -248,7 +244,26 @@ const bossMessages = [
 ]
 
 export default function DeepfakeNewsroom() {
-  const [timeLeft, setTimeLeft] = useState(300) // 1 hora en segundos
+  const [showIntroduction, setShowIntroduction] = useState(true)
+  // Calcular tiempo base según nivel de dificultad
+  const calculateTimeByLevel = (level: number): number => {
+    const baseTimes = {
+      1: 1800, // Nivel 1: 30 minutos (era 1 hora)
+      2: 1650, // Nivel 2: 27.5 minutos (era 55 min)
+      3: 1500, // Nivel 3: 25 minutos (era 50 min)
+      4: 1350, // Nivel 4: 22.5 minutos (era 45 min)
+      5: 1200, // Nivel 5: 20 minutos (era 40 min)
+      6: 1050, // Nivel 6: 17.5 minutos (era 35 min)
+      7: 900, // Nivel 7: 15 minutos (era 30 min)
+      8: 750, // Nivel 8: 12.5 minutos (era 25 min)
+      9: 600, // Nivel 9: 10 minutos (era 20 min)
+      10: 450, // Nivel 10+: 7.5 minutos (era 15 min)
+    }
+
+    return baseTimes[Math.min(level, 10) as keyof typeof baseTimes] || 450
+  }
+
+  const [timeLeft, setTimeLeft] = useState(calculateTimeByLevel(1)) // 1 hora en segundos (3600)
   const [currentCase, setCurrentCase] = useState<MediaCase | null>(null)
   const [emails, setEmails] = useState<Email[]>([])
   const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([])
@@ -573,50 +588,72 @@ export default function DeepfakeNewsroom() {
     }
   }, [penalties, isGameOver])
 
-  // Temporizador
+  // ===== SISTEMA DE TEMPORIZADOR =====
+  // Controla el tiempo límite de la misión (1 hora = 3600 segundos)
+  // El temporizador cuenta hacia atrás y termina el juego cuando llega a 0
   useEffect(() => {
-    if (isGameOver) return
+    if (isGameOver) return // No ejecutar si el juego ya terminó
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 0) {
-          clearInterval(timer)
+          clearInterval(timer) // Detener el temporizador
           if (!isGameOver) {
             setIsGameOver(true)
-            setGameOverReason("timeout")
+            setGameOverReason("timeout") // Razón: tiempo agotado
             showBoss("angry", "⏰ ¡Tiempo agotado! La misión ha fallado.", 6000)
           }
           return 0
         }
-        return prev - 1
+        return prev - 1 // Decrementar un segundo
       })
-    }, 1000)
+    }, 1000) // Ejecutar cada 1000ms (1 segundo)
 
-    return () => clearInterval(timer)
+    return () => clearInterval(timer) // Limpiar el temporizador al desmontar
   }, [isGameOver])
 
-  // Generar nuevos casos cuando se resuelven
-  useEffect(() => {
-    if (solvedCases.length > 0 && solvedCases.length % 3 === 0) {
-      const newLevel = Math.floor(solvedCases.length / 3) + 1
-      const newCase = generateNewCase(newLevel)
-      setMediaCases((prev) => [...prev, newCase])
-      setCaseCounter((prev) => prev + 1)
-
-      // Notificación de nuevo caso
-      setNotifications((prev) => [...prev, `🆕 ¡Nuevo caso desbloqueado! Nivel ${newLevel}`])
-      setTimeout(() => {
-        setNotifications((prev) => prev.slice(1))
-      }, 5000)
-    }
-  }, [solvedCases.length, caseCounter])
-
+  // ===== FUNCIÓN PARA FORMATEAR EL TIEMPO =====
+  // Convierte segundos a formato HH:MM:SS para mostrar en pantalla
   const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
+    const hours = Math.floor(seconds / 3600) // Calcular horas
+    const minutes = Math.floor((seconds % 3600) / 60) // Calcular minutos
+    const secs = seconds % 60 // Calcular segundos restantes
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
+
+  // ===== SISTEMA DE GENERACIÓN DE CASOS =====
+  // Genera nuevos casos dinámicamente de 3 en 3 cuando el jugador completa casos
+  const triggeredLevels = useRef<Set<number>>(new Set())
+
+  useEffect(() => {
+    const uniqueAttempts = new Set([...solvedCases, ...wrongAnswers])
+    const totalAttempts = uniqueAttempts.size
+
+    // Generar 3 nuevos casos cada 3 casos completados (resueltos o fallados)
+    if (totalAttempts > 0 && totalAttempts % 3 === 0) {
+      const level = Math.floor(totalAttempts / 3) + 1
+
+      if (!triggeredLevels.current.has(level)) {
+        // Generar 3 casos nuevos del mismo nivel
+        const newCases:any[] = []
+        for (let i = 0; i < 3; i++) {
+          const newCase = generateNewCase(level)
+          newCase.id = `case${caseCounter + i}` // Asegurar IDs únicos
+          newCases.push(newCase)
+        }
+
+        setMediaCases((prev) => [...prev, ...newCases])
+        setCaseCounter((prev) => prev + 3) // Incrementar contador por 3
+
+        setNotifications((prev) => [...prev, `🆕 ¡3 nuevos casos desbloqueados! Nivel ${level}`])
+        setTimeout(() => {
+          setNotifications((prev) => prev.slice(1))
+        }, 5000)
+
+        triggeredLevels.current.add(level)
+      }
+    }
+  }, [solvedCases, wrongAnswers, caseCounter])
 
   const handleCaseDecision = (caseId: string, userDecision: boolean) => {
     if (isGameOver) return
@@ -634,8 +671,30 @@ export default function DeepfakeNewsroom() {
       setPlayerStats((prev) => {
         const newXp = prev.xp + case_.xpReward
         const newStreak = prev.streak + 1
-        const newLevel = Math.floor(newXp / 500) + 1
+
+        // Calcular nivel basado en total de intentos (cada 3 respuestas = 1 nivel)
+        const totalAttempts = solvedCases.length + wrongAnswers.length + 1
+        const newLevel = Math.floor(totalAttempts / 3) + 1
         const newRank = rankTitles[Math.min(newLevel - 1, rankTitles.length - 1)]
+
+        // ===== AJUSTE DE TIEMPO POR NIVEL =====
+        // Si subió de nivel, ajustar el tiempo restante
+        if (newLevel > prev.level) {
+          const newTimeLimit = calculateTimeByLevel(newLevel)
+          const currentProgress = (calculateTimeByLevel(prev.level) - timeLeft) / calculateTimeByLevel(prev.level) // Progreso actual (0-1)
+          const adjustedTime = Math.max(150, newTimeLimit - newTimeLimit * currentProgress) // Mínimo 2.5 minutos
+
+          setTimeLeft(Math.floor(adjustedTime))
+
+          // Notificar cambio de tiempo
+          setNotifications((prevNotifs) => [
+            ...prevNotifs,
+            `⏰ ¡Nivel ${newLevel}! Tiempo ajustado: ${formatTime(Math.floor(adjustedTime))}`,
+          ])
+          setTimeout(() => {
+            setNotifications((prevNotifs) => prevNotifs.slice(1))
+          }, 6000)
+        }
 
         return {
           ...prev,
@@ -726,7 +785,8 @@ export default function DeepfakeNewsroom() {
   }
 
   const restartGame = () => {
-    setTimeLeft(3600)
+    setTimeLeft(calculateTimeByLevel(1)) // Reiniciar con tiempo del nivel 1
+    setShowIntroduction(true) // Mostrar introducción nuevamente
     setCurrentCase(null)
     setMediaCases(initialCases)
     setSolvedCases([])
@@ -744,6 +804,7 @@ export default function DeepfakeNewsroom() {
     setBossAppearance({ isVisible: false, mood: "normal", message: "", duration: 0 })
     setNotifications([])
     setCaseCounter(4)
+    triggeredLevels.current.clear() // IMPORTANTE: Limpiar los niveles activados
     setPlayerStats({
       level: 1,
       xp: 0,
@@ -755,98 +816,178 @@ export default function DeepfakeNewsroom() {
     })
   }
 
-  if (showVictory) {
+  // ===== PANTALLA DE INTRODUCCIÓN =====
+  if (showIntroduction) {
     return (
       <div
         className="min-h-screen flex items-center justify-center p-4 relative"
         style={{
-          background: "linear-gradient(45deg, #FFD700, #FFA500, #FF6347, #FF1493)",
-          backgroundSize: "400% 400%",
-          animation: "gradient 3s ease infinite",
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          backgroundAttachment: "fixed",
         }}
       >
         <div className="absolute inset-0 bg-black/20"></div>
-        <Card className="max-w-2xl w-full relative z-10 border-yellow-500 shadow-2xl bg-gradient-to-br from-yellow-50 to-orange-50">
-          <CardHeader className="text-center bg-gradient-to-r from-yellow-500 to-orange-500 text-white rounded-t-lg">
+
+        <Card className="max-w-4xl w-full relative z-10 border-blue-500 shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50">
+          <CardHeader className="text-center bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-t-lg">
             <div className="mx-auto mb-4">
-              <Trophy className="w-20 h-20 animate-bounce" />
+              <Shield className="w-20 h-20 animate-pulse" />
             </div>
-            <CardTitle className="text-4xl font-bold">🎉 ¡MISIÓN COMPLETADA! 🎉</CardTitle>
-            <CardDescription className="text-lg text-yellow-100">
-              ¡Felicidades! Has demostrado ser un verdadero Periodista anti Deepfakes
+            <CardTitle className="text-4xl font-bold">🎮 MISIÓN: DEEPFAKE NEWSROOM</CardTitle>
+            <CardDescription className="text-lg text-blue-100">
+              Centro de Operaciones Anti-Desinformación
             </CardDescription>
           </CardHeader>
+
           <CardContent className="space-y-6 p-8">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <Star className="w-8 h-8 text-yellow-500" />
-                <span className="text-2xl font-bold">{playerStats.rank}</span>
-                <Star className="w-8 h-8 text-yellow-500" />
-              </div>
-              <Badge className="text-lg px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500">
-                Nivel {playerStats.level} Alcanzado
-              </Badge>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div className="text-center p-4 bg-green-100 rounded-lg">
-                <Shield className="w-8 h-8 text-green-600 mx-auto mb-2" />
-                <p className="text-sm text-green-700">Precisión Final</p>
-                <p className="text-3xl font-bold text-green-800">{playerStats.accuracy}%</p>
-              </div>
-              <div className="text-center p-4 bg-blue-100 rounded-lg">
-                <Target className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                <p className="text-sm text-blue-700">Casos Resueltos</p>
-                <p className="text-3xl font-bold text-blue-800">{solvedCases.length}</p>
-              </div>
-              <div className="text-center p-4 bg-purple-100 rounded-lg">
-                <Zap className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <p className="text-sm text-purple-700">Racha Máxima</p>
-                <p className="text-3xl font-bold text-purple-800">{playerStats.maxStreak}</p>
-              </div>
-              <div className="text-center p-4 bg-yellow-100 rounded-lg">
-                <Sparkles className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-                <p className="text-sm text-yellow-700">XP Total</p>
-                <p className="text-3xl font-bold text-yellow-800">{playerStats.xp}</p>
-              </div>
-            </div>
-
-            <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-6 rounded-lg border-2 border-blue-200">
-              <h3 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
-                <Award className="w-6 h-6" />
-                Logros Desbloqueados:
+            {/* Briefing de la Misión */}
+            <div className="bg-gradient-to-r from-red-50 to-orange-50 p-6 rounded-lg border-2 border-red-200">
+              <h3 className="font-bold text-red-800 mb-3 flex items-center gap-2 text-xl">
+                <AlertTriangle className="w-6 h-6" />🚨 BRIEFING URGENTE
               </h3>
-              <ul className="text-blue-700 space-y-2">
-                <li>🏆 Maestro Anti Deepfake - Completar 10+ casos</li>
-                <li>🎯 Precisión Elite - Mantener 90%+ de precisión</li>
-                <li>⚡ Racha Legendaria - {playerStats.maxStreak} casos consecutivos</li>
-                <li>🛡️ Defensor de la Verdad - Proteger la información veraz</li>
-              </ul>
+              <p className="text-red-700 font-medium leading-relaxed">
+                <strong>Agente Juan Carlos Rodríguez</strong>, la desinformación digital ha alcanzado niveles críticos.
+                Tu misión es analizar contenido multimedia y determinar si es auténtico o manipulado mediante IA.
+                <span className="text-red-800 font-bold"> El futuro de la verdad está en tus manos.</span>
+              </p>
             </div>
 
-            <div className="flex gap-4">
+            {/* Objetivos de la Misión */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
+                <CardHeader>
+                  <CardTitle className="text-green-800 flex items-center gap-2">
+                    <Target className="w-6 h-6" />🎯 OBJETIVOS PRINCIPALES
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600" />
+                    <span className="text-green-700 font-medium">Resolver 10+ casos correctamente</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Shield className="w-5 h-5 text-green-600" />
+                    <span className="text-green-700 font-medium">Mantener 90%+ de precisión</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Clock className="w-5 h-5 text-green-600" />
+                    <span className="text-green-700 font-medium">Completar antes del tiempo límite</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <XCircle className="w-5 h-5 text-green-600" />
+                    <span className="text-green-700 font-medium">Máximo 2 errores críticos</span>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200">
+                <CardHeader>
+                  <CardTitle className="text-yellow-800 flex items-center gap-2">
+                    <Clock className="w-6 h-6" />⏰ SISTEMA DE TIEMPO
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="bg-yellow-100 p-3 rounded-lg">
+                    <p className="text-yellow-800 font-bold text-center text-lg">
+                      TIEMPO INICIAL: {formatTime(calculateTimeByLevel(1))}
+                    </p>
+                  </div>
+                  <div className="space-y-2 text-yellow-700 text-sm">
+                    <p>
+                      <strong>⚠️ ADVERTENCIA:</strong> El tiempo se reduce con cada nivel
+                    </p>
+                    <p>
+                      <strong>📈 Nivel 1-3:</strong> 30-25 minutos
+                    </p>
+                    <p>
+                      <strong>🔥 Nivel 4-6:</strong> 22.5-17.5 minutos
+                    </p>
+                    <p>
+                      <strong>💀 Nivel 7+:</strong> 15-7.5 minutos
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+
+            {/* Consecuencias */}
+            <div className="bg-gradient-to-r from-purple-50 to-pink-50 p-6 rounded-lg border-2 border-purple-200">
+              <h3 className="font-bold text-purple-800 mb-3 flex items-center gap-2 text-xl">
+                <Skull className="w-6 h-6" />⚡ CONDICIONES DE FALLO
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div className="bg-red-100 p-3 rounded-lg">
+                  <Clock className="w-8 h-8 text-red-600 mx-auto mb-2" />
+                  <p className="text-red-800 font-bold">TIEMPO AGOTADO</p>
+                  <p className="text-red-600 text-sm">Misión fallida</p>
+                </div>
+                <div className="bg-orange-100 p-3 rounded-lg">
+                  <XCircle className="w-8 h-8 text-orange-600 mx-auto mb-2" />
+                  <p className="text-orange-800 font-bold">20 ERRORES</p>
+                  <p className="text-orange-600 text-sm">Relevado del servicio</p>
+                </div>
+                <div className="bg-yellow-100 p-3 rounded-lg">
+                  <AlertTriangle className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
+                  <p className="text-yellow-800 font-bold">BAJA PRECISIÓN</p>
+                  <p className="text-yellow-600 text-sm">Pérdida de credibilidad</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Herramientas Disponibles */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border-2 border-blue-200">
+              <h3 className="font-bold text-blue-800 mb-3 flex items-center gap-2 text-xl">
+                <Bot className="w-6 h-6" />
+                🛠️ ARSENAL DISPONIBLE
+              </h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="text-center">
+                  <Mail className="w-6 h-6 text-blue-600 mx-auto mb-1" />
+                  <p className="text-blue-700 text-sm font-medium">Centro de Intel</p>
+                </div>
+                <div className="text-center">
+                  <MessageCircle className="w-6 h-6 text-green-600 mx-auto mb-1" />
+                  <p className="text-green-700 text-sm font-medium">Comunicaciones</p>
+                </div>
+                <div className="text-center">
+                  <Bot className="w-6 h-6 text-purple-600 mx-auto mb-1" />
+                  <p className="text-purple-700 text-sm font-medium">IA Asistente</p>
+                </div>
+                <div className="text-center">
+                  <Eye className="w-6 h-6 text-orange-600 mx-auto mb-1" />
+                  <p className="text-orange-700 text-sm font-medium">Laboratorio</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Botones de Acción */}
+            <div className="flex gap-4 pt-4">
               <Button
-                onClick={generateCertificate}
-                className="flex-1 bg-gradient-to-r from-green-500 to-blue-500 hover:from-green-600 hover:to-blue-600"
+                onClick={() => setShowIntroduction(false)}
+                className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-lg py-4"
                 size="lg"
               >
-                <Download className="w-5 h-5 mr-2" />
-                Descargar Certificado
+                <Shield className="w-6 h-6 mr-2" />🚀 INICIAR MISIÓN
               </Button>
-              <Button onClick={restartGame} variant="outline" size="lg">
-                Nueva Misión
+              <Button
+                onClick={() => (window.location.href = "/")}
+                variant="outline"
+                className="px-8 py-4 border-2 border-gray-300 hover:bg-gray-50"
+                size="lg"
+              >
+                ← Volver al Menú
               </Button>
+            </div>
+
+            {/* Disclaimer */}
+            <div className="text-center text-gray-600 text-sm bg-gray-50 p-3 rounded-lg">
+              <p>
+                <strong>📋 NOTA:</strong> Este es un entorno de entrenamiento. Los casos presentados son ficticios y con
+                fines educativos.
+              </p>
             </div>
           </CardContent>
         </Card>
-
-        <style jsx>{`
-          @keyframes gradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-        `}</style>
       </div>
     )
   }
@@ -1010,6 +1151,8 @@ export default function DeepfakeNewsroom() {
                 >
                   {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
                 </Button>
+                {/* ===== DISPLAY DEL TEMPORIZADOR ===== */}
+                {/* Muestra el tiempo restante en formato HH:MM:SS con color rojo para urgencia */}
                 <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full">
                   <Clock className="w-4 h-4" />
                   <span className="text-sm font-mono font-bold">{formatTime(timeLeft)}</span>
@@ -1495,7 +1638,9 @@ export default function DeepfakeNewsroom() {
                               <Eye className="w-4 h-4 mr-2" />🔍 Análisis de Metadatos
                             </Button>
                             <Button
-                              onClick={() => {window.open("https://undetectable.ai/es/ai-image-detector", "_blank")}} 
+                              onClick={() => {
+                                window.open("https://undetectable.ai/es/ai-image-detector", "_blank")
+                              }}
                               variant="outline"
                               className="w-full justify-start hover:bg-purple-50 border-purple-200"
                             >
@@ -1731,15 +1876,20 @@ export default function DeepfakeNewsroom() {
 
         {/* Elementos del escritorio físico */}
         <div className="fixed bottom-4 left-4 flex items-center gap-4 z-20">
-          <Button onClick={() => (window.location.href = "/")}
-            className="cursor-pointer bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-white/30 hover:scale-110 transition-transform">
+          <Button
+            onClick={() => (window.location.href = "/")}
+            className="cursor-pointer bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-white/30 hover:scale-110 transition-transform"
+          >
             <Coffee className="w-6 h-6 text-amber-600" />
           </Button>
-          
-          <Button onClick={()=>(window.location.href = "/")} className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-white/30 hover:scale-110 transition-transform">
+
+          <Button
+            onClick={() => (window.location.href = "/")}
+            className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-white/30 hover:scale-110 transition-transform"
+          >
             <Headphones className="w-6 h-6 text-gray-600" />
           </Button>
-          
+
           <Button className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-white/30 hover:scale-110 transition-transform">
             <FileText className="w-6 h-6 text-blue-600" />
           </Button>
@@ -1747,7 +1897,7 @@ export default function DeepfakeNewsroom() {
       </div>
 
       {/* Estilos CSS adicionales */}
-      <style jsx>{`
+      <style>{`
         @keyframes slide-in {
           from {
             transform: translateX(100%);
