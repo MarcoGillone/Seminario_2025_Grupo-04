@@ -150,6 +150,47 @@ const whatsappContacts: WhatsAppContact[] = [
   },
 ]
 
+const prompts = [
+  "Retrato hiperrealista de un político en conferencia, iluminación cinematográfica, 4k",
+  "Imagen realista de un CEO dando declaraciones, luz de estudio, expresión seria",
+  "Deepfake de un actor en una escena de acción, fondo borroso, enfoque nítido",
+  "Científico en laboratorio hablando a cámara, profundidad de campo, realismo extremo",
+  "Presentador de noticias dando una primicia, estilo CNN, calidad 8K",
+  "Celebridad dando una entrevista, fondo elegante, iluminación suave",
+  "Estudiante en aula universitaria, luz natural, mirada seria",
+  "Político saludando en evento público, crowd blur, enfoque en rostro",
+  "Influencer en TikTok, expresión exagerada, fondo artificial",
+  "Hombre de negocios en llamada por videoconferencia, tonos fríos",
+  // ...hasta llegar a 30
+]
+async function generarImagen(prompt: string): Promise<string> {
+  console.log("Generando imagen con prompt:", prompt);
+  const res = await fetch("/api/generar-imagen", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt }),
+  });
+
+  const data = await res.json();
+  return data.url;
+}
+
+async function fetchNewsImage(): Promise<string | null> {
+  const apiKey = "2c97d461a1824274bae74e31a41df742";
+  const query = "milei";
+  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const articleWithImage = data.articles.find((a: any) => a.urlToImage);
+    return articleWithImage?.urlToImage || null;
+  } catch (error) {
+    console.error("Error fetching news image:", error);
+    return null;
+  }
+}
+
 const initialCases: MediaCase[] = [
     {
     id: "case1",
@@ -262,6 +303,8 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   const [lastBossMessage, setLastBossMessage] = useState(0)
   const [isGameOver, setIsGameOver] = useState(false)
   const [gameOverReason, setGameOverReason] = useState("")
+  const [loadingInicial, setLoadingInicial] = useState(true);
+
   const [bossAppearance, setBossAppearance] = useState<BossAppearance>({
     isVisible: false,
     mood: "normal",
@@ -544,6 +587,70 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
     setWhatsappMessages(initialMessages)
   }, [])
 
+
+   useEffect(() => {
+    const generarCasosConIA = async () => {
+      const newLevel = Math.floor(solvedCases.length / 3) + 1
+
+      for (let i = 0; i < 3; i++) {
+        const prompt = prompts[Math.floor(Math.random() * prompts.length)]
+        const imageUrl = await generarImagen(prompt)
+
+        const newCase = generateNewCase(newLevel)
+        newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
+        newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
+
+        setMediaCases((prev) => [...prev, newCase])
+        setCaseCounter((prev) => prev + 1)
+      }
+
+      setNotifications((prev) => [...prev, `🆕 ¡3 nuevos casos desbloqueados! Nivel ${newLevel}`])
+      setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
+    }
+
+    if (solvedCases.length > 0 && solvedCases.length % 3 === 0) {
+      generarCasosConIA()
+    }
+  }, [solvedCases.length])
+
+  useEffect(() => {
+  const generarCasosIniciales = async () => {
+   const newLevel = 1;
+
+  for (let i = 0; i < 3; i++) {
+    const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+    const imageUrl = await generarImagen(prompt);
+
+    const newCase = generateNewCase(newLevel);
+    newCase.isDeepfake = true;
+    newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
+    newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
+
+    setMediaCases((prev) => [...prev, newCase]);
+    setCaseCounter((prev) => prev + 1);
+  }
+
+  for (let i = 0; i < 3; i++) {
+    const imageUrl = await fetchNewsImage();
+    if (!imageUrl) continue;
+
+    const newCase = generateNewCase(newLevel);
+    newCase.isDeepfake = false;
+    newCase.realImageUrl = imageUrl;
+    newCase.mediaUrl = imageUrl;
+
+    setMediaCases((prev) => [...prev, newCase]);
+    setCaseCounter((prev) => prev + 1);
+  }
+
+  setNotifications((prev) => [...prev, "🎯 Casos generados desde IA y noticias reales"]);
+  setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000);
+  setLoadingInicial(false);
+  }
+  generarCasosIniciales();
+}, []);
+
+
   // Verificar victoria
   useEffect(() => {
     if (solvedCases.length >= 10 && wrongAnswers.length <= 2 && !isGameOver) {
@@ -621,72 +728,75 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
 
-  const handleCaseDecision = (caseId: string, userDecision: boolean) => {
-    if (isGameOver) return
+const handleCaseDecision = async (caseId: string, userDecision: boolean) => {
+  if (isGameOver) return;
 
-    const case_ = mediaCases.find((c) => c.id === caseId)
-    if (!case_) return
+  const case_ = mediaCases.find((c) => c.id === caseId);
+  if (!case_) return;
 
-    const isCorrect = userDecision === case_.isDeepfake
+  const isCorrect = userDecision === case_.isDeepfake;
 
-    if (isCorrect) {
-      setSolvedCases((prev) => [...prev, caseId])
-      setScore((prev) => prev + case_.xpReward)
+  if (isCorrect) {
+    setSolvedCases((prev) => [...prev, caseId]);
+    setScore((prev) => prev + case_.xpReward);
 
-      // Actualizar stats del jugador
-      setPlayerStats((prev) => {
-        const newXp = prev.xp + case_.xpReward
-        const newStreak = prev.streak + 1
-        const newLevel = Math.floor(newXp / 500) + 1
-        const newRank = rankTitles[Math.min(newLevel - 1, rankTitles.length - 1)]
+    // ⏱️ Sumamos 30 segundos al reloj
+    setTimeLeft((prev) => prev + 30);
 
-        return {
-          ...prev,
-          xp: newXp,
-          streak: newStreak,
-          maxStreak: Math.max(prev.maxStreak, newStreak),
-          level: newLevel,
-          rank: newRank,
-          accuracy: Math.round(((solvedCases.length + 1) / (solvedCases.length + wrongAnswers.length + 1)) * 100),
-        }
-      })
+    // 🎯 Nuevo caso dinámico con IA
+    const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+    const imageUrl = await generarImagen(prompt);
+    const newLevel = Math.floor((solvedCases.length + 1) / 3) + 1;
+    const newCase = generateNewCase(newLevel);
 
-      showBoss("normal", `🎉 ¡Excelente trabajo! +${case_.xpReward} XP. Racha: ${playerStats.streak + 1}`, 3000)
+    newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
+    newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
 
-      const congratsMessage: WhatsAppMessage = {
-        id: `boss_congrats_${Date.now()}`,
-        from: "boss",
-        fromName: "Roberto Martínez (Jefe)",
-        content: `🏆 ¡MISIÓN COMPLETADA! "${case_.title}" - Recompensa: ${case_.xpReward} XP 🎯`,
-        timestamp: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
-        isOwn: false,
-        avatar: "RM",
-        messageType: "text",
-        isRead: false,
-      }
+    setMediaCases((prev) => [...prev, newCase]);
+    setCaseCounter((prev) => prev + 1);
 
-      setTimeout(() => {
-        setWhatsappMessages((prev) => [...prev, congratsMessage])
-      }, 1000)
-    } else {
-      setWrongAnswers((prev) => [...prev, caseId])
-      setPenalties((prev) => prev + 10)
-      setScore((prev) => Math.max(0, prev - 50))
+    // Actualizamos estadísticas
+    setPlayerStats((prev) => {
+      const newXp = prev.xp + case_.xpReward;
+      const newStreak = prev.streak + 1;
+      const newLevel = Math.floor(newXp / 500) + 1;
+      const newRank = rankTitles[Math.min(newLevel - 1, rankTitles.length - 1)];
 
-      // Resetear racha
-      setPlayerStats((prev) => ({
+      return {
         ...prev,
-        streak: 0,
-        accuracy: Math.round((solvedCases.length / (solvedCases.length + wrongAnswers.length + 1)) * 100),
-      }))
-    }
+        xp: newXp,
+        streak: newStreak,
+        maxStreak: Math.max(prev.maxStreak, newStreak),
+        level: newLevel,
+        rank: newRank,
+        accuracy: Math.round(((solvedCases.length + 1) / (solvedCases.length + wrongAnswers.length + 1)) * 100),
+      };
+    });
 
-    setAiResponse(
-      isCorrect
-        ? `✅ ¡CORRECTO! ${case_.isDeepfake ? "Era un deepfake" : "Era contenido auténtico"}. +${case_.xpReward} XP`
-        : `❌ INCORRECTO. ${case_.isDeepfake ? "Era un deepfake" : "Era contenido auténtico"}. Penalización: -50 puntos. Racha perdida.`,
-    )
+    // 🎉 Notificación
+    showBoss("normal", `🎉 ¡Correcto! +${case_.xpReward} XP. Tiempo extra: +30s`, 3000);
+  } else {
+    setWrongAnswers((prev) => [...prev, caseId]);
+    setPenalties((prev) => prev + 10);
+    setScore((prev) => Math.max(0, prev - 50));
+
+    // Resetear racha
+    setPlayerStats((prev) => ({
+      ...prev,
+      streak: 0,
+      accuracy: Math.round((solvedCases.length / (solvedCases.length + wrongAnswers.length + 1)) * 100),
+    }));
+
+    showBoss("angry", "❌ Incorrecto. Penalización aplicada.", 3000);
   }
+
+  setAiResponse(
+    isCorrect
+      ? `✅ ¡CORRECTO! ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. +${case_.xpReward} XP`
+      : `❌ INCORRECTO. ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. -50 puntos.`
+  );
+};
+
 
   const openCase = (caseId: string) => {
     const case_ = mediaCases.find((c) => c.id === caseId)
@@ -757,6 +867,13 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
       maxStreak: 0,
     })
   }
+  if (loadingInicial) {
+  return (
+    <div className="flex items-center justify-center h-screen bg-black text-white text-2xl">
+      Generando casos con IA...
+    </div>
+  );
+}
 
   if (showVictory) {
     return (
