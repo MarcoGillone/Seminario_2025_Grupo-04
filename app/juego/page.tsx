@@ -59,6 +59,7 @@ interface MediaCase {
   level: number
   xpReward: number
   complexity: string[]
+  status?: "pending" | "solved" | "wrong";
 }
 
 interface Email {
@@ -177,7 +178,8 @@ async function generarImagen(prompt: string): Promise<string> {
 
 async function fetchNewsImage(): Promise<string | null> {
   const apiKey = "2c97d461a1824274bae74e31a41df742";
-  const query = "milei";
+  const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"];
+  const query = queries[Math.floor(Math.random() * queries.length)];
   const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`;
 
   try {
@@ -291,7 +293,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   const [emails, setEmails] = useState<Email[]>([])
   const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([])
   const [selectedContact, setSelectedContact] = useState<string>("boss")
-  const [mediaCases, setMediaCases] = useState<MediaCase[]>(initialCases)
+  const [mediaCases, setMediaCases] = useState<MediaCase[]>([])
   const [solvedCases, setSolvedCases] = useState<string[]>([])
   const [wrongAnswers, setWrongAnswers] = useState<string[]>([])
   const [score, setScore] = useState(0)
@@ -400,7 +402,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
     }
 
     const newCase: MediaCase = {
-      id: `case${caseCounter}`,
+      id: `case_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       type: template.type,
       title: template.titles[Math.floor(Math.random() * template.titles.length)],
       source: template.sources[Math.floor(Math.random() * template.sources.length)],
@@ -588,30 +590,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   }, [])
 
 
-   useEffect(() => {
-    const generarCasosConIA = async () => {
-      const newLevel = Math.floor(solvedCases.length / 3) + 1
-
-      for (let i = 0; i < 3; i++) {
-        const prompt = prompts[Math.floor(Math.random() * prompts.length)]
-        const imageUrl = await generarImagen(prompt)
-
-        const newCase = generateNewCase(newLevel)
-        newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
-        newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
-
-        setMediaCases((prev) => [...prev, newCase])
-        setCaseCounter((prev) => prev + 1)
-      }
-
-      setNotifications((prev) => [...prev, `🆕 ¡3 nuevos casos desbloqueados! Nivel ${newLevel}`])
-      setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
-    }
-
-    if (solvedCases.length > 0 && solvedCases.length % 3 === 0) {
-      generarCasosConIA()
-    }
-  }, [solvedCases.length])
+  
 
   useEffect(() => {
   const generarCasosIniciales = async () => {
@@ -719,7 +698,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
         setNotifications((prev) => prev.slice(1))
       }, 5000)
     }
-  }, [solvedCases.length, caseCounter])
+  }, [solvedCases.length])
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
@@ -752,7 +731,12 @@ const handleCaseDecision = async (caseId: string, userDecision: boolean) => {
     newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
     newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
 
-    setMediaCases((prev) => [...prev, newCase]);
+    setMediaCases((prev) =>
+  prev.map((c) =>
+    c.id === caseId
+      ? { ...c, status: isCorrect ? "solved" : "wrong" }
+      : c
+  ));
     setCaseCounter((prev) => prev + 1);
 
     // Actualizamos estadísticas
@@ -1282,9 +1266,9 @@ const handleCaseDecision = async (caseId: string, userDecision: boolean) => {
                           <Card
                             key={case_.id}
                             className={`cursor-pointer transition-all hover:shadow-xl hover:scale-105 transform ${
-                              solvedCases.includes(case_.id)
+                              case_.status === "solved"
                                 ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 shadow-green-200"
-                                : wrongAnswers.includes(case_.id)
+                                : case_.status === "wrong"
                                   ? "bg-gradient-to-br from-red-50 to-pink-50 border-red-300 shadow-red-200"
                                   : "hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 border-gray-200"
                             }`}
