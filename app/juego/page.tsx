@@ -458,19 +458,35 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
 
     let newCase = generateNewCase(nivel);
 
-    if (usarIA) {
-      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-      const imageUrl = await generarImagen(prompt, nivel);
-      newCase.isDeepfake = true;
-      newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
-      newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
-    } else {
-      const imageUrl = await fetchNewsImage();
-      if (!imageUrl) continue; // si no hay imagen, salteamos
-      newCase.isDeepfake = false;
-      newCase.mediaUrl = imageUrl;
-      newCase.realImageUrl = imageUrl;
-    }
+if (usarIA) {
+  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+  const imageUrl = await generarImagen(prompt, nivel);
+  newCase.isDeepfake = true;
+  newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
+  newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
+  newCase.title = prompt; // ✅ usar el prompt como título
+} else {
+  const apiKey = "2c97d461a1824274bae74e31a41df742";
+  const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"];
+  const query = queries[Math.floor(Math.random() * queries.length)];
+  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const articleWithImage = data.articles.find((a: any) => a.urlToImage);
+    if (!articleWithImage) continue;
+
+    newCase.isDeepfake = false;
+    newCase.mediaUrl = articleWithImage.urlToImage;
+    newCase.realImageUrl = articleWithImage.urlToImage;
+    newCase.title = articleWithImage.description || "Caso de noticia"; // ✅ usar description como título
+  } catch (error) {
+    console.error("Error fetching news case:", error);
+    continue;
+  }
+}
+
 
     nuevosCasos.push(newCase);
   }
@@ -652,43 +668,59 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
 
   
 
-  useEffect(() => {
+useEffect(() => {
   const generarCasosIniciales = async () => {
-   const newLevel = 1;
+    const newLevel = 1;
 
-  for (let i = 0; i < 3; i++) {
-    const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-    const imageUrl = await generarImagen(prompt, newLevel);
+    for (let i = 0; i < 3; i++) {
+      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+      const imageUrl = await generarImagen(prompt, newLevel);
 
-    const newCase = generateNewCase(newLevel);
-    newCase.isDeepfake = true;
-    newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
-    newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
+      const newCase = generateNewCase(newLevel);
+      newCase.isDeepfake = true;
+      newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
+      newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
+      newCase.title = prompt; // ✅ Aquí agregás el prompt como título
+      newCase.description = `Imagen IA: "${prompt}"`; // Opcional: agregás descripción
 
-    setMediaCases((prev) => [...prev, newCase]);
-    setCaseCounter((prev) => prev + 1);
-  }
+      setMediaCases((prev) => [...prev, newCase]);
+      setCaseCounter((prev) => prev + 1);
+    }
 
-  for (let i = 0; i < 3; i++) {
-    const imageUrl = await fetchNewsImage();
-    if (!imageUrl) continue;
+    for (let i = 0; i < 3; i++) {
+      const apiKey = "2c97d461a1824274bae74e31a41df742";
+      const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"];
+      const query = queries[Math.floor(Math.random() * queries.length)];
+      const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`;
 
-    const newCase = generateNewCase(newLevel);
-    newCase.isDeepfake = false;
-    newCase.realImageUrl = imageUrl;
-    newCase.mediaUrl = imageUrl;
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const articleWithImage = data.articles.find((a: any) => a.urlToImage);
+        if (!articleWithImage) continue;
 
-    setMediaCases((prev) => [...prev, newCase]);
-    setCaseCounter((prev) => prev + 1);
-  }
+        const newCase = generateNewCase(newLevel);
+        newCase.isDeepfake = false;
+        newCase.realImageUrl = articleWithImage.urlToImage;
+        newCase.mediaUrl = articleWithImage.urlToImage;
+        newCase.title = articleWithImage.description || "Noticia sin descripción"; // ✅ Aquí usás la descripción
+        newCase.description = articleWithImage.title || "Noticia generada automáticamente"; // Opcional
 
-  setNotifications((prev) => [...prev, "🎯 Casos generados desde IA y noticias reales"]);
-  setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000);
-  setLoadingInicial(false);
-  }
+        setMediaCases((prev) => [...prev, newCase]);
+        setCaseCounter((prev) => prev + 1);
+      } catch (error) {
+        console.error("Error fetching initial news case:", error);
+        continue;
+      }
+    }
+
+    setNotifications((prev) => [...prev, "🎯 Casos generados desde IA y noticias reales"]);
+    setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000);
+    setLoadingInicial(false);
+  };
+
   generarCasosIniciales();
 }, []);
-
 
   // Verificar victoria
   useEffect(() => {
