@@ -164,17 +164,39 @@ const prompts = [
   "Hombre de negocios en llamada por videoconferencia, tonos fríos",
   // ...hasta llegar a 30
 ]
-async function generarImagen(prompt: string): Promise<string> {
-  console.log("Generando imagen con prompt:", prompt);
+
+const obtenerParametrosPorNivel = (nivel: number) => {
+  // escalar calidad con nivel
+   if (nivel <= 1) {
+    return { width: 512, height: 512, steps: 30, cfg_scale: 6.5, sampler: "Euler", model: "Realistic_Vision_V5.1" };
+  } else if (nivel <= 2) {
+    return { width: 640, height: 640, steps: 35, cfg_scale: 7.5, sampler: "Euler", model: "Realistic_Vision_V5.1" };
+  } else if (nivel <= 3) {
+    return { width: 768, height: 768, steps: 35, cfg_scale: 8.5, sampler: "DPM++ 2M Karras", model: "Realistic_Vision_V5.1" };
+  } else {
+    return { width: 896, height: 896, steps: 40, cfg_scale: 9.5, sampler: "UniPC", model: "realvisxlV50_v50LightningBakedvae" };
+  }
+};
+
+
+async function generarImagen(prompt: string, nivel: number): Promise<string> {
+  const qualityParams = obtenerParametrosPorNivel(nivel);
+  console.log(`Generando imagen con prompt: ${prompt}, params: ${JSON.stringify(qualityParams)}`)
   const res = await fetch("/api/generar-imagen", {
+    
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({
+      prompt,
+      ...qualityParams, // aquí se agregan steps, cfg_scale, resolution, modelo, etc.
+    }),
+    
   });
 
   const data = await res.json();
   return data.url;
 }
+
 
 async function fetchNewsImage(): Promise<string | null> {
   const apiKey = "2c97d461a1824274bae74e31a41df742";
@@ -185,6 +207,7 @@ async function fetchNewsImage(): Promise<string | null> {
   try {
     const res = await fetch(url);
     const data = await res.json();
+    console.log("Fetched news data:", data);
     const articleWithImage = data.articles.find((a: any) => a.urlToImage);
     return articleWithImage?.urlToImage || null;
   } catch (error) {
@@ -338,6 +361,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   return Math.max(5, 30 - (nivel - 1) * 2); // de 30s bajando de a 2s por nivel, mínimo 5s
   }
 
+
   // Generar nuevos casos dinámicamente
   const generateNewCase = (level: number): MediaCase => {
     const difficulties: Array<"easy" | "medium" | "hard" | "expert" | "master"> =
@@ -436,7 +460,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
 
     if (usarIA) {
       const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-      const imageUrl = await generarImagen(prompt);
+      const imageUrl = await generarImagen(prompt, nivel);
       newCase.isDeepfake = true;
       newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
       newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
@@ -634,7 +658,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
 
   for (let i = 0; i < 3; i++) {
     const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-    const imageUrl = await generarImagen(prompt);
+    const imageUrl = await generarImagen(prompt, newLevel);
 
     const newCase = generateNewCase(newLevel);
     newCase.isDeepfake = true;
@@ -761,12 +785,16 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
     if (isCorrect) {
       setSolvedCases((prev) => [...prev, caseId]);
       setScore((prev) => prev + case_.xpReward);
-      showBoss("normal", `🎉 ¡Correcto! +${case_.xpReward} XP. Tiempo extra: +30s`, 3000);
+      
       // ⏱️ Sumamos 30 segundos al reloj
-      setTimeLeft((prev) => prev + 30);
+      
 
       // 🎯 Nuevo caso dinámico con IA
       const newLevel = Math.floor((solvedCases.length + 1) / 3) + 1;
+      const tiempoExtra = calcularTiempoExtraPorNivel(newLevel);
+      setTimeLeft((prev) => prev + tiempoExtra);
+      showBoss("normal", `🎉 ¡Correcto! +${case_.xpReward} XP. Tiempo extra: +${tiempoExtra}s`, 3000);
+
       await agregarCasosAleatorios(newLevel);
 
 
