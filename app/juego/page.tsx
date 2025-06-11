@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -1121,9 +1120,8 @@ useEffect(() => {
   }
 
   return (
-
+  
     <div id="tour-blur-wrapper" style={{ position: 'relative' }}>
-
       <div
         className="min-h-screen relative overflow-hidden"
         style={{
