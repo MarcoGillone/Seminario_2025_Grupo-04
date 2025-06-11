@@ -707,55 +707,57 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
 
-const handleCaseDecision = async (caseId: string, userDecision: boolean) => {
-  if (isGameOver) return;
+  const handleCaseDecision = async (caseId: string, userDecision: boolean) => {
+    if (isGameOver) return;
 
-  const case_ = mediaCases.find((c) => c.id === caseId);
-  if (!case_) return;
+    const case_ = mediaCases.find((c) => c.id === caseId);
+    if (!case_) return;
 
-  const isCorrect = userDecision === case_.isDeepfake;
-
-  if (isCorrect) {
-    setSolvedCases((prev) => [...prev, caseId]);
-    setScore((prev) => prev + case_.xpReward);
-
-    // ⏱️ Sumamos 30 segundos al reloj
-    setTimeLeft((prev) => prev + 30);
-
-    // 🎯 Nuevo caso dinámico con IA
-    const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-    const imageUrl = await generarImagen(prompt);
-    const newLevel = Math.floor((solvedCases.length + 1) / 3) + 1;
-    const newCase = generateNewCase(newLevel);
-
-    newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
-    newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
+    const isCorrect = userDecision === case_.isDeepfake;
 
     setMediaCases((prev) =>
-  prev.map((c) =>
-    c.id === caseId
-      ? { ...c, status: isCorrect ? "solved" : "wrong" }
-      : c
-  ));
-    setCaseCounter((prev) => prev + 1);
+    prev.map((c) =>
+      c.id === caseId
+        ? { ...c, status: isCorrect ? "solved" : "wrong" }
+        : c
+    ));
 
-    // Actualizamos estadísticas
-    setPlayerStats((prev) => {
-      const newXp = prev.xp + case_.xpReward;
-      const newStreak = prev.streak + 1;
-      const newLevel = Math.floor(newXp / 500) + 1;
-      const newRank = rankTitles[Math.min(newLevel - 1, rankTitles.length - 1)];
+    if (isCorrect) {
+      setSolvedCases((prev) => [...prev, caseId]);
+      setScore((prev) => prev + case_.xpReward);
 
-      return {
-        ...prev,
-        xp: newXp,
-        streak: newStreak,
-        maxStreak: Math.max(prev.maxStreak, newStreak),
-        level: newLevel,
-        rank: newRank,
-        accuracy: Math.round(((solvedCases.length + 1) / (solvedCases.length + wrongAnswers.length + 1)) * 100),
-      };
-    });
+      // ⏱️ Sumamos 30 segundos al reloj
+      setTimeLeft((prev) => prev + 30);
+
+      // 🎯 Nuevo caso dinámico con IA
+      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+      const imageUrl = await generarImagen(prompt);
+      const newLevel = Math.floor((solvedCases.length + 1) / 3) + 1;
+      const newCase = generateNewCase(newLevel);
+
+      newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
+      newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
+
+      
+      setCaseCounter((prev) => prev + 1);
+
+      // Actualizamos estadísticas
+      setPlayerStats((prev) => {
+        const newXp = prev.xp + case_.xpReward;
+        const newStreak = prev.streak + 1;
+        const newLevel = Math.floor(newXp / 500) + 1;
+        const newRank = rankTitles[Math.min(newLevel - 1, rankTitles.length - 1)];
+
+        return {
+          ...prev,
+          xp: newXp,
+          streak: newStreak,
+          maxStreak: Math.max(prev.maxStreak, newStreak),
+          level: newLevel,
+          rank: newRank,
+          accuracy: Math.round(((solvedCases.length + 1) / (solvedCases.length + wrongAnswers.length + 1)) * 100),
+        };
+      });
 
     // 🎉 Notificación
     showBoss("normal", `🎉 ¡Correcto! +${case_.xpReward} XP. Tiempo extra: +30s`, 3000);
@@ -1233,7 +1235,7 @@ const handleCaseDecision = async (caseId: string, userDecision: boolean) => {
                         <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 hover:shadow-lg transition-all">
                           <CardContent className="p-4 text-center">
                             <AlertTriangle className="w-10 h-10 text-yellow-600 mx-auto mb-2" />
-                            <p className="text-3xl font-bold text-yellow-600">{mediaCases.length - solvedCases.length}</p>
+                            <p className="text-3xl font-bold text-yellow-600">{mediaCases.filter((c) => !solvedCases.includes(c.id) && c.status !== "wrong").length}</p>
                             <p className="text-sm text-yellow-700 font-semibold">🎯 Misiones Pendientes</p>
                           </CardContent>
                         </Card>
