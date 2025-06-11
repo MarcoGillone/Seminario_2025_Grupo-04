@@ -193,6 +193,9 @@ async function fetchNewsImage(): Promise<string | null> {
   }
 }
 
+
+
+
 const initialCases: MediaCase[] = [
     {
     id: "case1",
@@ -330,7 +333,10 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   // aca se utiliza la logica de los pasos del tour
   // tour steps
   const [mostrarTour, setMostrarTour] = useState(false);
-
+  //Tiempo extra por nivel
+  const calcularTiempoExtraPorNivel = (nivel: number): number => {
+  return Math.max(5, 30 - (nivel - 1) * 2); // de 30s bajando de a 2s por nivel, mínimo 5s
+  }
 
   // Generar nuevos casos dinámicamente
   const generateNewCase = (level: number): MediaCase => {
@@ -419,6 +425,36 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
 
     return newCase
   }
+
+  const agregarCasosAleatorios = async (nivel: number) => {
+  const nuevosCasos: MediaCase[] = [];
+
+  for (let i = 0; i < 2; i++) {
+    const usarIA = Math.random() > 0.5;
+
+    let newCase = generateNewCase(nivel);
+
+    if (usarIA) {
+      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+      const imageUrl = await generarImagen(prompt);
+      newCase.isDeepfake = true;
+      newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
+      newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
+    } else {
+      const imageUrl = await fetchNewsImage();
+      if (!imageUrl) continue; // si no hay imagen, salteamos
+      newCase.isDeepfake = false;
+      newCase.mediaUrl = imageUrl;
+      newCase.realImageUrl = imageUrl;
+    }
+
+    nuevosCasos.push(newCase);
+  }
+
+  setMediaCases((prev) => [...prev, ...nuevosCasos]);
+  setCaseCounter((prev) => prev + nuevosCasos.length);
+};
+
 
   const generateHints = (difficulty: string, isDeepfake: boolean): string[] => {
     const deepfakeHints = {
@@ -725,21 +761,14 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
     if (isCorrect) {
       setSolvedCases((prev) => [...prev, caseId]);
       setScore((prev) => prev + case_.xpReward);
-
+      showBoss("normal", `🎉 ¡Correcto! +${case_.xpReward} XP. Tiempo extra: +30s`, 3000);
       // ⏱️ Sumamos 30 segundos al reloj
       setTimeLeft((prev) => prev + 30);
 
       // 🎯 Nuevo caso dinámico con IA
-      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-      const imageUrl = await generarImagen(prompt);
       const newLevel = Math.floor((solvedCases.length + 1) / 3) + 1;
-      const newCase = generateNewCase(newLevel);
+      await agregarCasosAleatorios(newLevel);
 
-      newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
-      newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
-
-      
-      setCaseCounter((prev) => prev + 1);
 
       // Actualizamos estadísticas
       setPlayerStats((prev) => {
@@ -760,7 +789,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
       });
 
     // 🎉 Notificación
-    showBoss("normal", `🎉 ¡Correcto! +${case_.xpReward} XP. Tiempo extra: +30s`, 3000);
+
   } else {
     setWrongAnswers((prev) => [...prev, caseId]);
     setPenalties((prev) => prev + 10);
