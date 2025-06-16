@@ -1,5 +1,4 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -59,6 +58,7 @@ interface MediaCase {
   level: number
   xpReward: number
   complexity: string[]
+  status?: "pending" | "solved" | "wrong";
 }
 
 interface Email {
@@ -149,6 +149,74 @@ const whatsappContacts: WhatsAppContact[] = [
     isOnline: false,
   },
 ]
+
+const prompts = [
+  "Retrato hiperrealista de un político en conferencia, iluminación cinematográfica, 4k",
+  "Imagen realista de un CEO dando declaraciones, luz de estudio, expresión seria",
+  "Deepfake de un actor en una escena de acción, fondo borroso, enfoque nítido",
+  "Científico en laboratorio hablando a cámara, profundidad de campo, realismo extremo",
+  "Presentador de noticias dando una primicia, estilo CNN, calidad 8K",
+  "Celebridad dando una entrevista, fondo elegante, iluminación suave",
+  "Estudiante en aula universitaria, luz natural, mirada seria",
+  "Político saludando en evento público, crowd blur, enfoque en rostro",
+  "Influencer en TikTok, expresión exagerada, fondo artificial",
+  "Hombre de negocios en llamada por videoconferencia, tonos fríos",
+  // ...hasta llegar a 30
+]
+
+const obtenerParametrosPorNivel = (nivel: number) => {
+  // escalar calidad con nivel
+   if (nivel <= 1) {
+    return { width: 512, height: 512, steps: 30, cfg_scale: 6.5, sampler: "Euler", model: "Realistic_Vision_V5.1" };
+  } else if (nivel <= 2) {
+    return { width: 640, height: 640, steps: 35, cfg_scale: 7.5, sampler: "Euler", model: "Realistic_Vision_V5.1" };
+  } else if (nivel <= 3) {
+    return { width: 768, height: 768, steps: 35, cfg_scale: 8.5, sampler: "DPM++ 2M Karras", model: "Realistic_Vision_V5.1" };
+  } else {
+    return { width: 896, height: 896, steps: 40, cfg_scale: 9.5, sampler: "UniPC", model: "realvisxlV50_v50LightningBakedvae" };
+  }
+};
+
+
+async function generarImagen(prompt: string, nivel: number): Promise<string> {
+  const qualityParams = obtenerParametrosPorNivel(nivel);
+  console.log(`Generando imagen con prompt: ${prompt}, params: ${JSON.stringify(qualityParams)}`)
+  const res = await fetch("/api/generar-imagen", {
+    
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      prompt,
+      ...qualityParams, // aquí se agregan steps, cfg_scale, resolution, modelo, etc.
+    }),
+    
+  });
+
+  const data = await res.json();
+  return data.url;
+}
+
+
+async function fetchNewsImage(): Promise<string | null> {
+  const apiKey = "2c97d461a1824274bae74e31a41df742";
+  const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"];
+  const query = queries[Math.floor(Math.random() * queries.length)];
+  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    console.log("Fetched news data:", data);
+    const articleWithImage = data.articles.find((a: any) => a.urlToImage);
+    return articleWithImage?.urlToImage || null;
+  } catch (error) {
+    console.error("Error fetching news image:", error);
+    return null;
+  }
+}
+
+
+
 
 const initialCases: MediaCase[] = [
     {
@@ -250,7 +318,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   const [emails, setEmails] = useState<Email[]>([])
   const [whatsappMessages, setWhatsappMessages] = useState<WhatsAppMessage[]>([])
   const [selectedContact, setSelectedContact] = useState<string>("boss")
-  const [mediaCases, setMediaCases] = useState<MediaCase[]>(initialCases)
+  const [mediaCases, setMediaCases] = useState<MediaCase[]>([])
   const [solvedCases, setSolvedCases] = useState<string[]>([])
   const [wrongAnswers, setWrongAnswers] = useState<string[]>([])
   const [score, setScore] = useState(0)
@@ -262,6 +330,8 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   const [lastBossMessage, setLastBossMessage] = useState(0)
   const [isGameOver, setIsGameOver] = useState(false)
   const [gameOverReason, setGameOverReason] = useState("")
+  const [loadingInicial, setLoadingInicial] = useState(true);
+
   const [bossAppearance, setBossAppearance] = useState<BossAppearance>({
     isVisible: false,
     mood: "normal",
@@ -285,6 +355,10 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   // aca se utiliza la logica de los pasos del tour
   // tour steps
   const [mostrarTour, setMostrarTour] = useState(false);
+  //Tiempo extra por nivel
+  const calcularTiempoExtraPorNivel = (nivel: number): number => {
+  return Math.max(5, 30 - (nivel - 1) * 2); // de 30s bajando de a 2s por nivel, mínimo 5s
+  }
 
 
   // Generar nuevos casos dinámicamente
@@ -357,7 +431,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
     }
 
     const newCase: MediaCase = {
-      id: `case${caseCounter}`,
+      id: `case_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
       type: template.type,
       title: template.titles[Math.floor(Math.random() * template.titles.length)],
       source: template.sources[Math.floor(Math.random() * template.sources.length)],
@@ -374,6 +448,52 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
 
     return newCase
   }
+
+  const agregarCasosAleatorios = async (nivel: number) => {
+  const nuevosCasos: MediaCase[] = [];
+
+  for (let i = 0; i < 2; i++) {
+    const usarIA = Math.random() > 0.5;
+
+    let newCase = generateNewCase(nivel);
+
+if (usarIA) {
+  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+  const imageUrl = await generarImagen(prompt, nivel);
+  newCase.isDeepfake = true;
+  newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
+  newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
+  newCase.title = prompt; // ✅ usar el prompt como título
+} else {
+  const apiKey = "2c97d461a1824274bae74e31a41df742";
+  const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"];
+  const query = queries[Math.floor(Math.random() * queries.length)];
+  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`;
+
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    const articleWithImage = data.articles.find((a: any) => a.urlToImage);
+    if (!articleWithImage) continue;
+
+    newCase.isDeepfake = false;
+    newCase.mediaUrl = articleWithImage.urlToImage;
+    newCase.realImageUrl = articleWithImage.urlToImage;
+    newCase.title = articleWithImage.description || "Caso de noticia"; // ✅ usar description como título
+  } catch (error) {
+    console.error("Error fetching news case:", error);
+    continue;
+  }
+}
+
+
+    nuevosCasos.push(newCase);
+  }
+
+  setMediaCases((prev) => [...prev, ...nuevosCasos]);
+  setCaseCounter((prev) => prev + nuevosCasos.length);
+};
+
 
   const generateHints = (difficulty: string, isDeepfake: boolean): string[] => {
     const deepfakeHints = {
@@ -544,6 +664,63 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
     setWhatsappMessages(initialMessages)
   }, [])
 
+
+  
+
+useEffect(() => {
+  const generarCasosIniciales = async () => {
+    const newLevel = 1;
+
+    for (let i = 0; i < 3; i++) {
+      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
+      const imageUrl = await generarImagen(prompt, newLevel);
+
+      const newCase = generateNewCase(newLevel);
+      newCase.isDeepfake = true;
+      newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
+      newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
+      newCase.title = prompt; // ✅ Aquí agregás el prompt como título
+      newCase.description = `Imagen IA: "${prompt}"`; // Opcional: agregás descripción
+
+      setMediaCases((prev) => [...prev, newCase]);
+      setCaseCounter((prev) => prev + 1);
+    }
+
+    for (let i = 0; i < 3; i++) {
+      const apiKey = "2c97d461a1824274bae74e31a41df742";
+      const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"];
+      const query = queries[Math.floor(Math.random() * queries.length)];
+      const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`;
+
+      try {
+        const res = await fetch(url);
+        const data = await res.json();
+        const articleWithImage = data.articles.find((a: any) => a.urlToImage);
+        if (!articleWithImage) continue;
+
+        const newCase = generateNewCase(newLevel);
+        newCase.isDeepfake = false;
+        newCase.realImageUrl = articleWithImage.urlToImage;
+        newCase.mediaUrl = articleWithImage.urlToImage;
+        newCase.title = articleWithImage.description || "Noticia sin descripción"; // ✅ Aquí usás la descripción
+        newCase.description = articleWithImage.title || "Noticia generada automáticamente"; // Opcional
+
+        setMediaCases((prev) => [...prev, newCase]);
+        setCaseCounter((prev) => prev + 1);
+      } catch (error) {
+        console.error("Error fetching initial news case:", error);
+        continue;
+      }
+    }
+
+    setNotifications((prev) => [...prev, "🎯 Casos generados desde IA y noticias reales"]);
+    setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000);
+    setLoadingInicial(false);
+  };
+
+  generarCasosIniciales();
+}, []);
+
   // Verificar victoria
   useEffect(() => {
     if (solvedCases.length >= 10 && wrongAnswers.length <= 2 && !isGameOver) {
@@ -612,7 +789,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
         setNotifications((prev) => prev.slice(1))
       }, 5000)
     }
-  }, [solvedCases.length, caseCounter])
+  }, [solvedCases.length])
 
   const formatTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600)
@@ -621,24 +798,43 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
     return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
 
-  const handleCaseDecision = (caseId: string, userDecision: boolean) => {
-    if (isGameOver) return
+  const handleCaseDecision = async (caseId: string, userDecision: boolean) => {
+    if (isGameOver) return;
 
-    const case_ = mediaCases.find((c) => c.id === caseId)
-    if (!case_) return
+    const case_ = mediaCases.find((c) => c.id === caseId);
+    if (!case_) return;
 
-    const isCorrect = userDecision === case_.isDeepfake
+    const isCorrect = userDecision === case_.isDeepfake;
+
+    setMediaCases((prev) =>
+    prev.map((c) =>
+      c.id === caseId
+        ? { ...c, status: isCorrect ? "solved" : "wrong" }
+        : c
+    ));
 
     if (isCorrect) {
-      setSolvedCases((prev) => [...prev, caseId])
-      setScore((prev) => prev + case_.xpReward)
+      setSolvedCases((prev) => [...prev, caseId]);
+      setScore((prev) => prev + case_.xpReward);
+      
+      // ⏱️ Sumamos 30 segundos al reloj
+      
 
-      // Actualizar stats del jugador
+      // 🎯 Nuevo caso dinámico con IA
+      const newLevel = Math.floor((solvedCases.length + 1) / 3) + 1;
+      const tiempoExtra = calcularTiempoExtraPorNivel(newLevel);
+      setTimeLeft((prev) => prev + tiempoExtra);
+      showBoss("normal", `🎉 ¡Correcto! +${case_.xpReward} XP. Tiempo extra: +${tiempoExtra}s`, 3000);
+
+      await agregarCasosAleatorios(newLevel);
+
+
+      // Actualizamos estadísticas
       setPlayerStats((prev) => {
-        const newXp = prev.xp + case_.xpReward
-        const newStreak = prev.streak + 1
-        const newLevel = Math.floor(newXp / 500) + 1
-        const newRank = rankTitles[Math.min(newLevel - 1, rankTitles.length - 1)]
+        const newXp = prev.xp + case_.xpReward;
+        const newStreak = prev.streak + 1;
+        const newLevel = Math.floor(newXp / 500) + 1;
+        const newRank = rankTitles[Math.min(newLevel - 1, rankTitles.length - 1)];
 
         return {
           ...prev,
@@ -648,45 +844,33 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
           level: newLevel,
           rank: newRank,
           accuracy: Math.round(((solvedCases.length + 1) / (solvedCases.length + wrongAnswers.length + 1)) * 100),
-        }
-      })
+        };
+      });
 
-      showBoss("normal", `🎉 ¡Excelente trabajo! +${case_.xpReward} XP. Racha: ${playerStats.streak + 1}`, 3000)
+    // 🎉 Notificación
 
-      const congratsMessage: WhatsAppMessage = {
-        id: `boss_congrats_${Date.now()}`,
-        from: "boss",
-        fromName: "Roberto Martínez (Jefe)",
-        content: `🏆 ¡MISIÓN COMPLETADA! "${case_.title}" - Recompensa: ${case_.xpReward} XP 🎯`,
-        timestamp: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
-        isOwn: false,
-        avatar: "RM",
-        messageType: "text",
-        isRead: false,
-      }
+  } else {
+    setWrongAnswers((prev) => [...prev, caseId]);
+    setPenalties((prev) => prev + 10);
+    setScore((prev) => Math.max(0, prev - 50));
 
-      setTimeout(() => {
-        setWhatsappMessages((prev) => [...prev, congratsMessage])
-      }, 1000)
-    } else {
-      setWrongAnswers((prev) => [...prev, caseId])
-      setPenalties((prev) => prev + 10)
-      setScore((prev) => Math.max(0, prev - 50))
+    // Resetear racha
+    setPlayerStats((prev) => ({
+      ...prev,
+      streak: 0,
+      accuracy: Math.round((solvedCases.length / (solvedCases.length + wrongAnswers.length + 1)) * 100),
+    }));
 
-      // Resetear racha
-      setPlayerStats((prev) => ({
-        ...prev,
-        streak: 0,
-        accuracy: Math.round((solvedCases.length / (solvedCases.length + wrongAnswers.length + 1)) * 100),
-      }))
-    }
-
-    setAiResponse(
-      isCorrect
-        ? `✅ ¡CORRECTO! ${case_.isDeepfake ? "Era un deepfake" : "Era contenido auténtico"}. +${case_.xpReward} XP`
-        : `❌ INCORRECTO. ${case_.isDeepfake ? "Era un deepfake" : "Era contenido auténtico"}. Penalización: -50 puntos. Racha perdida.`,
-    )
+    showBoss("angry", "❌ Incorrecto. Penalización aplicada.", 3000);
   }
+
+  setAiResponse(
+    isCorrect
+      ? `✅ ¡CORRECTO! ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. +${case_.xpReward} XP`
+      : `❌ INCORRECTO. ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. -50 puntos.`
+  );
+};
+
 
   const openCase = (caseId: string) => {
     const case_ = mediaCases.find((c) => c.id === caseId)
@@ -757,6 +941,13 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
       maxStreak: 0,
     })
   }
+  if (loadingInicial) {
+  return (
+    <div className="flex items-center justify-center h-screen bg-black text-white text-2xl">
+      Generando casos con IA...
+    </div>
+  );
+}
 
   if (showVictory) {
     return (
@@ -929,9 +1120,8 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   }
 
   return (
-
+  
     <div id="tour-blur-wrapper" style={{ position: 'relative' }}>
-
       <div
         className="min-h-screen relative overflow-hidden"
         style={{
@@ -1132,7 +1322,7 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
                         <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 hover:shadow-lg transition-all">
                           <CardContent className="p-4 text-center">
                             <AlertTriangle className="w-10 h-10 text-yellow-600 mx-auto mb-2" />
-                            <p className="text-3xl font-bold text-yellow-600">{mediaCases.length - solvedCases.length}</p>
+                            <p className="text-3xl font-bold text-yellow-600">{mediaCases.filter((c) => !solvedCases.includes(c.id) && c.status !== "wrong").length}</p>
                             <p className="text-sm text-yellow-700 font-semibold">🎯 Misiones Pendientes</p>
                           </CardContent>
                         </Card>
@@ -1165,9 +1355,9 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
                           <Card
                             key={case_.id}
                             className={`cursor-pointer transition-all hover:shadow-xl hover:scale-105 transform ${
-                              solvedCases.includes(case_.id)
+                              case_.status === "solved"
                                 ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-300 shadow-green-200"
-                                : wrongAnswers.includes(case_.id)
+                                : case_.status === "wrong"
                                   ? "bg-gradient-to-br from-red-50 to-pink-50 border-red-300 shadow-red-200"
                                   : "hover:bg-gradient-to-br hover:from-blue-50 hover:to-purple-50 border-gray-200"
                             }`}

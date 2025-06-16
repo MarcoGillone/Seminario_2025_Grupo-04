@@ -130,7 +130,7 @@ export default function Component() {
             <Button
                 size="lg"
                 className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8 py-3"
-                onClick={() => (window.location.href = "/juego")}
+                onClick={() => (window.location.href = "/juego/briefing")}
               >
                 <Play className="mr-2 h-5 w-5" />
                 Jugar Investigación Deepfake
