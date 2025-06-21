@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Progress } from "@/components/ui/progress"
 import Tour from "./TourContainer"
+import Briefing from "./briefing/page"
 
 import {
   Mail,
@@ -340,7 +341,7 @@ export default function DeepfakeNewsroom() {
   const [gameStarted, setGameStarted] = useState(false)
   const [mostrarIntro, setMostrarIntro] = useState(true);
   const [tourYaFinalizado, setTourYaFinalizado] = useState(false)
-
+  const [mostrarBriefing, setMostrarBriefing] = useState(true);
 
   const [bossAppearance, setBossAppearance] = useState<BossAppearance>({
     isVisible: false,
@@ -604,7 +605,7 @@ export default function DeepfakeNewsroom() {
   // Generar certificado PDF
   const generateCertificate = () => {
     const certificateData = {
-      name: "Juan Carlos Rodríguez",
+      name: "Juan Rodríguez",
       course: "Especialista en Detección de Deepfakes",
       level: playerStats.rank,
       accuracy: playerStats.accuracy,
@@ -671,7 +672,7 @@ export default function DeepfakeNewsroom() {
         from: "inteligencia.global@newsintel.org",
         subject: "🛑 ALERTA: Trump detenido",
         content:
-          "Juan Carlos, circula una imagen de Trump siendo arrestado. Sospechamos deepfake. La difusión está aumentando. Necesitamos verificación urgente.",
+          "Juan, circula una imagen de Trump siendo arrestado. Sospechamos deepfake. La difusión está aumentando. Necesitamos verificación urgente.",
         timestamp: "09:45",
         hasAttachment: true,
         caseId: "case2", // Trump espía ruso
@@ -683,7 +684,7 @@ export default function DeepfakeNewsroom() {
         from: "cinefilos.latam@filtrados.com",
         subject: "🎬 Francella en Hollywood",
         content:
-          "JuanCa, nos llegó esta imagen de Francella como Rambo. ¿Real o montaje publicitario? Urge verificar antes de publicar en primicia.",
+          "Juan, nos llegó esta imagen de Francella como Rambo. ¿Real o montaje publicitario? Urge verificar antes de publicar en primicia.",
         timestamp: "09:00",
         hasAttachment: true,
         caseId: "case3", // Francella-Rambo
@@ -702,7 +703,7 @@ export default function DeepfakeNewsroom() {
         from: "boss",
         fromName: "Roberto Martínez (Jefe)",
         content:
-          "🎮 ¡Bienvenido al Centro de Operaciones, Juan Carlos Tienes varios casos urgentes que analizar hoy. ¡Que comience la misión!",
+          "🎮 ¡Bienvenido al Centro de Operaciones, Juan Tienes varios casos urgentes que analizar hoy. ¡Que comience la misión!",
         timestamp: "09:00",
         isOwn: false,
         avatar: "RM",
@@ -1031,7 +1032,11 @@ export default function DeepfakeNewsroom() {
             autoPlay
             controls
             playsInline
-            onEnded={() => setMostrarIntro(false)}
+            onEnded={() => {
+              setMostrarIntro(false);
+              setMostrarBriefing(true); // ahora muestra el briefing antes del juego
+            }}
+
             className="w-full rounded-lg shadow-xl"
           />
           <button
@@ -1045,10 +1050,21 @@ export default function DeepfakeNewsroom() {
     );
   }
 
+  if (mostrarBriefing) {
+    return (
+      <Briefing
+        onStart={() => {
+          setMostrarBriefing(false);
+          setMostrarTour(true); // inicia el juego o el tour
+        }}
+      />
+    );
+  }
+
   if (loadingInicial && !mostrarIntro) {
     return (
       <div className="flex items-center justify-center h-screen bg-black text-white text-2xl">
-        Generando casos con IA...
+        Aguarde un momento ... Estamos preparando los casos para tu evaluación.
       </div>
     );
   }
@@ -1235,6 +1251,17 @@ export default function DeepfakeNewsroom() {
         {/* Overlay para efectos */}
         <div className="absolute inset-0 bg-black/10"></div>
 
+        {mostrarBriefing && (
+          <div className="fixed inset-0 z-[999] flex items-center justify-center bg-black bg-opacity-60">
+            <Briefing
+              onStart={() => {
+                setMostrarBriefing(false)
+                setMostrarTour(true) // o startGame() si así comienza tu juego
+              }}
+            />
+          </div>
+        )}
+
         {/* Aparición del jefe */}
         {bossAppearance.isVisible && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
@@ -1243,13 +1270,13 @@ export default function DeepfakeNewsroom() {
                 <img
                   src={
                     bossAppearance.mood === "furious" || bossAppearance.mood === "angry"
-                      ? "/placeholder.svg?height=150&width=150&text=😡+Boss"
-                      : "/placeholder.svg?height=150&width=150&text=😊+Boss"
+                      ? "/personajes/Roberto-perfil-enojado.png"
+                      : "/personajes/Roberto-perfil-feliz.png"
                   }
                   alt="Jefe"
                   className="w-32 h-32 mx-auto rounded-full mb-4 border-4 border-gray-300"
                 />
-                <h2 className="text-xl font-bold mb-2 text-gray-800">🎮 Comandante Roberto Martínez</h2>
+                <h2 className="text-xl font-bold mb-2 text-gray-800">Lic. Roberto Martínez</h2>
                 <p
                   className={`text-lg ${
                     bossAppearance.mood === "furious"
@@ -1290,7 +1317,7 @@ export default function DeepfakeNewsroom() {
                   <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                   <Gamepad2 className="w-5 h-5 text-blue-400 ml-2" />
-                  <span className="text-white text-sm font-bold">DEEPFAKE ANALYST - Juan Carlos Rodriguez</span>
+                  <span className="text-white text-sm font-bold">Periodista - Juan Rodriguez</span>
                 </div>
                 <div className="flex items-center gap-4 text-white">
                   <div className="flex items-center gap-2 bg-blue-600 px-3 py-1 rounded-full">

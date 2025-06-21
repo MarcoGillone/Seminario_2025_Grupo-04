@@ -1,7 +1,5 @@
-// Nuevo archivo: app/briefing/page.tsx
 "use client";
 
-import { useRouter } from "next/navigation";
 import {
   AlertTriangle,
   Shield,
@@ -18,9 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 
-export default function BriefingPage() {
-  const router = useRouter();
-
+export default function Briefing({ onStart }: { onStart: () => void }) {
   const formatTime = (seconds: number) => {
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
@@ -28,12 +24,14 @@ export default function BriefingPage() {
   };
 
   const calculateTimeByLevel = (level: number) => {
-    // return Math.max(450, 1800 - (level - 1) * 150); // Ejemplo de escala
-    return 300; // Tiempo fijo de 5 minutos (300 segundos) para todos los niveles
+    return 300; // Tiempo fijo de 5 minutos
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative" style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", backgroundAttachment: "fixed" }}>
+    <div
+      className="min-h-screen flex items-center justify-center p-4 relative"
+      style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", backgroundAttachment: "fixed" }}
+    >
       <div className="absolute inset-0 bg-black/20"></div>
 
       <Card className="max-w-4xl w-full relative z-10 border-blue-500 shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50">
@@ -53,11 +51,11 @@ export default function BriefingPage() {
               <AlertTriangle className="w-6 h-6" />🚨 BRIEFING URGENTE
             </h3>
             <p className="text-red-700 font-medium leading-relaxed">
-              <strong>Agente Juan Carlos Rodríguez</strong>, la desinformación digital ha alcanzado niveles críticos.
+              <strong>Periodista Juan Rodríguez</strong>, la desinformación digital ha alcanzado niveles críticos.
               Tu misión es analizar contenido multimedia y determinar si es auténtico o deepfakes manipulados mediante IA.
               <br />
               <br />
-              <span className="text-red-800 font-bold"> El futuro de la verdad está en tus manos.</span>
+              <span className="text-red-800 font-bold">El futuro de la verdad está en tus manos.</span>
             </p>
           </div>
 
@@ -157,14 +155,14 @@ export default function BriefingPage() {
 
           <div className="flex gap-4 pt-4">
             <Button
-              onClick={() => router.push("/juego")}
+              onClick={onStart}
               className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-lg py-4"
               size="lg"
             >
               <Shield className="w-6 h-6 mr-2" />🚀 INICIAR MISIÓN
             </Button>
             <Button
-              onClick={() => router.push("/")}
+              onClick={() => (window.location.href = "/")}
               variant="outline"
               className="px-8 py-4 border-2 border-gray-300 hover:bg-gray-50"
               size="lg"
