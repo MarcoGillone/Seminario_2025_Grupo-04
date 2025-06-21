@@ -7,9 +7,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Input } from "@/components/ui/input"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Progress } from "@/components/ui/progress"
-import { useRouter } from "next/navigation";
-import Tour from './TourContainer';
-
+import Tour from "./TourContainer"
 
 import {
   Mail,
@@ -58,7 +56,7 @@ interface MediaCase {
   level: number
   xpReward: number
   complexity: string[]
-  status?: "pending" | "solved" | "wrong";
+  status?: "pending" | "solved" | "wrong"
 }
 
 interface Email {
@@ -166,60 +164,67 @@ const prompts = [
 
 const obtenerParametrosPorNivel = (nivel: number) => {
   // escalar calidad con nivel
-   if (nivel <= 1) {
-    return { width: 512, height: 512, steps: 30, cfg_scale: 6.5, sampler: "Euler", model: "Realistic_Vision_V5.1" };
+  if (nivel <= 1) {
+    return { width: 512, height: 512, steps: 30, cfg_scale: 6.5, sampler: "Euler", model: "Realistic_Vision_V5.1" }
   } else if (nivel <= 2) {
-    return { width: 640, height: 640, steps: 35, cfg_scale: 7.5, sampler: "Euler", model: "Realistic_Vision_V5.1" };
+    return { width: 640, height: 640, steps: 35, cfg_scale: 7.5, sampler: "Euler", model: "Realistic_Vision_V5.1" }
   } else if (nivel <= 3) {
-    return { width: 768, height: 768, steps: 35, cfg_scale: 8.5, sampler: "DPM++ 2M Karras", model: "Realistic_Vision_V5.1" };
+    return {
+      width: 768,
+      height: 768,
+      steps: 35,
+      cfg_scale: 8.5,
+      sampler: "DPM++ 2M Karras",
+      model: "Realistic_Vision_V5.1",
+    }
   } else {
-    return { width: 896, height: 896, steps: 40, cfg_scale: 9.5, sampler: "UniPC", model: "realvisxlV50_v50LightningBakedvae" };
+    return {
+      width: 896,
+      height: 896,
+      steps: 40,
+      cfg_scale: 9.5,
+      sampler: "UniPC",
+      model: "realvisxlV50_v50LightningBakedvae",
+    }
   }
-};
-
+}
 
 async function generarImagen(prompt: string, nivel: number): Promise<string> {
-  const qualityParams = obtenerParametrosPorNivel(nivel);
+  const qualityParams = obtenerParametrosPorNivel(nivel)
   console.log(`Generando imagen con prompt: ${prompt}, params: ${JSON.stringify(qualityParams)}`)
   const res = await fetch("/api/generar-imagen", {
-    
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       prompt,
       ...qualityParams, // aquí se agregan steps, cfg_scale, resolution, modelo, etc.
     }),
-    
-  });
+  })
 
-  const data = await res.json();
-  return data.url;
+  const data = await res.json()
+  return data.url
 }
 
-
 async function fetchNewsImage(): Promise<string | null> {
-  const apiKey = "2c97d461a1824274bae74e31a41df742";
-  const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"];
-  const query = queries[Math.floor(Math.random() * queries.length)];
-  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`;
+  const apiKey = "2c97d461a1824274bae74e31a41df742"
+  const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
+  const query = queries[Math.floor(Math.random() * queries.length)]
+  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`
 
   try {
-    const res = await fetch(url);
-    const data = await res.json();
-    console.log("Fetched news data:", data);
-    const articleWithImage = data.articles.find((a: any) => a.urlToImage);
-    return articleWithImage?.urlToImage || null;
+    const res = await fetch(url)
+    const data = await res.json()
+    console.log("Fetched news data:", data)
+    const articleWithImage = data.articles.find((a: any) => a.urlToImage)
+    return articleWithImage?.urlToImage || null
   } catch (error) {
-    console.error("Error fetching news image:", error);
-    return null;
+    console.error("Error fetching news image:", error)
+    return null
   }
 }
 
-
-
-
 const initialCases: MediaCase[] = [
-    {
+  {
     id: "case1",
     type: "image",
     title: "Cristiano Ronaldo promociona la controversial Herbalife",
@@ -230,11 +235,11 @@ const initialCases: MediaCase[] = [
     hints: [
       "Observa las sombras y la iluminación inconsistente",
       "Revisa la calidad de imagen alrededor del rostro",
-      "Los bordes del cabello parecen artificiales",  
+      "Los bordes del cabello parecen artificiales",
     ],
     mediaUrl: "img/CR7 Herbalife.jpg",
     realImageUrl: "img/CR7 Herbalife.jpg",
-    xpReward:100,
+    xpReward: 100,
     complexity: ["Iluminación básica", "Bordes simples"],
     level: 1,
   },
@@ -254,7 +259,7 @@ const initialCases: MediaCase[] = [
     ],
     mediaUrl: "img/Trump IA.jpg",
     realImageUrl: "img/Trump IA.jpg",
-    xpReward:100,
+    xpReward: 100,
     complexity: ["Iluminación básica", "Bordes simples"],
     level: 1,
   },
@@ -273,7 +278,7 @@ const initialCases: MediaCase[] = [
     ],
     mediaUrl: "img/Francella_Rambo.jpg",
     realImageUrl: "img/Francella_Rambo.jpg",
-    xpReward:100,
+    xpReward: 100,
     complexity: ["Iluminación básica", "Bordes simples"],
     level: 1,
   },
@@ -312,7 +317,8 @@ const bossMessages = [
   "Esto es inaceptable. Demasiados errores.",
 ]
 
-export default function DeepfakeNewsroom() { // aca tienen que ir todos los componentes que queremos resaltar
+export default function DeepfakeNewsroom() {
+  // aca tienen que ir todos los componentes que queremos resaltar
   const [timeLeft, setTimeLeft] = useState(300) // Timer de 5 minutos
   const [currentCase, setCurrentCase] = useState<MediaCase | null>(null)
   const [emails, setEmails] = useState<Email[]>([])
@@ -330,7 +336,11 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   const [lastBossMessage, setLastBossMessage] = useState(0)
   const [isGameOver, setIsGameOver] = useState(false)
   const [gameOverReason, setGameOverReason] = useState("")
-  const [loadingInicial, setLoadingInicial] = useState(true);
+  const [loadingInicial, setLoadingInicial] = useState(true)
+  const [gameStarted, setGameStarted] = useState(false)
+  const [mostrarIntro, setMostrarIntro] = useState(true);
+  const [tourYaFinalizado, setTourYaFinalizado] = useState(false)
+
 
   const [bossAppearance, setBossAppearance] = useState<BossAppearance>({
     isVisible: false,
@@ -351,15 +361,77 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   })
   const [showVictory, setShowVictory] = useState(false)
   const [caseCounter, setCaseCounter] = useState(4)
-  
+
   // aca se utiliza la logica de los pasos del tour
   // tour steps
-  const [mostrarTour, setMostrarTour] = useState(false);
+  const [mostrarTour, setMostrarTour] = useState(false)
   //Tiempo extra por nivel
   const calcularTiempoExtraPorNivel = (nivel: number): number => {
-  return Math.max(5, 30 - (nivel - 1) * 2); // de 30s bajando de a 2s por nivel, mínimo 5s
+    return Math.max(5, 30 - (nivel - 1) * 2) // de 30s bajando de a 2s por nivel, mínimo 5s
   }
 
+  // Funciones de sonido
+  const playSuccessSound = () => {
+    if (!soundEnabled) return
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+
+    oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime) // C5
+    oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1) // E5
+    oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2) // G5
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5)
+
+    oscillator.start(audioContext.currentTime)
+    oscillator.stop(audioContext.currentTime + 0.5)
+  }
+
+  const playErrorSound = () => {
+    if (!soundEnabled) return
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+
+    oscillator.frequency.setValueAtTime(220, audioContext.currentTime) // A3
+    oscillator.frequency.setValueAtTime(196, audioContext.currentTime + 0.15) // G3
+    oscillator.frequency.setValueAtTime(174.61, audioContext.currentTime + 0.3) // F3
+
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.6)
+
+    oscillator.start(audioContext.currentTime)
+    oscillator.stop(audioContext.currentTime + 0.6)
+  }
+
+  const playLevelUpSound = () => {
+    if (!soundEnabled) return
+    const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+    const oscillator = audioContext.createOscillator()
+    const gainNode = audioContext.createGain()
+
+    oscillator.connect(gainNode)
+    gainNode.connect(audioContext.destination)
+
+    // Secuencia ascendente para level up
+    const notes = [261.63, 329.63, 392.0, 523.25, 659.25] // C4, E4, G4, C5, E5
+    notes.forEach((freq, index) => {
+      oscillator.frequency.setValueAtTime(freq, audioContext.currentTime + index * 0.1)
+    })
+
+    gainNode.gain.setValueAtTime(0.4, audioContext.currentTime)
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8)
+
+    oscillator.start(audioContext.currentTime)
+    oscillator.stop(audioContext.currentTime + 0.8)
+  }
 
   // Generar nuevos casos dinámicamente
   const generateNewCase = (level: number): MediaCase => {
@@ -450,53 +522,53 @@ export default function DeepfakeNewsroom() { // aca tienen que ir todos los comp
   }
 
   const agregarCasosAleatorios = async (nivel: number) => {
-  const nuevosCasos: MediaCase[] = [];
+    const nuevosCasos: MediaCase[] = []
 
-  for (let i = 0; i < 2; i++) {
-    const usarIA = Math.random() > 0.5;
+    for (let i = 0; i < 2; i++) {
+      const usarIA = Math.random() > 0.5
 
-    let newCase = generateNewCase(nivel);
+      const newCase = generateNewCase(nivel)
 
-if (usarIA) {
-  const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-  const imageUrl = await generarImagen(prompt, nivel);
-  newCase.isDeepfake = true;
-  newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
-  newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
-  newCase.title = prompt; // ✅ usar el prompt como título
-} else {
-  const apiKey = "2c97d461a1824274bae74e31a41df742";
-  const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"];
-  const query = queries[Math.floor(Math.random() * queries.length)];
-  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`;
+      if (usarIA) {
+        const prompt = prompts[Math.floor(Math.random() * prompts.length)]
+        const imageUrl = await generarImagen(prompt, nivel)
+        newCase.isDeepfake = true
+        newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
+        newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
+        newCase.title = prompt // ✅ usar el prompt como título
+      } else {
+        const apiKey = "2c97d461a1824274bae74e31a41df742"
+        const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
+        const query = queries[Math.floor(Math.random() * queries.length)]
+        const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`
 
-  try {
-    const res = await fetch(url);
-    const data = await res.json();
-    const articleWithImage = data.articles.find((a: any) => a.urlToImage);
-    if (!articleWithImage) continue;
+        try {
+          const res = await fetch(url)
+          const data = await res.json()
+          const articleWithImage = data.articles.find((a: any) => a.urlToImage)
+          if (!articleWithImage) continue
 
-    newCase.isDeepfake = false;
-    newCase.mediaUrl = articleWithImage.urlToImage;
-    newCase.realImageUrl = articleWithImage.urlToImage;
-    newCase.title = articleWithImage.description || "Caso de noticia"; // ✅ usar description como título
-  } catch (error) {
-    console.error("Error fetching news case:", error);
-    continue;
+          newCase.isDeepfake = false
+          newCase.mediaUrl = articleWithImage.urlToImage
+          newCase.realImageUrl = articleWithImage.urlToImage
+          newCase.title = articleWithImage.description || "Caso de noticia" // ✅ usar description como título
+        } catch (error) {
+          console.error("Error fetching news case:", error)
+          continue
+        }
+      }
+
+      nuevosCasos.push(newCase)
+    }
+
+    setMediaCases((prev) => [...prev, ...nuevosCasos])
+    setCaseCounter((prev) => prev + nuevosCasos.length)
   }
-}
 
+  type Difficulty = 'easy' | 'medium' | 'hard' | 'expert' | 'master';
 
-    nuevosCasos.push(newCase);
-  }
-
-  setMediaCases((prev) => [...prev, ...nuevosCasos]);
-  setCaseCounter((prev) => prev + nuevosCasos.length);
-};
-
-
-  const generateHints = (difficulty: string, isDeepfake: boolean): string[] => {
-    const deepfakeHints = {
+  const generateHints = (difficulty: Difficulty, isDeepfake: boolean): string[] => {
+    const deepfakeHints: Record<Difficulty, string[]> = {
       easy: [
         "Observa inconsistencias en la iluminación",
         "Revisa los bordes del rostro",
@@ -514,20 +586,20 @@ if (usarIA) {
         "Busca marcas de agua digitales",
       ],
       master: ["Utiliza análisis forense avanzado", "Detecta patrones de GAN", "Analiza coherencia biométrica"],
-    }
+    };
 
-    const authenticHints = {
+    const authenticHints: Record<Difficulty, string[]> = {
       easy: ["La iluminación es consistente", "No hay artefactos digitales", "Metadatos coherentes"],
       medium: ["Sincronización natural", "Expresiones auténticas", "Calidad uniforme"],
       hard: ["Patrones de compresión naturales", "Coherencia biométrica", "Ausencia de manipulación"],
       expert: ["Firma digital auténtica", "Análisis espectral limpio", "Coherencia forense completa"],
       master: ["Verificación criptográfica", "Análisis de blockchain", "Certificación de origen"],
-    }
+    };
 
     return isDeepfake
-      ? deepfakeHints[difficulty as keyof typeof deepfakeHints]
-      : authenticHints[difficulty as keyof typeof authenticHints]
-  }
+      ? deepfakeHints[difficulty]
+      : authenticHints[difficulty];
+  };
 
   // Generar certificado PDF
   const generateCertificate = () => {
@@ -664,62 +736,60 @@ if (usarIA) {
     setWhatsappMessages(initialMessages)
   }, [])
 
+  useEffect(() => {
+    const generarCasosIniciales = async () => {
+      const newLevel = 1
 
-  
+      for (let i = 0; i < 3; i++) {
+        const prompt = prompts[Math.floor(Math.random() * prompts.length)]
+        const imageUrl = await generarImagen(prompt, newLevel)
 
-useEffect(() => {
-  const generarCasosIniciales = async () => {
-    const newLevel = 1;
+        const newCase = generateNewCase(newLevel)
+        newCase.isDeepfake = true
+        newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
+        newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
+        newCase.title = prompt // ✅ Aquí agregás el prompt como título
+        newCase.description = `Imagen IA: "${prompt}"` // Opcional: agregás descripción
 
-    for (let i = 0; i < 3; i++) {
-      const prompt = prompts[Math.floor(Math.random() * prompts.length)];
-      const imageUrl = await generarImagen(prompt, newLevel);
-
-      const newCase = generateNewCase(newLevel);
-      newCase.isDeepfake = true;
-      newCase.realImageUrl = imageUrl ?? newCase.realImageUrl;
-      newCase.mediaUrl = imageUrl ?? newCase.mediaUrl;
-      newCase.title = prompt; // ✅ Aquí agregás el prompt como título
-      newCase.description = `Imagen IA: "${prompt}"`; // Opcional: agregás descripción
-
-      setMediaCases((prev) => [...prev, newCase]);
-      setCaseCounter((prev) => prev + 1);
-    }
-
-    for (let i = 0; i < 3; i++) {
-      const apiKey = "2c97d461a1824274bae74e31a41df742";
-      const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"];
-      const query = queries[Math.floor(Math.random() * queries.length)];
-      const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`;
-
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        const articleWithImage = data.articles.find((a: any) => a.urlToImage);
-        if (!articleWithImage) continue;
-
-        const newCase = generateNewCase(newLevel);
-        newCase.isDeepfake = false;
-        newCase.realImageUrl = articleWithImage.urlToImage;
-        newCase.mediaUrl = articleWithImage.urlToImage;
-        newCase.title = articleWithImage.description || "Noticia sin descripción"; // ✅ Aquí usás la descripción
-        newCase.description = articleWithImage.title || "Noticia generada automáticamente"; // Opcional
-
-        setMediaCases((prev) => [...prev, newCase]);
-        setCaseCounter((prev) => prev + 1);
-      } catch (error) {
-        console.error("Error fetching initial news case:", error);
-        continue;
+        setMediaCases((prev) => [...prev, newCase])
+        setCaseCounter((prev) => prev + 1)
       }
+
+      for (let i = 0; i < 3; i++) {
+        const apiKey = "2c97d461a1824274bae74e31a41df742"
+        const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
+        const query = queries[Math.floor(Math.random() * queries.length)]
+        const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`
+
+        try {
+          const res = await fetch(url)
+          const data = await res.json()
+          const articleWithImage = data.articles.find((a: any) => a.urlToImage)
+          if (!articleWithImage) continue
+
+          const newCase = generateNewCase(newLevel)
+          newCase.isDeepfake = false
+          newCase.realImageUrl = articleWithImage.urlToImage
+          newCase.mediaUrl = articleWithImage.urlToImage
+          newCase.title = articleWithImage.description || "Noticia sin descripción" // ✅ Aquí usás la descripción
+          newCase.description = articleWithImage.title || "Noticia generada automáticamente" // Opcional
+
+          setMediaCases((prev) => [...prev, newCase])
+          setCaseCounter((prev) => prev + 1)
+        } catch (error) {
+          console.error("Error fetching initial news case:", error)
+          continue
+        }
+      }
+
+      setNotifications((prev) => [...prev, "🎯 Casos generados desde IA y noticias reales"])
+      setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
+      setLoadingInicial(false)
+      setMostrarTour(true)
     }
 
-    setNotifications((prev) => [...prev, "🎯 Casos generados desde IA y noticias reales"]);
-    setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000);
-    setLoadingInicial(false);
-  };
-
-  generarCasosIniciales();
-}, []);
+    generarCasosIniciales()
+  }, [])
 
   // Verificar victoria
   useEffect(() => {
@@ -753,9 +823,9 @@ useEffect(() => {
     }
   }, [penalties, isGameOver])
 
-  // Temporizador
+  // Temporizador - solo inicia cuando gameStarted es true
   useEffect(() => {
-    if (isGameOver) return
+    if (isGameOver || !gameStarted) return
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -773,7 +843,7 @@ useEffect(() => {
     }, 1000)
 
     return () => clearInterval(timer)
-  }, [isGameOver])
+  }, [isGameOver, gameStarted])
 
   // Generar nuevos casos cuando se resuelven
   useEffect(() => {
@@ -792,85 +862,86 @@ useEffect(() => {
   }, [solvedCases.length])
 
   const formatTime = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
-    return `${hours.toString().padStart(2, "0")}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }
 
   const handleCaseDecision = async (caseId: string, userDecision: boolean) => {
-    if (isGameOver) return;
+    if (isGameOver) return
 
-    const case_ = mediaCases.find((c) => c.id === caseId);
-    if (!case_) return;
+    const case_ = mediaCases.find((c) => c.id === caseId)
+    if (!case_) return
 
-    const isCorrect = userDecision === case_.isDeepfake;
+    const isCorrect = userDecision === case_.isDeepfake
 
-    setMediaCases((prev) =>
-    prev.map((c) =>
-      c.id === caseId
-        ? { ...c, status: isCorrect ? "solved" : "wrong" }
-        : c
-    ));
+    setMediaCases((prev) => prev.map((c) => (c.id === caseId ? { ...c, status: isCorrect ? "solved" : "wrong" } : c)))
 
     if (isCorrect) {
-      setSolvedCases((prev) => [...prev, caseId]);
-      setScore((prev) => prev + case_.xpReward);
-      
-      // ⏱️ Sumamos 30 segundos al reloj
-      
+      // Reproducir sonido de éxito
+      playSuccessSound()
 
-      // 🎯 Nuevo caso dinámico con IA
-      const newLevel = Math.floor((solvedCases.length + 1) / 3) + 1;
-      const tiempoExtra = calcularTiempoExtraPorNivel(newLevel);
-      setTimeLeft((prev) => prev + tiempoExtra);
-      showBoss("normal", `🎉 ¡Correcto! +${case_.xpReward} XP. Tiempo extra: +${tiempoExtra}s`, 3000);
+      setSolvedCases((prev) => [...prev, caseId])
+      setScore((prev) => prev + case_.xpReward)
 
-      await agregarCasosAleatorios(newLevel);
+      // Tiempo extra por nivel
+      const newLevel = Math.floor((solvedCases.length + 1) / 3) + 1
+      const tiempoExtra = calcularTiempoExtraPorNivel(newLevel)
+      setTimeLeft((prev) => prev + tiempoExtra)
 
-
-      // Actualizamos estadísticas
+      // Actualizar estadísticas del jugador
       setPlayerStats((prev) => {
-        const newXp = prev.xp + case_.xpReward;
-        const newStreak = prev.streak + 1;
-        const newLevel = Math.floor(newXp / 500) + 1;
-        const newRank = rankTitles[Math.min(newLevel - 1, rankTitles.length - 1)];
+        const newXp = prev.xp + case_.xpReward
+        const newStreak = prev.streak + 1
+        const newPlayerLevel = Math.floor(newXp / 500) + 1
+        const newRank = rankTitles[Math.min(newPlayerLevel - 1, rankTitles.length - 1)]
+
+        // Verificar si subió de nivel
+        const leveledUp = newPlayerLevel > prev.level
+        if (leveledUp) {
+          playLevelUpSound()
+          setNotifications((prevNotifs) => [...prevNotifs, `🎉 ¡NIVEL ${newPlayerLevel}! Nuevo rango: ${newRank}`])
+          setTimeout(() => setNotifications((prev) => prev.slice(1)), 8000)
+          showBoss("normal", `🎉 ¡Felicidades! Has alcanzado el nivel ${newPlayerLevel}: ${newRank}`, 5000)
+        }
 
         return {
           ...prev,
           xp: newXp,
           streak: newStreak,
           maxStreak: Math.max(prev.maxStreak, newStreak),
-          level: newLevel,
+          level: newPlayerLevel,
           rank: newRank,
           accuracy: Math.round(((solvedCases.length + 1) / (solvedCases.length + wrongAnswers.length + 1)) * 100),
-        };
-      });
+        }
+      })
 
-    // 🎉 Notificación
+      showBoss("normal", `🎉 ¡Correcto! +${case_.xpReward} XP. Tiempo extra: +${tiempoExtra}s`, 3000)
+      await agregarCasosAleatorios(newLevel)
+    } else {
+      // Reproducir sonido de error
+      playErrorSound()
 
-  } else {
-    setWrongAnswers((prev) => [...prev, caseId]);
-    setPenalties((prev) => prev + 10);
-    setScore((prev) => Math.max(0, prev - 50));
+      setWrongAnswers((prev) => [...prev, caseId])
+      setPenalties((prev) => prev + 10)
+      setScore((prev) => Math.max(0, prev - 50))
 
-    // Resetear racha
-    setPlayerStats((prev) => ({
-      ...prev,
-      streak: 0,
-      accuracy: Math.round((solvedCases.length / (solvedCases.length + wrongAnswers.length + 1)) * 100),
-    }));
+      // Resetear racha
+      setPlayerStats((prev) => ({
+        ...prev,
+        streak: 0,
+        accuracy: Math.round((solvedCases.length / (solvedCases.length + wrongAnswers.length + 1)) * 100),
+      }))
 
-    showBoss("angry", "❌ Incorrecto. Penalización aplicada.", 3000);
+      showBoss("angry", "❌ Incorrecto. Penalización aplicada.", 3000)
+    }
+
+    setAiResponse(
+      isCorrect
+        ? `✅ ¡CORRECTO! ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. +${case_.xpReward} XP`
+        : `❌ INCORRECTO. ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. -50 puntos.`,
+    )
   }
-
-  setAiResponse(
-    isCorrect
-      ? `✅ ¡CORRECTO! ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. +${case_.xpReward} XP`
-      : `❌ INCORRECTO. ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. -50 puntos.`
-  );
-};
-
 
   const openCase = (caseId: string) => {
     const case_ = mediaCases.find((c) => c.id === caseId)
@@ -914,6 +985,7 @@ useEffect(() => {
 
   const restartGame = () => {
     setTimeLeft(300) // Timer de 5 minutos
+    setGameStarted(false) // Resetear estado del juego
     setCurrentCase(null)
     setMediaCases(initialCases)
     setSolvedCases([])
@@ -940,14 +1012,46 @@ useEffect(() => {
       streak: 0,
       maxStreak: 0,
     })
+    setMostrarTour(true) // Mostrar tour nuevamente
   }
-  if (loadingInicial) {
-  return (
-    <div className="flex items-center justify-center h-screen bg-black text-white text-2xl">
-      Generando casos con IA...
-    </div>
-  );
-}
+
+  const startGame = () => {
+    setGameStarted(true)
+    setNotifications((prev) => [...prev, "🎮 ¡Misión iniciada! El tiempo corre..."])
+    setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
+    showBoss("normal", "🎯 ¡La misión ha comenzado! Analiza los casos con cuidado.", 4000)
+  }
+
+  if (mostrarIntro) {
+    return (
+      <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+        <div className="relative w-full max-w-7xl mx-auto px-4">
+          <video
+            src="/videos/intro.mp4"
+            autoPlay
+            controls
+            playsInline
+            onEnded={() => setMostrarIntro(false)}
+            className="w-full rounded-lg shadow-xl"
+          />
+          <button
+            onClick={() => setMostrarIntro(false)}
+            className="absolute top-4 right-4 bg-white text-black px-4 py-2 rounded-md font-bold hover:bg-gray-200 z-50"
+          >
+            Omitir introducción
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (loadingInicial && !mostrarIntro) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-black text-white text-2xl">
+        Generando casos con IA...
+      </div>
+    );
+  }
 
   if (showVictory) {
     return (
@@ -995,8 +1099,8 @@ useEffect(() => {
               </div>
               <div className="text-center p-4 bg-purple-100 rounded-lg">
                 <Zap className="w-8 h-8 text-purple-600 mx-auto mb-2" />
-                <p className="text-sm text-purple-700">Racha Máxima</p>
-                <p className="text-3xl font-bold text-purple-800">{playerStats.maxStreak}</p>
+                <p className="text-sm text-purple-700">Puntuación Final</p>
+                <p className="text-3xl font-bold text-purple-800">{score}</p>
               </div>
               <div className="text-center p-4 bg-yellow-100 rounded-lg">
                 <Sparkles className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
@@ -1120,15 +1224,14 @@ useEffect(() => {
   }
 
   return (
-  
-    <div id="tour-blur-wrapper" style={{ position: 'relative' }}>
+    <div id="tour-blur-wrapper" style={{ position: "relative" }}>
       <div
         className="min-h-screen relative overflow-hidden"
         style={{
           background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
           backgroundAttachment: "fixed",
         }}
-        >
+      >
         {/* Overlay para efectos */}
         <div className="absolute inset-0 bg-black/10"></div>
 
@@ -1198,15 +1301,19 @@ useEffect(() => {
                     <Zap className="w-4 h-4" />
                     <span className="text-sm font-bold">{playerStats.xp} XP</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full" id="timer-del-juego">
-                    <Clock className="w-4 h-4"/>
-                    <span className="text-sm font-mono font-bold">{formatTime(timeLeft)}</span>
+                  <div
+                    className={`flex items-center gap-2 px-3 py-1 rounded-full ${gameStarted ? "bg-red-600" : "bg-gray-600"}`}
+                    id="timer-del-juego"
+                  >
+                    <Clock className="w-4 h-4" />
+                    <span className="text-sm font-mono font-bold">
+                      {gameStarted ? formatTime(timeLeft) : "ESPERANDO..."}
+                    </span>
                   </div>
                 </div>
               </div>
 
-
-{/* ----------------------------------------------------------------------------------------------------------------------------------------------
+              {/* ----------------------------------------------------------------------------------------------------------------------------------------------
 //                                      PANTALLA PRINCIPAL
 // ----------------------------------------------------------------------------------------------------------------------------------------------*/}
               {/* Pantalla principal */}
@@ -1322,7 +1429,9 @@ useEffect(() => {
                         <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 hover:shadow-lg transition-all">
                           <CardContent className="p-4 text-center">
                             <AlertTriangle className="w-10 h-10 text-yellow-600 mx-auto mb-2" />
-                            <p className="text-3xl font-bold text-yellow-600">{mediaCases.filter((c) => !solvedCases.includes(c.id) && c.status !== "wrong").length}</p>
+                            <p className="text-3xl font-bold text-yellow-600">
+                              {mediaCases.filter((c) => !solvedCases.includes(c.id) && c.status !== "wrong").length}
+                            </p>
                             <p className="text-sm text-yellow-700 font-semibold">🎯 Misiones Pendientes</p>
                           </CardContent>
                         </Card>
@@ -1471,9 +1580,13 @@ useEffect(() => {
                                   </div>
                                   <div className="flex items-center gap-2">
                                     {email.priority === "legal" && <Scale className="w-4 h-4 text-red-600" />}
-                                    {email.priority === "urgent" && <AlertTriangle className="w-4 h-4 text-yellow-600" />}
+                                    {email.priority === "urgent" && (
+                                      <AlertTriangle className="w-4 h-4 text-yellow-600" />
+                                    )}
                                     {email.hasAttachment && <Paperclip className="w-4 h-4 text-gray-400" />}
-                                    {!email.isRead && <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse" />}
+                                    {!email.isRead && (
+                                      <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse" />
+                                    )}
                                   </div>
                                 </div>
                                 <h3 className="font-bold mb-1">{email.subject}</h3>
@@ -1687,28 +1800,37 @@ useEffect(() => {
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
-                              <Button variant="outline" className="w-full justify-start hover:bg-blue-50 border-blue-200" id="btn-analisis-metadatos">
+                              <Button
+                                variant="outline"
+                                className="w-full justify-start hover:bg-blue-50 border-blue-200"
+                                id="btn-analisis-metadatos"
+                              >
                                 <Eye className="w-4 h-4 mr-2" />🔍 Análisis de Metadatos
                               </Button>
                               <Button
-                                onClick={() => {window.open("https://undetectable.ai/es/ai-image-detector", "_blank")}} 
+                                onClick={() => {
+                                  window.open("https://undetectable.ai/es/ai-image-detector", "_blank")
+                                }}
                                 variant="outline"
                                 className="w-full justify-start hover:bg-purple-50 border-purple-200"
-                                data-tour="ai-tool-detect" id="btn-deteccion-imagenes"
+                                data-tour="ai-tool-detect"
+                                id="btn-deteccion-imagenes"
                               >
                                 <Zap className="w-4 h-4 mr-2" />⚡ Detección de Imágenes
                               </Button>
                               <Button
                                 variant="outline"
-                                className="w-full justify-start hover:bg-green-50 border-green-200" id="btn-analisis-facial"
+                                className="w-full justify-start hover:bg-green-50 border-green-200"
+                                id="btn-analisis-facial"
                               >
                                 <Target className="w-4 h-4 mr-2" />🎯 Análisis Facial
                               </Button>
                               <Button
                                 variant="outline"
-                                className="w-full justify-start hover:bg-orange-50 border-orange-200" id="btn-sincronizacion"
+                                className="w-full justify-start hover:bg-orange-50 border-orange-200"
+                                id="btn-sincronizacion"
                               >
-                                <Video className="w-4 h-4 mr-2" />🎬 Sincronización Audio-Video 
+                                <Video className="w-4 h-4 mr-2" />🎬 Sincronización Audio-Video
                               </Button>
                             </CardContent>
                           </Card>
@@ -1760,9 +1882,9 @@ useEffect(() => {
                             </CardHeader>
                             <CardContent>
                               <p className="text-yellow-700 text-sm font-medium">
-                                Has cometido algunos errores en tu misión. Te recomiendo tomarte más tiempo para analizar
-                                cada caso. Usa las herramientas de análisis y revisa las pistas antes de tomar una
-                                decisión final.
+                                Has cometido algunos errores en tu misión. Te recomiendo tomarte más tiempo para
+                                analizar cada caso. Usa las herramientas de análisis y revisa las pistas antes de tomar
+                                una decisión final.
                               </p>
                             </CardContent>
                           </Card>
@@ -1802,7 +1924,9 @@ useEffect(() => {
                                   <Badge className={`${difficultyColors[currentCase.difficulty]} text-white font-bold`}>
                                     {currentCase.difficulty.toUpperCase()}
                                   </Badge>
-                                  <Badge className="bg-purple-600 text-white font-bold">+{currentCase.xpReward} XP</Badge>
+                                  <Badge className="bg-purple-600 text-white font-bold">
+                                    +{currentCase.xpReward} XP
+                                  </Badge>
                                 </div>
 
                                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
@@ -1928,8 +2052,10 @@ useEffect(() => {
 
           {/* Elementos del escritorio físico */}
           <div className="fixed top-4 left-4 flex items-center gap-4 z-20">
-            <Button onClick={() => (window.location.href = "/")}
-              className="cursor-pointer bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-white/30 hover:scale-110 transition-transform text-gray-700 font-semibold">
+            <Button
+              onClick={() => (window.location.href = "/")}
+              className="cursor-pointer bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-white/30 hover:scale-110 transition-transform text-gray-700 font-semibold"
+            >
               Volver al inicio
             </Button>
           </div>
@@ -1961,32 +2087,39 @@ useEffect(() => {
           <button
             onClick={() => setMostrarTour(true)}
             style={{
-              position: 'fixed',
-              bottom: '24px',
-              right: '24px',
+              position: "fixed",
+              bottom: "24px",
+              right: "24px",
               zIndex: 9999,
-              backgroundColor: '#00bcd4',
-              color: '#fff',
-              border: 'none',
-              padding: '12px 16px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
-              fontWeight: 'bold'
+              backgroundColor: "#00bcd4",
+              color: "#fff",
+              border: "none",
+              padding: "12px 16px",
+              borderRadius: "8px",
+              cursor: "pointer",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)",
+              fontWeight: "bold",
             }}
           >
             ¿Cómo jugar?
           </button>
         )}
 
-      {mostrarTour && (
-        <Tour 
-          onFinish={() => setMostrarTour(false)} 
-          setActiveWindow={setActiveWindow} 
-        />
-      )}
-      </div>    
+        {mostrarTour && (
+          <Tour
+            onFinish={() => {
+              setMostrarTour(false)
 
+              if (!tourYaFinalizado) {
+                setTourYaFinalizado(true) // marcar como ya finalizado
+                startGame() // mostrar el mensaje del jefe SOLO la primera vez
+              }
+            }}
+            setActiveWindow={setActiveWindow}
+          />
+        )}
+
+      </div>
     </div>
   )
 }
