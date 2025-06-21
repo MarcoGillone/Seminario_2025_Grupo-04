@@ -28,7 +28,8 @@ export default function BriefingPage() {
   };
 
   const calculateTimeByLevel = (level: number) => {
-    return Math.max(450, 1800 - (level - 1) * 150); // Ejemplo de escala
+    // return Math.max(450, 1800 - (level - 1) * 150); // Ejemplo de escala
+    return 300; // Tiempo fijo de 5 minutos (300 segundos) para todos los niveles
   };
 
   return (
@@ -40,7 +41,7 @@ export default function BriefingPage() {
           <div className="mx-auto mb-4">
             <Shield className="w-20 h-20 animate-pulse" />
           </div>
-          <CardTitle className="text-4xl font-bold">🎮 MISIÓN: DEEPFAKE NEWSROOM</CardTitle>
+          <CardTitle className="text-4xl font-bold">🎮 MISIÓN: INVESTIGACIÓN DEEPFAKES</CardTitle>
           <CardDescription className="text-lg text-blue-100">
             Centro de Operaciones Anti-Desinformación
           </CardDescription>
@@ -53,7 +54,9 @@ export default function BriefingPage() {
             </h3>
             <p className="text-red-700 font-medium leading-relaxed">
               <strong>Agente Juan Carlos Rodríguez</strong>, la desinformación digital ha alcanzado niveles críticos.
-              Tu misión es analizar contenido multimedia y determinar si es auténtico o manipulado mediante IA.
+              Tu misión es analizar contenido multimedia y determinar si es auténtico o deepfakes manipulados mediante IA.
+              <br />
+              <br />
               <span className="text-red-800 font-bold"> El futuro de la verdad está en tus manos.</span>
             </p>
           </div>
@@ -80,7 +83,7 @@ export default function BriefingPage() {
                 </div>
                 <div className="flex items-center gap-3">
                   <XCircle className="w-5 h-5 text-green-600" />
-                  <span className="text-green-700 font-medium">Máximo 2 errores críticos</span>
+                  <span className="text-green-700 font-medium">Máximo 1 error crítico</span>
                 </div>
               </CardContent>
             </Card>
@@ -98,10 +101,8 @@ export default function BriefingPage() {
                   </p>
                 </div>
                 <div className="space-y-2 text-yellow-700 text-sm">
-                  <p><strong>⚠️ ADVERTENCIA:</strong> El tiempo se reduce con cada nivel</p>
-                  <p><strong>📈 Nivel 1-3:</strong> 30-25 minutos</p>
-                  <p><strong>🔥 Nivel 4-6:</strong> 22.5-17.5 minutos</p>
-                  <p><strong>💀 Nivel 7+:</strong> 15-7.5 minutos</p>
+                  <p><strong>⚠️ ADVERTENCIA:</strong> Ten mucho cuidado con el tiempo.</p>
+                  <p>A medida que vayas acertando, el tiempo se incrementará</p>
                 </div>
               </CardContent>
             </Card>
@@ -119,7 +120,7 @@ export default function BriefingPage() {
               </div>
               <div className="bg-orange-100 p-3 rounded-lg">
                 <XCircle className="w-8 h-8 text-orange-600 mx-auto mb-2" />
-                <p className="text-orange-800 font-bold">20 ERRORES</p>
+                <p className="text-orange-800 font-bold">2 ERRORES</p>
                 <p className="text-orange-600 text-sm">Relevado del servicio</p>
               </div>
               <div className="bg-yellow-100 p-3 rounded-lg">
@@ -132,16 +133,16 @@ export default function BriefingPage() {
 
           <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-lg border-2 border-blue-200">
             <h3 className="font-bold text-blue-800 mb-3 flex items-center gap-2 text-xl">
-              <Bot className="w-6 h-6" />🛠️ ARSENAL DISPONIBLE
+              <Bot className="w-6 h-6" />🛠️ HERRAMIENTAS DISPONIBLES
             </h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="text-center">
                 <Mail className="w-6 h-6 text-blue-600 mx-auto mb-1" />
-                <p className="text-blue-700 text-sm font-medium">Centro de Intel</p>
+                <p className="text-blue-700 text-sm font-medium">Correos electrónicos</p>
               </div>
               <div className="text-center">
                 <MessageCircle className="w-6 h-6 text-green-600 mx-auto mb-1" />
-                <p className="text-green-700 text-sm font-medium">Comunicaciones</p>
+                <p className="text-green-700 text-sm font-medium">WhatsApp</p>
               </div>
               <div className="text-center">
                 <Bot className="w-6 h-6 text-purple-600 mx-auto mb-1" />
