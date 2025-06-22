@@ -343,6 +343,8 @@ export default function DeepfakeNewsroom() {
   const [tourYaFinalizado, setTourYaFinalizado] = useState(false)
   const [mostrarBriefing, setMostrarBriefing] = useState(true);
   const [mostrarVideoGameOver, setMostrarVideoGameOver] = useState(true);
+  const [mostrarVideoVictory, setMostrarVideoVictory] = useState(true);
+
 
   const videoFinal =
     gameOverReason === "timeout"
@@ -1078,6 +1080,30 @@ export default function DeepfakeNewsroom() {
   }
 
   if (showVictory) {
+
+    if (mostrarVideoVictory) {
+      return (
+        <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
+          <div className="relative w-full max-w-5xl">
+            <video
+              src="/videos/victory.mp4"
+              autoPlay
+              controls
+              playsInline
+              onEnded={() => setMostrarVideoVictory(false)}
+              className="w-full rounded-lg shadow-xl"
+            />
+            <button
+              onClick={() => setMostrarVideoVictory(false)}
+              className="absolute top-4 right-4 bg-white text-black px-4 py-2 rounded-md font-bold hover:bg-gray-200 z-50"
+            >
+              Omitir video
+            </button>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div
         className="min-h-screen flex items-center justify-center p-4 relative"
