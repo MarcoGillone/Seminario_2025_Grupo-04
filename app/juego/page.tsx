@@ -668,7 +668,7 @@ export default function DeepfakeNewsroom() {
       {
         id: "email1",
         from: "fuente.anonima@protonmail.com",
-        subject: "🎯 MISIÓN: Ronaldo y Herbalife",
+        subject: "MISIÓN: Ronaldo y Herbalife",
         content:
           "Sen, detectamos una posible promoción de Herbalife por parte de Cristiano Ronaldo. Verificá autenticidad de la imagen. Hay sospechas de montaje.",
         timestamp: "10:30",
@@ -680,7 +680,7 @@ export default function DeepfakeNewsroom() {
       {
         id: "email2",
         from: "inteligencia.global@newsintel.org",
-        subject: "🛑 ALERTA: Trump detenido",
+        subject: "ALERTA: Trump detenido",
         content:
           "Juan, circula una imagen de Trump siendo arrestado. Sospechamos deepfake. La difusión está aumentando. Necesitamos verificación urgente.",
         timestamp: "09:45",
@@ -713,7 +713,7 @@ export default function DeepfakeNewsroom() {
         from: "boss",
         fromName: "Roberto Martínez (Jefe)",
         content:
-          "🎮 ¡Bienvenido al Centro de Operaciones, Juan Tienes varios casos urgentes que analizar hoy. ¡Que comience la misión!",
+          "¡Bienvenido al Centro de Operaciones, Juan Tienes varios casos urgentes que analizar hoy. ¡Que comience la misión!",
         timestamp: "09:00",
         isOwn: false,
         avatar: "RM",
@@ -724,7 +724,7 @@ export default function DeepfakeNewsroom() {
         id: "wa2",
         from: "source1",
         fromName: "Fuente Anónima",
-        content: "🕵️ Tengo algo que te va a interesar... Nivel de amenaza: ALTO 👀",
+        content: "Tengo algo que te va a interesar... Nivel de amenaza: ALTO 👀",
         timestamp: "10:45",
         isOwn: false,
         caseId: "case2",
@@ -736,7 +736,7 @@ export default function DeepfakeNewsroom() {
         id: "wa3",
         from: "colleague",
         fromName: "María García (Colega)",
-        content: "💪 ¿Cómo vas con la misión? Si necesitas backup, avísame. ¡Somos un equipo!",
+        content: "¿Cómo vas con la misión? Si necesitas backup, avísame. ¡Somos un equipo!",
         timestamp: "10:50",
         isOwn: false,
         avatar: "MG",
@@ -793,7 +793,7 @@ export default function DeepfakeNewsroom() {
         }
       }
 
-      setNotifications((prev) => [...prev, "🎯 Casos generados desde IA y noticias reales"])
+      setNotifications((prev) => [...prev, "Casos generados desde IA y noticias reales"])
       setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
       setLoadingInicial(false)
       setMostrarTour(true)
@@ -845,7 +845,7 @@ export default function DeepfakeNewsroom() {
           if (!isGameOver) {
             setIsGameOver(true)
             setGameOverReason("timeout")
-            showBoss("angry", "⏰ ¡Tiempo agotado! La misión ha fallado.", 6000)
+            showBoss("angry", "¡Tiempo agotado! La misión ha fallado.", 6000)
           }
           return 0
         }
@@ -865,7 +865,7 @@ export default function DeepfakeNewsroom() {
       setCaseCounter((prev) => prev + 1)
 
       // Notificación de nuevo caso
-      setNotifications((prev) => [...prev, `🆕 ¡Nuevo caso desbloqueado! Nivel ${newLevel}`])
+      setNotifications((prev) => [...prev, `¡Nuevo caso desbloqueado! Nivel ${newLevel}`])
       setTimeout(() => {
         setNotifications((prev) => prev.slice(1))
       }, 5000)
@@ -911,9 +911,9 @@ export default function DeepfakeNewsroom() {
         const leveledUp = newPlayerLevel > prev.level
         if (leveledUp) {
           playLevelUpSound()
-          setNotifications((prevNotifs) => [...prevNotifs, `🎉 ¡NIVEL ${newPlayerLevel}! Nuevo rango: ${newRank}`])
+          setNotifications((prevNotifs) => [...prevNotifs, `¡NIVEL ${newPlayerLevel}! Nuevo rango: ${newRank}`])
           setTimeout(() => setNotifications((prev) => prev.slice(1)), 8000)
-          showBoss("normal", `🎉 ¡Felicidades! Has alcanzado el nivel ${newPlayerLevel}: ${newRank}`, 5000)
+          showBoss("normal", `¡Felicidades! Has alcanzado el nivel ${newPlayerLevel}: ${newRank}`, 5000)
         }
 
         return {
@@ -927,7 +927,7 @@ export default function DeepfakeNewsroom() {
         }
       })
 
-      showBoss("normal", `🎉 ¡Correcto! +${case_.xpReward} XP. Tiempo extra: +${tiempoExtra}s`, 3000)
+      showBoss("normal", `¡Correcto! +${case_.xpReward} XP. Tiempo extra: +${tiempoExtra}s`, 3000)
       await agregarCasosAleatorios(newLevel)
     } else {
       // Reproducir sonido de error
@@ -944,13 +944,13 @@ export default function DeepfakeNewsroom() {
         accuracy: Math.round((solvedCases.length / (solvedCases.length + wrongAnswers.length + 1)) * 100),
       }))
 
-      showBoss("angry", "❌ Incorrecto. Penalización aplicada.", 3000)
+      showBoss("angry", "Incorrecto. Penalización aplicada.", 3000)
     }
 
     setAiResponse(
       isCorrect
-        ? `✅ ¡CORRECTO! ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. +${case_.xpReward} XP`
-        : `❌ INCORRECTO. ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. -50 puntos.`,
+        ? `¡CORRECTO! ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. +${case_.xpReward} XP`
+        : `INCORRECTO. ${case_.isDeepfake ? "Era un deepfake" : "Era auténtico"}. -50 puntos.`,
     )
   }
 
@@ -1028,9 +1028,9 @@ export default function DeepfakeNewsroom() {
 
   const startGame = () => {
     setGameStarted(true)
-    setNotifications((prev) => [...prev, "🎮 ¡Misión iniciada! El tiempo corre..."])
+    setNotifications((prev) => [...prev, "¡Misión iniciada! El tiempo corre..."])
     setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
-    showBoss("normal", "🎯 ¡La misión ha comenzado! Analiza los casos con cuidado.", 4000)
+    showBoss("normal", "¡La misión ha comenzado! Analiza los casos con cuidado.", 4000)
   }
 
   if (mostrarIntro) {
@@ -1119,7 +1119,7 @@ export default function DeepfakeNewsroom() {
             <div className="mx-auto mb-4">
               <Trophy className="w-20 h-20 animate-bounce" />
             </div>
-            <CardTitle className="text-4xl font-bold">🎉 ¡MISIÓN COMPLETADA! 🎉</CardTitle>
+            <CardTitle className="text-4xl font-bold">¡MISIÓN COMPLETADA!</CardTitle>
             <CardDescription className="text-lg text-yellow-100">
               ¡Felicidades! Has demostrado ser un verdadero Periodista anti Deepfakes
             </CardDescription>
@@ -1240,7 +1240,7 @@ export default function DeepfakeNewsroom() {
               {gameOverReason === "fired" ? <Skull className="w-16 h-16" /> : <Clock className="w-16 h-16" />}
             </div>
             <CardTitle className="text-3xl">
-              {gameOverReason === "fired" ? "🚫 MISIÓN FALLIDA" : "⏰ TIEMPO AGOTADO"}
+              {gameOverReason === "fired" ? "MISIÓN FALLIDA" : "TIEMPO AGOTADO"}
             </CardTitle>
             <CardDescription className="text-lg text-red-100">
               {gameOverReason === "fired"
@@ -1374,9 +1374,9 @@ export default function DeepfakeNewsroom() {
                   <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                   <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
-                  <Gamepad2 className="w-5 h-5 text-blue-400 ml-2" />
-                  <span className="text-white text-sm font-bold">Periodista - Juan Rodriguez</span>
-                </div>
+                  <div className="w-5 h-5 text-blue-400 ml-2" />
+                    <span className="text-white text-sm font-bold">Periodista - Juan Rodriguez</span>
+                  </div>
                 <div className="flex items-center gap-4 text-white">
                   <div className="flex items-center gap-2 bg-blue-600 px-3 py-1 rounded-full">
                     <Star className="w-4 h-4" />
@@ -1402,7 +1402,7 @@ export default function DeepfakeNewsroom() {
 //                                      PANTALLA PRINCIPAL
 // ----------------------------------------------------------------------------------------------------------------------------------------------*/}
               {/* Pantalla principal */}
-              <div className="bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900 min-h-[600px] p-4">
+              <div className="bg-gradient-to-br from-grey-800 to-grey-900 min-h-[600px] p-4">
                 {/* Barra de tareas */}
                 <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 mb-4 flex items-center justify-between border border-white/20">
                   <div className="flex items-center gap-2">
@@ -1413,7 +1413,7 @@ export default function DeepfakeNewsroom() {
                       className="text-white bg-blue-600 hover:bg-blue-700"
                       id="btn-centro-de-comando"
                     >
-                      <Monitor className="w-4 h-4 mr-1" />🎯 Centro de Comando
+                      <Monitor className="w-4 h-4 mr-1" />Centro de Comando
                     </Button>
                     <Button
                       variant={activeWindow === "email" ? "default" : "ghost"}
@@ -1422,7 +1422,7 @@ export default function DeepfakeNewsroom() {
                       className="text-white"
                       id="btn-mail"
                     >
-                      <Mail className="w-4 h-4 mr-1" />📧 Mail ({emails.filter((e) => !e.isRead).length})
+                      <Mail className="w-4 h-4 mr-1" />Mail ({emails.filter((e) => !e.isRead).length})
                     </Button>
                     <Button
                       variant={activeWindow === "whatsapp" ? "default" : "ghost"}
@@ -1431,7 +1431,7 @@ export default function DeepfakeNewsroom() {
                       className="text-white"
                       id="btn-whatsapp"
                     >
-                      <MessageCircle className="w-4 h-4 mr-1" />💬 Whatsapp
+                      <MessageCircle className="w-4 h-4 mr-1" />Whatsapp
                       {whatsappMessages.filter((m) => !m.isRead).length > 0 && (
                         <Badge variant="destructive" className="ml-1 px-1 py-0 text-xs animate-bounce">
                           {whatsappMessages.filter((m) => !m.isRead).length}
@@ -1445,7 +1445,7 @@ export default function DeepfakeNewsroom() {
                       className="text-white"
                       id="btn-ia-asistente"
                     >
-                      <Bot className="w-4 h-4 mr-1" />🤖 IA Asistente
+                      <Bot className="w-4 h-4 mr-1" />IA Asistente
                     </Button>
                     <Button
                       variant={activeWindow === "analysis" ? "default" : "ghost"}
@@ -1453,7 +1453,7 @@ export default function DeepfakeNewsroom() {
                       onClick={() => setActiveWindow("analysis")}
                       className="text-white"
                     >
-                      <Eye className="w-4 h-4 mr-1" />🔍 Laboratorio
+                      <Eye className="w-4 h-4 mr-1" />Laboratorio
                     </Button>
                   </div>
 
@@ -1481,7 +1481,7 @@ export default function DeepfakeNewsroom() {
                     <div className="p-6" id="centro-de-comando">
                       <div className="flex items-center justify-between mb-6">
                         <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
-                          <Shield className="w-8 h-8 text-blue-600" />🎮 Centro de Comando - Misiones Activas
+                          <div className="w-8 h-8 text-blue-600" />Centro de Comando
                         </h2>
                         <div className="flex items-center gap-4">
                           <Badge className="text-lg px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500">
@@ -1502,7 +1502,7 @@ export default function DeepfakeNewsroom() {
                             <div className="flex items-center gap-3 text-red-800">
                               <AlertTriangle className="w-6 h-6" />
                               <span className="font-bold text-lg">
-                                ⚠️ ALERTA CRÍTICA: Estás cerca de ser relevado del servicio. Errores: {penalties}/20
+                                ALERTA CRÍTICA: Estás cerca de ser relevado del servicio. Errores: {penalties}/20
                               </span>
                             </div>
                           </CardContent>
@@ -1517,28 +1517,28 @@ export default function DeepfakeNewsroom() {
                             <p className="text-3xl font-bold text-yellow-600">
                               {mediaCases.filter((c) => !solvedCases.includes(c.id) && c.status !== "wrong").length}
                             </p>
-                            <p className="text-sm text-yellow-700 font-semibold">🎯 Misiones Pendientes</p>
+                            <p className="text-sm text-yellow-700 font-semibold">Misiones Pendientes</p>
                           </CardContent>
                         </Card>
                         <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:shadow-lg transition-all">
                           <CardContent className="p-4 text-center">
                             <CheckCircle className="w-10 h-10 text-green-600 mx-auto mb-2" />
                             <p className="text-3xl font-bold text-green-600">{solvedCases.length}</p>
-                            <p className="text-sm text-green-700 font-semibold">✅ Misiones Completadas</p>
+                            <p className="text-sm text-green-700 font-semibold">Misiones Completadas</p>
                           </CardContent>
                         </Card>
                         <Card className="bg-gradient-to-br from-red-50 to-pink-50 border-red-200 hover:shadow-lg transition-all">
                           <CardContent className="p-4 text-center">
                             <XCircle className="w-10 h-10 text-red-600 mx-auto mb-2" />
                             <p className="text-3xl font-bold text-red-600">{wrongAnswers.length}</p>
-                            <p className="text-sm text-red-700 font-semibold">❌ Errores Críticos</p>
+                            <p className="text-sm text-red-700 font-semibold">Errores Críticos</p>
                           </CardContent>
                         </Card>
                         <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200 hover:shadow-lg transition-all">
                           <CardContent className="p-4 text-center">
                             <Target className="w-10 h-10 text-blue-600 mx-auto mb-2" />
                             <p className="text-3xl font-bold text-blue-600">{playerStats.accuracy}%</p>
-                            <p className="text-sm text-blue-700 font-semibold">🎯 Precisión</p>
+                            <p className="text-sm text-blue-700 font-semibold">Precisión</p>
                           </CardContent>
                         </Card>
                       </div>
@@ -1615,7 +1615,7 @@ export default function DeepfakeNewsroom() {
                   {activeWindow === "email" && (
                     <div className="p-6">
                       <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        <Mail className="w-6 h-6 text-blue-600" />📧 Centro de Inteligencia
+                        <Mail className="w-6 h-6 text-blue-600" />Centro de Inteligencia
                         {emails.some((e) => e.priority === "legal") && (
                           <Badge variant="destructive" className="ml-2 animate-pulse">
                             <Scale className="w-3 h-3 mr-1" />
@@ -1691,7 +1691,7 @@ export default function DeepfakeNewsroom() {
                         <Card className="lg:col-span-1">
                           <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
                             <CardTitle className="flex items-center gap-2 text-lg">
-                              <MessageCircle className="w-5 h-5" />💬 Comunicaciones Seguras
+                              <MessageCircle className="w-5 h-5" />Comunicaciones Seguras
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="p-0">
@@ -1861,7 +1861,7 @@ export default function DeepfakeNewsroom() {
                   {activeWindow === "ai" && (
                     <div className="p-6">
                       <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        <Bot className="w-6 h-6 text-blue-600" />🤖 Asistente IA - DeepDetect Pro
+                        <Bot className="w-6 h-6 text-blue-600" />Asistente IA - DeepDetect Pro
                       </h2>
                       <div className="space-y-4">
                         {aiResponse && (
@@ -1880,8 +1880,8 @@ export default function DeepfakeNewsroom() {
                           <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200">
                             <CardHeader>
                               <CardTitle className="text-lg flex items-center gap-2">
-                                <Zap className="w-5 h-5 text-blue-600" />
-                                🛠️ Herramientas de Análisis
+                                <div className="w-5 h-5 text-blue-600" />
+                                Herramientas de Análisis
                               </CardTitle>
                             </CardHeader>
                             <CardContent className="space-y-2">
@@ -1890,7 +1890,7 @@ export default function DeepfakeNewsroom() {
                                 className="w-full justify-start hover:bg-blue-50 border-blue-200"
                                 id="btn-analisis-metadatos"
                               >
-                                <Eye className="w-4 h-4 mr-2" />🔍 Análisis de Metadatos
+                                <Eye className="w-4 h-4 mr-2" />Análisis de Metadatos
                               </Button>
                               <Button
                                 onClick={() => {
@@ -1901,21 +1901,21 @@ export default function DeepfakeNewsroom() {
                                 data-tour="ai-tool-detect"
                                 id="btn-deteccion-imagenes"
                               >
-                                <Zap className="w-4 h-4 mr-2" />⚡ Detección de Imágenes
+                                <Zap className="w-4 h-4 mr-2" />Detección de Imágenes
                               </Button>
                               <Button
                                 variant="outline"
                                 className="w-full justify-start hover:bg-green-50 border-green-200"
                                 id="btn-analisis-facial"
                               >
-                                <Target className="w-4 h-4 mr-2" />🎯 Análisis Facial
+                                <Target className="w-4 h-4 mr-2" />Análisis Facial
                               </Button>
                               <Button
                                 variant="outline"
                                 className="w-full justify-start hover:bg-orange-50 border-orange-200"
                                 id="btn-sincronizacion"
                               >
-                                <Video className="w-4 h-4 mr-2" />🎬 Sincronización Audio-Video
+                                <Video className="w-4 h-4 mr-2" />Sincronización Audio-Video
                               </Button>
                             </CardContent>
                           </Card>
@@ -1923,7 +1923,7 @@ export default function DeepfakeNewsroom() {
                           <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
                             <CardHeader>
                               <CardTitle className="text-lg flex items-center gap-2">
-                                <Sparkles className="w-5 h-5 text-green-600" />💡 Consejos del Experto
+                                <Sparkles className="w-5 h-5 text-green-600" />Consejos del Experto
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -2040,7 +2040,7 @@ export default function DeepfakeNewsroom() {
                           <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
                             <CardHeader>
                               <CardTitle className="flex items-center gap-2">
-                                <Shield className="w-5 h-5 text-purple-600" />🎯 Laboratorio de Análisis
+                                <Shield className="w-5 h-5 text-purple-600" />Laboratorio de Análisis
                               </CardTitle>
                               <CardDescription className="font-medium">
                                 ¿Es este contenido auténtico o un deepfake?
@@ -2056,7 +2056,7 @@ export default function DeepfakeNewsroom() {
                                       disabled={wrongAnswers.includes(currentCase.id)}
                                     >
                                       <CheckCircle className="w-10 h-10" />
-                                      <span>✅ AUTÉNTICO</span>
+                                      <span>AUTÉNTICO</span>
                                     </Button>
                                     <Button
                                       onClick={() => handleCaseDecision(currentCase.id, true)}
@@ -2064,13 +2064,13 @@ export default function DeepfakeNewsroom() {
                                       disabled={wrongAnswers.includes(currentCase.id)}
                                     >
                                       <XCircle className="w-10 h-10" />
-                                      <span>❌ DEEPFAKE</span>
+                                      <span>DEEPFAKE</span>
                                     </Button>
                                   </div>
                                 ) : (
                                   <div className="text-center p-6 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-2 border-green-300">
                                     <CheckCircle className="w-16 h-16 text-green-600 mx-auto mb-3" />
-                                    <p className="font-bold text-green-800 text-lg">🎉 ¡Misión Completada!</p>
+                                    <p className="font-bold text-green-800 text-lg">¡Misión Completada!</p>
                                     <p className="text-sm text-green-600 mt-1 font-medium">
                                       {currentCase.isDeepfake ? "Era un deepfake" : "Era contenido auténtico"}
                                     </p>
@@ -2082,7 +2082,7 @@ export default function DeepfakeNewsroom() {
 
                                 <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                                   <h4 className="font-bold mb-3 text-yellow-800 flex items-center gap-2">
-                                    <Eye className="w-5 h-5" />🔍 Pistas de Análisis:
+                                    <Eye className="w-5 h-5" />Pistas de Análisis:
                                   </h4>
                                   <ul className="text-sm space-y-2 text-yellow-700">
                                     {currentCase.hints.map((hint, index) => (
@@ -2123,7 +2123,7 @@ export default function DeepfakeNewsroom() {
                               onClick={() => setActiveWindow("desktop")}
                               className="mt-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                             >
-                              🎯 Ir al Centro de Comando
+                              Ir al Centro de Comando
                             </Button>
                           </CardContent>
                         </Card>

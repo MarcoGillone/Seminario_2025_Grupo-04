@@ -35,128 +35,128 @@ const TourStep = ({ targetSelector, text, onNext, onPrev, onFinish, isLastStep, 
 
   return (
     <>
-      {/* Highlight */}
+    {/* Highlight */}
+    <div style={{
+      position: 'absolute',
+      top: targetRect.top + window.scrollY - 5,
+      left: targetRect.left + window.scrollX - 5,
+      width: targetRect.width + 10,
+      height: targetRect.height + 10,
+      borderRadius: '10px',
+      border: '3px solid #00337b',
+      backgroundColor: 'rgba(0, 112, 243, 0.1)',
+      zIndex: 1000,
+      pointerEvents: 'none',
+      boxShadow: '0 0 30px rgba(0, 112, 243, 0.6)',
+    }} />
+
+    {/* Tooltip */}
+    <div style={{
+      position: 'absolute',
+      top,
+      left,
+      background: 'linear-gradient(145deg, #001e3c, #003366)',
+      padding: '1.2rem 1.5rem',
+      borderRadius: '16px',
+      border: '2px solid #0070f3',
+      boxShadow: '0 0 20px #0070f3, 0 0 10px rgba(0, 0, 0, 0.8)',
+      zIndex: 1001,
+      maxWidth: tooltipWidth,
+      fontFamily: '"Orbitron", sans-serif',
+      color: '#eee',
+      textShadow: '0 0 2px #000',
+    }}>
+      {/* Flecha */}
       <div style={{
         position: 'absolute',
-        top: targetRect.top + window.scrollY - 5,
-        left: targetRect.left + window.scrollX - 5,
-        width: targetRect.width + 10,
-        height: targetRect.height + 10,
-        borderRadius: '10px',
-        border: '3px solid #d400ff',
-        backgroundColor: 'rgba(212, 0, 255, 0.1)',
-        zIndex: 1000,
-        pointerEvents: 'none',
-        boxShadow: '0 0 30px rgba(212, 0, 255, 0.6)',
+        top: arrowPosition === 'top' ? -8 : 'unset',
+        bottom: arrowPosition === 'bottom' ? -8 : 'unset',
+        left: 20,
+        width: 0,
+        height: 0,
+        borderLeft: '8px solid transparent',
+        borderRight: '8px solid transparent',
+        borderBottom: arrowPosition === 'top' ? '8px solid #0070f3' : 'none',
+        borderTop: arrowPosition === 'bottom' ? '8px solid #0070f3' : 'none',
       }} />
 
-      {/* Tooltip */}
-      <div style={{
-        position: 'absolute',
-        top,
-        left,
-        background: 'linear-gradient(145deg, #1e003a, #2c0058)',
-        padding: '1.2rem 1.5rem',
-        borderRadius: '16px',
-        border: '2px solid #d400ff',
-        boxShadow: '0 0 20px #d400ff, 0 0 10px rgba(0, 0, 0, 0.8)',
-        zIndex: 1001,
-        maxWidth: tooltipWidth,
-        fontFamily: '"Orbitron", sans-serif',
-        color: '#eee',
-        textShadow: '0 0 2px #000',
-      }}>
-        {/* Flecha */}
-        <div style={{
-          position: 'absolute',
-          top: arrowPosition === 'top' ? -8 : 'unset',
-          bottom: arrowPosition === 'bottom' ? -8 : 'unset',
-          left: 20,
-          width: 0,
-          height: 0,
-          borderLeft: '8px solid transparent',
-          borderRight: '8px solid transparent',
-          borderBottom: arrowPosition === 'top' ? '8px solid #d400ff' : 'none',
-          borderTop: arrowPosition === 'bottom' ? '8px solid #d400ff' : 'none',
-        }} />
+      <h3 style={{
+        margin: '0 0 0.5rem 0',
+        fontSize: '1.1rem',
+        color: '#fff',
+        letterSpacing: '0.05rem',
+      }}>{text.titulo}</h3>
 
-        <h3 style={{
-          margin: '0 0 0.5rem 0',
-          fontSize: '1.1rem',
+      <p style={{
+        margin: 0,
+        fontSize: '0.95rem',
+        color: '#ccc',
+        lineHeight: '1.4rem',
+      }}>{text.descripcion}</p>
+
+      {/* Controles */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.2rem', gap: '0.5rem' }}>
+        <button onClick={onFinish} style={{
+          backgroundColor: '#6b7280',
           color: '#fff',
-          letterSpacing: '0.05rem',
-        }}>{text.titulo}</h3>
+          padding: '6px 12px',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontFamily: '"Orbitron", sans-serif',
+          fontSize: '0.8rem',
+        }}>
+          Finalizar Tour
+        </button>
 
-        <p style={{
-          margin: 0,
-          fontSize: '0.95rem',
-          color: '#ccc',
-          lineHeight: '1.4rem',
-        }}>{text.descripcion}</p>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          {!isFirstStep && (
+            <button onClick={onPrev} style={{
+              backgroundColor: '#1e293b',
+              color: '#ccc',
+              padding: '6px 14px',
+              border: '1px solid #3b82f6',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontFamily: '"Orbitron", sans-serif',
+            }}>
+              Atrás
+            </button>
+          )}
 
-        {/* Controles */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.2rem', gap: '0.5rem' }}>
-          <button onClick={onFinish} style={{
-            backgroundColor: '#6b7280',
-            color: '#fff',
-            padding: '6px 12px',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontFamily: '"Orbitron", sans-serif',
-            fontSize: '0.8rem',
-          }}>
-            Finalizar Tour
-          </button>
+          {!isLastStep && (
+            <button onClick={onNext} style={{
+              backgroundColor: '#00b3ff',
+              color: '#000',
+              padding: '6px 14px',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontFamily: '"Orbitron", sans-serif',
+              fontWeight: 'bold',
+            }}>
+              Siguiente
+            </button>
+          )}
 
-          <div style={{ display: 'flex', gap: '0.5rem' }}>
-            {!isFirstStep && (
-              <button onClick={onPrev} style={{
-                backgroundColor: '#333',
-                color: '#ccc',
-                padding: '6px 14px',
-                border: '1px solid #888',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontFamily: '"Orbitron", sans-serif',
-              }}>
-                Atrás
-              </button>
-            )}
-
-            {!isLastStep && (
-              <button onClick={onNext} style={{
-                backgroundColor: '#00b3ff',
-                color: '#000',
-                padding: '6px 14px',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontFamily: '"Orbitron", sans-serif',
-                fontWeight: 'bold',
-              }}>
-                Siguiente
-              </button>
-            )}
-
-            {isLastStep && (
-              <button onClick={onFinish} style={{
-                backgroundColor: '#ff0080',
-                color: '#fff',
-                padding: '6px 14px',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontFamily: '"Orbitron", sans-serif',
-                fontWeight: 'bold',
-              }}>
-                Finalizar
-              </button>
-            )}
-          </div>
+          {isLastStep && (
+            <button onClick={onFinish} style={{
+              backgroundColor: '#0070f3',
+              color: '#fff',
+              padding: '6px 14px',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontFamily: '"Orbitron", sans-serif',
+              fontWeight: 'bold',
+            }}>
+              Finalizar
+            </button>
+          )}
         </div>
       </div>
-    </>
+    </div>
+  </>
   );
 };
 

@@ -54,7 +54,7 @@ export default function Briefing({ onStart }: { onStart: () => void }) {
       <Card className="max-w-4xl w-full relative z-10 border-blue-500 shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50">
       <Card className="max-w-4xl w-full relative z-10 border-blue-500 shadow-2xl bg-gradient-to-br from-blue-50 to-purple-50">
         <CardHeader className="text-center bg-gradient-to-r from-blue-800 to-blue-800 text-white rounded-t-lg">
-          <CardTitle className={`text-4xl font-bold ${merriweather.className}`}>INVESTIGACIÓN DEEPFAKES</CardTitle>
+          <CardTitle className={`text-4xl font-bold ${merriweather.className}`}>INVESTIGACIÓN DE DEEPFAKES</CardTitle>
           <CardDescription className="text-lg text-blue-100">
             Defendiendo el periodismo en la era de la IA
           </CardDescription>
