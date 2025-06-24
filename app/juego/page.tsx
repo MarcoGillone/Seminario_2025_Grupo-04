@@ -10,6 +10,28 @@ import { Progress } from "@/components/ui/progress"
 import Tour from "./TourContainer"
 import Briefing from "./briefing/page"
 
+import { Oswald, Anton, Merriweather, Roboto } from 'next/font/google'
+
+const oswald = Oswald({
+  subsets: ['latin'],
+  weight: ['400', '700'], // podés ajustar los pesos según necesites
+})
+
+const anton = Anton({
+  subsets: ['latin'],
+  weight: '400', // Anton solo tiene un peso disponible
+})
+
+const merriweather = Merriweather({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+})
+
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: '400',
+})
+
 import {
   Mail,
   MessageCircle,
@@ -31,7 +53,7 @@ import {
   Mic,
   Camera,
   Plus,
-  Skull,
+  Ban,
   Scale,
   Monitor,
   Trophy,
@@ -41,7 +63,10 @@ import {
   Shield,
   Gamepad2,
   Sparkles,
+  Flame
 } from "lucide-react"
+
+import { Search } from "lucide-react";
 
 interface MediaCase {
   id: string
@@ -294,11 +319,11 @@ const difficultyColors = {
 }
 
 const rankTitles = [
-  "Novato Periodista",
-  "Investigador Junior",
-  "Analista Experto",
-  "Periodista Senior anti Deepfakes",
-  "Especialista Elite en Verificación",
+  "Novato",
+  "Junior",
+  "Experto",
+  "Senior Anti-DeepFakes",
+  "Elite en Verificación",
   "Maestro Verificador de Contenido Digital",
 ]
 
@@ -444,6 +469,32 @@ export default function DeepfakeNewsroom() {
     oscillator.stop(audioContext.currentTime + 0.8)
   }
 
+  // Titular de ultimo momento dinamico
+
+  const mensajes = [
+    "🔴 ÚLTIMO MOMENTO: Detectado intento de manipulación en imagen compartida por redes sociales. — Recordá verificar la fuente antes de compartir.",
+    "🔴 ALERTA: Aumentan los casos de imágenes falsas en campañas políticas. — Prestá atención al origen del contenido.",
+    "🔴 IMPORTANTE: Herramientas de IA generan contenido cada vez más realista. — Informate antes de difundir.",
+    "🔴 ANÁLISIS: Algunos medios están difundiendo noticias alteradas. — Consultá múltiples fuentes.",
+    "🔴 DATO CLAVE: Las imágenes virales pueden estar editadas con inteligencia artificial. — No creas todo lo que ves."
+  ];
+
+  const [indiceMensaje, setIndiceMensaje] = useState(0);
+
+  useEffect(() => {
+    const intervalo = setInterval(() => {
+      setIndiceMensaje((prev) => {
+        let nuevo;
+        do {
+          nuevo = Math.floor(Math.random() * mensajes.length);
+        } while (nuevo === prev); // evita repetir el mismo
+        return nuevo;
+      });
+    }, 120000); // cada 2 minutos
+
+    return () => clearInterval(intervalo);
+  }, []);
+
   // Generar nuevos casos dinámicamente
   const generateNewCase = (level: number): MediaCase => {
     const difficulties: Array<"easy" | "medium" | "hard" | "expert" | "master"> =
@@ -476,7 +527,7 @@ export default function DeepfakeNewsroom() {
         ],
       },
       {
-        type: "video" as const,
+        type: "image" as const,
         titles: [
           "Declaraciones no autorizadas",
           "Confesión en privado",
@@ -486,7 +537,7 @@ export default function DeepfakeNewsroom() {
         ],
         sources: ["Grabación filtrada", "Vigilancia", "Testimonio anónimo", "Hackeo"],
         descriptions: [
-          "Video que muestra comportamiento contradictorio",
+          "Imagen que muestra comportamiento contradictorio",
           "Grabación de conversación privada reveladora",
           "Evidencia audiovisual de irregularidades",
           "Material que podría ser manipulado digitalmente",
@@ -556,6 +607,7 @@ export default function DeepfakeNewsroom() {
         try {
           const res = await fetch(url)
           const data = await res.json()
+          console.log("Respuesta de NewsAPI:", data);
           const articleWithImage = data.articles.find((a: any) => a.urlToImage)
           if (!articleWithImage) continue
 
@@ -827,7 +879,7 @@ export default function DeepfakeNewsroom() {
 
   // Verificar game over por penalizaciones
   useEffect(() => {
-    if (penalties >= 20 && !isGameOver) {
+    if (penalties >= 2 && !isGameOver) {
       setIsGameOver(true)
       setGameOverReason("fired")
       showBoss("furious", "¡MISIÓN FALLIDA! Has sido relevado del servicio.", 8000)
@@ -934,7 +986,7 @@ export default function DeepfakeNewsroom() {
       playErrorSound()
 
       setWrongAnswers((prev) => [...prev, caseId])
-      setPenalties((prev) => prev + 10)
+      setPenalties((prev) => prev + 1)
       setScore((prev) => Math.max(0, prev - 50))
 
       // Resetear racha
@@ -1227,37 +1279,34 @@ export default function DeepfakeNewsroom() {
     return (
       <div
         className="min-h-screen flex items-center justify-center p-4 relative"
-        style={{
-          backgroundImage: "url('/placeholder.svg?height=1080&width=1920&text=Game+Over+Background')",
-          backgroundSize: "cover",
-          backgroundPosition: "center",
-        }}
+        style={{ backgroundColor: "#112433" }} // Azul oscuro
       >
-        <div className="absolute inset-0 bg-black/70"></div>
         <Card className="max-w-2xl w-full relative z-10 border-red-500 shadow-2xl">
-          <CardHeader className="text-center bg-red-600 text-white rounded-t-lg">
+          <CardHeader className="text-center bg-red-700 text-white rounded-t-lg">
             <div className="mx-auto mb-4">
-              {gameOverReason === "fired" ? <Skull className="w-16 h-16" /> : <Clock className="w-16 h-16" />}
+              {gameOverReason === "fired" ? (
+                <Ban className="w-16 h-16" />
+              ) : (
+                <Clock className="w-16 h-16" />
+              )}
             </div>
-            <CardTitle className="text-3xl">
+            <CardTitle className={`text-3xl ${merriweather.className}`}>
               {gameOverReason === "fired" ? "MISIÓN FALLIDA" : "TIEMPO AGOTADO"}
             </CardTitle>
             <CardDescription className="text-lg text-red-100">
               {gameOverReason === "fired"
-                ? "Has sido relevado del servicio por múltiples errores críticos"
-                : "Se acabó el tiempo para completar la misión"}
+                ? "Has sido eliminado de la prueba por múltiples errores críticos"
+                : "Se acabó el tiempo para completar la evaluación"}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4 p-6">
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <h3 className="font-bold text-red-800 mb-2">Consecuencias de la Misión:</h3>
+              <h3 className="font-bold text-red-800 mb-2">Consecuencias:</h3>
               <ul className="text-red-700 space-y-1">
                 {gameOverReason === "fired" ? (
                   <>
-                    <li>• Operación terminada</li>
-                    <li>• Credenciales revocadas</li>
+                    <li>• Evaluación terminada</li>
                     <li>• Acceso denegado al sistema</li>
-                    <li>• Reentrenamiento requerido</li>
                   </>
                 ) : (
                   <>
@@ -1271,30 +1320,32 @@ export default function DeepfakeNewsroom() {
 
             <div className="grid grid-cols-2 gap-4 text-center">
               <div>
-                <p className="text-sm text-gray-600">Casos Resueltos</p>
-                <p className="text-2xl font-bold text-green-600">{solvedCases.length}</p>
+                <p className="text-xl text-gray-600-bold">Casos Resueltos</p>
+                <p className="text-3xl font-bold text-green-600">{solvedCases.length}</p>
               </div>
               <div>
-                <p className="text-sm text-gray-600">Errores Cometidos</p>
-                <p className="text-2xl font-bold text-red-600">{wrongAnswers.length}</p>
+                <p className="text-xl text-gray-600-bold">Errores Cometidos</p>
+                <p className="text-3xl font-bold text-red-600">{wrongAnswers.length}</p>
               </div>
             </div>
 
             <div className="text-center">
-              <p className="text-sm text-gray-600 mb-2">Puntuación Final</p>
+              <p className="text-xl text-gray-600-bold mb-2">Puntuación Final</p>
               <p className="text-3xl font-bold">{score} XP</p>
-              <p className="text-sm text-gray-500">
+              <p className="text-md text-gray-500-bold">
                 Nivel {playerStats.level} - {playerStats.rank}
               </p>
             </div>
 
-            <Button onClick={restartGame} className="w-full" size="lg">
-              🔄 Reintentar Misión
+            <Button onClick={restartGame} className="w-full bg-red-700" size="lg">
+              Reintentar Misión
             </Button>
           </CardContent>
         </Card>
       </div>
     );
+
+
   }
 
   return (
@@ -1302,8 +1353,10 @@ export default function DeepfakeNewsroom() {
       <div
         className="min-h-screen relative overflow-hidden"
         style={{
-          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          backgroundImage: "linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%)",
           backgroundAttachment: "fixed",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
         }}
       >
         {/* Overlay para efectos */}
@@ -1376,17 +1429,24 @@ export default function DeepfakeNewsroom() {
                   <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
                   */}
-                  <div className="w-5 h-5 text-blue-400 ml-2" />
-                    <span className="text-white text-sm font-bold">Periodista - Juan Rodriguez</span>
+                  {/*<div className="w-5 h-5 text-blue-400 ml-2" />*/}
+
+                    {/* Foto de perfil */}
+                    <img
+                      src="personajes/juan-perfil.png"
+                      alt="Foto de perfil"
+                      className="w-12 h-12 rounded-full object-cover border-2 border-white"
+                    />  
+                    <span className={`text-white text-sm font-bold ${oswald.className}`}>Periodista - Juan Rodriguez</span>
                   </div>
                 <div className="flex items-center gap-4 text-white">
                   <div className="flex items-center gap-2 bg-blue-500 px-3 py-1 rounded-full">
                     <Star className="w-4 h-4" />
-                    <span className="text-sm font-bold">Nivel {playerStats.level}</span>
+                    <span className={`text-sm font-bold ${roboto.className}`}>Nivel {playerStats.level}</span>
                   </div>
                   <div className="flex items-center gap-2 bg-blue-800 px-3 py-1 rounded-full">
                     <Zap className="w-4 h-4" />
-                    <span className="text-sm font-bold">{playerStats.xp} XP</span>
+                    <span className={`text-sm font-bold ${roboto.className}`}>{playerStats.xp} XP</span>
                   </div>
                   <div
                     className={`flex items-center gap-2 px-3 py-1 rounded-full ${gameStarted ? "bg-red-600" : "bg-gray-600"}`}
@@ -1407,30 +1467,30 @@ export default function DeepfakeNewsroom() {
               <div className="bg-gradient-to-br from-grey-800 to-grey-900 min-h-[600px] p-4">
                 {/* Barra de tareas */}
                 <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 mb-4 flex items-center justify-between border border-white/20">
-                  <div className="flex items-center gap-2">
-                  <Button
-                    variant={activeWindow === "desktop" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => setActiveWindow("desktop")}
-                    className={
+                  <div className="flex items-center gap-2">                   
+                    <Button
+                      variant={activeWindow === "desktop" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => setActiveWindow("desktop")}
+                      className={`${roboto.className} ${
                         activeWindow === "desktop"
                           ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
                           : "text-white"
-                      }
-                    id="btn-centro-de-comando"
-                  >
-                    <Monitor className="w-4 h-4 mr-1" />
-                    Panel de análisis
-                  </Button>
+                      }`}
+                      id="btn-centro-de-comando"
+                    >
+                      <Monitor className="w-4 h-4 mr-1" />
+                      Panel de análisis
+                    </Button>
                     <Button
                       variant={activeWindow === "email" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveWindow("email")}
-                      className={
+                      className={`${roboto.className} ${
                         activeWindow === "email"
                           ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
                           : "text-white"
-                      }
+                      }`}
                       id="btn-mail"
                     >
                       <Mail className="w-4 h-4 mr-1" />Mail ({emails.filter((e) => !e.isRead).length})
@@ -1439,11 +1499,11 @@ export default function DeepfakeNewsroom() {
                       variant={activeWindow === "whatsapp" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveWindow("whatsapp")}
-                      className={
+                      className={`${roboto.className} ${
                         activeWindow === "whatsapp"
                           ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
                           : "text-white"
-                      } 
+                      }`} 
                       id="btn-whatsapp"
                     >
                       <MessageCircle className="w-4 h-4 mr-1" />Whatsapp
@@ -1457,11 +1517,11 @@ export default function DeepfakeNewsroom() {
                       variant={activeWindow === "ai" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveWindow("ai")}
-                      className={
+                      className={`${roboto.className} ${
                         activeWindow === "ai"
                           ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
                           : "text-white"
-                      }
+                      }`}
                       id="btn-ia-asistente"
                     >
                       <Bot className="w-4 h-4 mr-1" />IA Asistente
@@ -1470,28 +1530,28 @@ export default function DeepfakeNewsroom() {
                       variant={activeWindow === "analysis" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveWindow("analysis")}
-                      className={
+                      className={`${roboto.className} ${
                         activeWindow === "analysis"
                           ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
                           : "text-white"
-                      }                    >
-                      <Eye className="w-4 h-4 mr-1" />Laboratorio
+                      }`}                    >
+                      <Search className="w-4 h-4 mr-1" />Laboratorio
                     </Button>
                   </div>
 
                   <div className="flex items-center gap-4 text-white">
                     <div className="flex items-center gap-2 bg-green-600 px-3 py-1 rounded-full">
                       <Trophy className="w-4 h-4" />
-                      <span className="text-sm font-bold">{score} Puntos</span>
+                      <span className={`text-sm font-bold ${roboto.className}`}>{score} Puntos</span>
                     </div>
                     <div className="flex items-center gap-2 bg-yellow-600 px-3 py-1 rounded-full">
-                      <Target className="w-4 h-4" />
-                      <span className="text-sm font-bold">Racha: {playerStats.streak}</span>
+                      <Flame className="w-4 h-4" />
+                      <span className={`text-sm font-bold ${roboto.className}`}>Racha: {playerStats.streak}</span>
                     </div>
                     {penalties > 0 && (
                       <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full animate-pulse">
                         <AlertTriangle className="w-4 h-4" />
-                        <span className="text-sm font-bold">Errores: {penalties}/20</span>
+                        <span className="text-sm font-bold">Errores: {penalties}/2</span>
                       </div>
                     )}
                   </div>
@@ -1501,30 +1561,38 @@ export default function DeepfakeNewsroom() {
                 <div className="bg-white/95 backdrop-blur-sm rounded-lg shadow-xl min-h-[500px] border border-white/30">
                   {activeWindow === "desktop" && (
                     <div className="p-6" id="centro-de-comando">
+
+                      {/* Zócalo estilo noticiero */}
+                        <div className="w-full bg-red-700 overflow-hidden py-1 rounded-md mb-4">
+                          <div className="inline-block whitespace-nowrap animate-marquee text-white text-sm font-bold tracking-wide px-4">
+                            {mensajes[indiceMensaje]}
+                          </div>
+                        </div>
+
                       <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-800 to-blue-600 bg-clip-text text-transparent flex items-center gap-3">
-                          <div className="w-8 h-8" style={{ color: '#6fcafa' }} />Panel de análisis
+                        <h2 className={`text-4xl font-bold bg-gradient-to-r from-[#111827] to-blue-800 bg-clip-text text-transparent flex items-center gap-3 ${anton.className}`}>
+                          Panel de análisis
                         </h2>
                         <div className="flex items-center gap-4">
-                          <Badge className="text-lg px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-600">
+                          <Badge className={`text-lg px-4 py-2 bg-gradient-to-r from-blue-800 to-blue-600 ${merriweather.className}`}>
                             {playerStats.rank}
                           </Badge>
                           <div className="text-right">
-                            <p className="text-sm text-gray-600">Progreso al siguiente nivel</p>
+                            <p className={`text-sm text-blue-600 ${roboto.className}`}>Progreso al siguiente nivel</p>
                             <Progress value={(playerStats.xp % 500) / 5} className="w-32" />
-                            <p className="text-xs text-gray-500">{playerStats.xp % 500}/500 XP</p>
+                            <p className={`text-md text-blue-600 ${roboto.className}`}>{playerStats.xp % 500}/500 XP</p>
                           </div>
                         </div>
                       </div>
 
                       {/* Alerta de peligro */}
-                      {penalties >= 10 && penalties < 20 && (
+                      {penalties >= 1 && penalties < 2 && (
                         <Card className="mb-6 border-red-500 bg-gradient-to-r from-red-50 to-orange-50 animate-pulse">
                           <CardContent className="p-4">
                             <div className="flex items-center gap-3 text-red-800">
                               <AlertTriangle className="w-6 h-6" />
                               <span className="font-bold text-lg">
-                                ALERTA CRÍTICA: Estás cerca de ser relevado del servicio. Errores: {penalties}/20
+                                ALERTA CRÍTICA: Estás cerca de ser desaprobado. Errores: {penalties}/2
                               </span>
                             </div>
                           </CardContent>
@@ -1532,35 +1600,76 @@ export default function DeepfakeNewsroom() {
                       )}
 
                       {/* Estadísticas del jugador */}
-                      <div className="grid grid-cols-4 gap-4 mb-6">
+                      <div className="grid grid-cols-4 gap-2 mb-4">
                         <Card className="bg-gradient-to-br from-yellow-50 to-orange-50 border-yellow-200 hover:shadow-lg transition-all">
-                          <CardContent className="p-4 text-center">
-                            <AlertTriangle className="w-10 h-10 text-yellow-600 mx-auto mb-2" />
-                            <p className="text-3xl font-bold text-yellow-600">
-                              {mediaCases.filter((c) => !solvedCases.includes(c.id) && c.status !== "wrong").length}
-                            </p>
-                            <p className="text-sm text-yellow-700 font-semibold">Misiones Pendientes</p>
+                          <CardContent className="p-2">
+                            <div className="flex items-center">
+                              <div className="w-2/5 flex justify-center">
+                                <AlertTriangle className="w-14 h-14 text-yellow-600" />
+                              </div>
+                              <div className="w-3/5">
+                                <p className="text-2xl font-bold text-yellow-600 leading-tight">
+                                  {mediaCases.filter((c) => !solvedCases.includes(c.id) && c.status !== "wrong").length}
+                                </p>
+                                <p className={`text-sm text-yellow-700 font-semibold ${roboto.className}`}>
+                                  Casos Pendientes
+                                </p>
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
+
                         <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200 hover:shadow-lg transition-all">
-                          <CardContent className="p-4 text-center">
-                            <CheckCircle className="w-10 h-10 text-green-600 mx-auto mb-2" />
-                            <p className="text-3xl font-bold text-green-600">{solvedCases.length}</p>
-                            <p className="text-sm text-green-700 font-semibold">Misiones Completadas</p>
+                          <CardContent className="p-2">
+                            <div className="flex items-center">
+                              <div className="w-2/5 flex justify-center">
+                                <CheckCircle className="w-14 h-14 text-green-600" />
+                              </div>
+                              <div className="w-3/5">
+                                <p className="text-2xl font-bold text-green-600 leading-tight">
+                                  {solvedCases.length}
+                                </p>
+                                <p className={`text-sm text-green-700 font-semibold ${roboto.className}`}>
+                                  Casos Completados
+                                </p>
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
+
                         <Card className="bg-gradient-to-br from-red-50 to-pink-50 border-red-200 hover:shadow-lg transition-all">
-                          <CardContent className="p-4 text-center">
-                            <XCircle className="w-10 h-10 text-red-600 mx-auto mb-2" />
-                            <p className="text-3xl font-bold text-red-600">{wrongAnswers.length}</p>
-                            <p className="text-sm text-red-700 font-semibold">Errores Críticos</p>
+                          <CardContent className="p-2">
+                            <div className="flex items-center">
+                              <div className="w-2/5 flex justify-center">
+                                <XCircle className="w-14 h-14 text-red-600" />
+                              </div>
+                              <div className="w-3/5">
+                                <p className="text-2xl font-bold text-red-600 leading-tight">
+                                  {wrongAnswers.length}
+                                </p>
+                                <p className={`text-sm text-red-700 font-semibold ${roboto.className}`}>
+                                  Errores Críticos
+                                </p>
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
+
                         <Card className="bg-gradient-to-br from-blue-50 to-purple-50 border-blue-200 hover:shadow-lg transition-all">
-                          <CardContent className="p-4 text-center">
-                            <Target className="w-10 h-10 text-blue-600 mx-auto mb-2" />
-                            <p className="text-3xl font-bold text-blue-600">{playerStats.accuracy}%</p>
-                            <p className="text-sm text-blue-700 font-semibold">Precisión</p>
+                          <CardContent className="p-2">
+                            <div className="flex items-center">
+                              <div className="w-2/5 flex justify-center">
+                                <Target className="w-14 h-14 text-blue-600" />
+                              </div>
+                              <div className="w-3/5">
+                                <p className="text-2xl font-bold text-blue-600 leading-tight">
+                                  {playerStats.accuracy}%
+                                </p>
+                                <p className={`text-sm text-blue-700 font-semibold ${roboto.className}`}>
+                                  Precisión
+                                </p>
+                              </div>
+                            </div>
                           </CardContent>
                         </Card>
                       </div>
@@ -1582,28 +1691,28 @@ export default function DeepfakeNewsroom() {
                             <CardHeader className="pb-2">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
+
                                   <Badge
-                                    variant={case_.type === "image" ? "default" : "secondary"}
-                                    className="bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+                                    className="bg-transparent text-[#13118c] p-1 hover:bg-transparent hover:text-[#13118c] transition-none"
                                   >
                                     {case_.type === "image" ? (
-                                      <ImageIcon className="w-3 h-3 mr-1" />
+                                      <ImageIcon className="w-6 h-6" /> // más grande
                                     ) : (
-                                      <Video className="w-3 h-3 mr-1" />
+                                      <Video className="w-6 h-6" />
                                     )}
-                                    {case_.type}
                                   </Badge>
-                                  <Badge className={`${difficultyColors[case_.difficulty]} text-white`}>
+
+                                  <Badge className={`bg-transparent text-[#13118c] hover:bg-[#13118c] hover:text-white transition-colors duration-200 rounded-full px-3 py-1 text-sm font-semibold ${merriweather.className}`}>
                                     Nivel {case_.level}
                                   </Badge>
                                 </div>
                                 <div className="flex items-center gap-1">
                                   {solvedCases.includes(case_.id) && <CheckCircle className="w-5 h-5 text-green-600" />}
                                   {wrongAnswers.includes(case_.id) && <XCircle className="w-5 h-5 text-red-600" />}
-                                  <span className="text-xs font-bold text-purple-600">+{case_.xpReward} XP</span>
+                                  <span className={`text-md font-bold text-[#13118c]-600 ${roboto.className}`}>+{case_.xpReward} XP</span>
                                 </div>
                               </div>
-                              <CardTitle className="text-sm font-bold">{case_.title}</CardTitle>
+                              <CardTitle className={`text-xl font-bold ${merriweather.className}`}>{case_.title}</CardTitle>
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-3">
@@ -1612,12 +1721,12 @@ export default function DeepfakeNewsroom() {
                                   alt={case_.title}
                                   className="w-full h-32 object-cover rounded border-2 border-gray-200"
                                 />
-                                <p className="text-xs text-gray-600">{case_.description}</p>
+                                <p className={`text-xs text-black-600 text-bold ${roboto.className}`}>{case_.description}</p>
                                 <div className="flex justify-between items-center">
                                   <Badge variant="outline" className="text-xs font-semibold">
                                     {case_.difficulty.toUpperCase()}
                                   </Badge>
-                                  <span className="text-xs text-gray-500 font-medium">{case_.source}</span>
+                                  <span className={`text-xs text-gray-500 text-bold font-medium ${roboto.className}`}>{case_.source}</span>
                                 </div>
                                 <div className="flex flex-wrap gap-1">
                                   {case_.complexity.map((comp, idx) => (
@@ -1636,8 +1745,8 @@ export default function DeepfakeNewsroom() {
 
                   {activeWindow === "email" && (
                     <div className="p-6">
-                      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        <Mail className="w-6 h-6 text-blue-600" />Centro de Inteligencia
+                      <h2 className={`text-3xl font-bold mb-4 flex items-center gap-2 bg-gradient-to-r from-[#111827] to-blue-800 bg-clip-text text-transparent ${anton.className}`}>
+                        <Mail className="w-7 h-7 text-blue-600" />Bandeja de Entrada
                         {emails.some((e) => e.priority === "legal") && (
                           <Badge variant="destructive" className="ml-2 animate-pulse">
                             <Scale className="w-3 h-3 mr-1" />
@@ -1882,8 +1991,8 @@ export default function DeepfakeNewsroom() {
 
                   {activeWindow === "ai" && (
                     <div className="p-6">
-                      <h2 className="text-2xl font-bold mb-4 flex items-center gap-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                        <Bot className="w-6 h-6 text-blue-600" />Asistente IA - DeepDetect Pro
+                      <h2 className={`text-3xl font-bold mb-4 flex items-center gap-2 bg-gradient-to-r from-[#111827] to-blue-800 bg-clip-text text-transparent ${anton.className}`}>
+                        <Bot className="w-7 h-7 text-blue-600" />Asistente IA - DeepDetect Pro
                       </h2>
                       <div className="space-y-4">
                         {aiResponse && (
@@ -2006,15 +2115,10 @@ export default function DeepfakeNewsroom() {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                           <Card className="bg-gradient-to-br from-gray-50 to-blue-50 border-blue-200">
                             <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                {currentCase.type === "image" ? (
-                                  <ImageIcon className="w-5 h-5 text-blue-600" />
-                                ) : (
-                                  <Video className="w-5 h-5 text-purple-600" />
-                                )}
-                                🔍 {currentCase.title}
+                              <CardTitle className={`flex items-center gap-2 ${merriweather.className}`}>
+                                {currentCase.title}
                               </CardTitle>
-                              <CardDescription className="font-medium">{currentCase.description}</CardDescription>
+                              <CardDescription className={`font-medium text-black ${roboto.className}`}>{currentCase.description}</CardDescription>
                             </CardHeader>
                             <CardContent>
                               <div className="space-y-4">
@@ -2028,16 +2132,16 @@ export default function DeepfakeNewsroom() {
                                   <Badge variant="outline" className="font-semibold">
                                     📍 Fuente: {currentCase.source}
                                   </Badge>
-                                  <Badge className={`${difficultyColors[currentCase.difficulty]} text-white font-bold`}>
+                                  <Badge className="font-bold text-white" style={{ backgroundColor: "#13118c", color: "#ffffff" }}>
                                     {currentCase.difficulty.toUpperCase()}
                                   </Badge>
-                                  <Badge className="bg-purple-600 text-white font-bold">
+                                  <Badge className="font-bold" style={{ backgroundColor: "#13118c", color: "#ffffff" }}>
                                     +{currentCase.xpReward} XP
                                   </Badge>
                                 </div>
 
                                 <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                  <h4 className="font-bold text-blue-800 mb-2">🧩 Complejidad del Caso:</h4>
+                                  <h4 className={`font-bold text-blue-800 mb-2 ${roboto.className}`}>Complejidad del Caso:</h4>
                                   <div className="flex flex-wrap gap-1">
                                     {currentCase.complexity.map((comp, idx) => (
                                       <Badge key={idx} variant="secondary" className="text-xs">
@@ -2061,10 +2165,10 @@ export default function DeepfakeNewsroom() {
 
                           <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
                             <CardHeader>
-                              <CardTitle className="flex items-center gap-2">
-                                <Shield className="w-5 h-5 text-purple-600" />Laboratorio de Análisis
+                              <CardTitle className={`flex items-center gap-2 ${roboto.className}`}>
+                                Laboratorio de Análisis
                               </CardTitle>
-                              <CardDescription className="font-medium">
+                              <CardDescription className={`font-medium ${roboto.className}`}>
                                 ¿Es este contenido auténtico o un deepfake?
                               </CardDescription>
                             </CardHeader>
@@ -2104,7 +2208,7 @@ export default function DeepfakeNewsroom() {
 
                                 <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                                   <h4 className="font-bold mb-3 text-yellow-800 flex items-center gap-2">
-                                    <Eye className="w-5 h-5" />Pistas de Análisis:
+                                    Pistas de Análisis:
                                   </h4>
                                   <ul className="text-sm space-y-2 text-yellow-700">
                                     {currentCase.hints.map((hint, index) => (
@@ -2119,11 +2223,11 @@ export default function DeepfakeNewsroom() {
                                 {wrongAnswers.includes(currentCase.id) && (
                                   <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-300 rounded-lg">
                                     <p className="text-orange-800 text-sm font-bold">
-                                      <strong>⚠️ Consecuencias del error:</strong>
+                                      <strong>Consecuencias del error:</strong>
                                       <br />• Penalización de -50 puntos
                                       <br />• Racha de aciertos perdida
                                       <br />• Caso bloqueado temporalmente
-                                      <br />• Riesgo de relevación a 20 errores
+                                      <br />• Riesgo de eliminación, +1 caso de error
                                     </p>
                                   </div>
                                 )}
@@ -2134,19 +2238,19 @@ export default function DeepfakeNewsroom() {
                       ) : (
                         <Card className="bg-gradient-to-br from-gray-50 to-blue-50 border-blue-200">
                           <CardContent className="text-center py-16">
-                            <Eye className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                            <Search className="w-16 h-16 text-gray-400 mx-auto mb-4" />
                             <h3 className="text-xl font-bold mb-2 text-gray-700">
-                              🔍 Selecciona una misión para analizar
+                              Selecciona una misión para analizar
                             </h3>
                             <p className="text-gray-600 font-medium">
-                              Ve al Centro de Redacción y haz clic en uno de los casos disponibles
+                              Ve al Panel de analisis y haz clic en uno de los casos disponibles
                             </p>
                             <Button
                               onClick={() => setActiveWindow("desktop")}
-                              className="mt-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                              className="mt-4 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-600 hover:to-blue-600"
                             >
                               Ir al Panel de análisis
-                            </Button>
+                            </Button> 
                           </CardContent>
                         </Card>
                       )}
@@ -2161,7 +2265,8 @@ export default function DeepfakeNewsroom() {
           <div className="fixed top-4 left-4 flex items-center gap-4 z-20">
             <Button
               onClick={() => (window.location.href = "/")}
-              className="cursor-pointer bg-white/90 backdrop-blur-sm rounded-lg px-4 py-2 shadow-lg border border-white/30 hover:scale-110 transition-transform text-gray-700 font-semibold"
+              className="cursor-pointer bg-white/90 backdrop-blur-sm rounded-sm px-1.5 py-0.5 shadow border border-white/30 hover:scale-105 transition-transform text-gray-700 text-xs font-medium"
+
             >
               Volver al inicio
             </Button>

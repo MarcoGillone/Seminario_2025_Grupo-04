@@ -5,22 +5,22 @@ const pasos = [
   {
     id: 'btn-comando',
     selector: '#btn-centro-de-comando',
-    titulo: 'Centro de Comando',
-    descripcion: 'Acá accedés a tus casos pendientes, completados y estadísticas generales del nivel.',
+    titulo: 'Panel de análisis',
+    descripcion: 'Desde esta sección podés gestionar tus investigaciones: revisar casos activos, consultar los que ya resolviste y ver tu progreso general en el nivel.',
     ventana: 'desktop',
   },
   {
     id: 'mail',
     selector: '#btn-mail',
     titulo: 'Sección Mail',
-    descripcion: 'Lee los correos relevantes que ponen en contexto al caso.',
+    descripcion: 'Acá podes leer los correos relevantes que ponen en contexto al caso.',
     ventana: 'email',
   },
   {
     id: 'whatsapp',
     selector: '#btn-whatsapp',
     titulo: 'Sección WhatsApp',
-    descripcion: 'Revisá los mensajes que te vayan llegando de diversas fuentes.',
+    descripcion: 'Acá podes revisar los mensajes que te vayan llegando de diversas fuentes.',
     ventana: 'whatsapp',
   },
   {
@@ -63,13 +63,6 @@ const pasos = [
     selector: '#timer-del-juego',
     titulo: 'Timer',
     descripcion: 'Acá podés ver el tiempo restante que te queda para poder resolver los casos. ¡El tiempo corre!',
-    ventana: 'desktop',
-  },
-  {
-    id: 'centro-de-comando',
-    selector: '#centro-de-comando',
-    titulo: 'Centro de Comando',
-    descripcion: 'Desde esta sección podés gestionar tus investigaciones: revisar casos activos, consultar los que ya resolviste y ver tu progreso general en el nivel.',
     ventana: 'desktop',
   },
 ];
