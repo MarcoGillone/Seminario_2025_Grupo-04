@@ -1371,18 +1371,20 @@ export default function DeepfakeNewsroom() {
               {/* Barra superior del monitor */}
               <div className="bg-gradient-to-r from-gray-800 to-gray-900 p-3 rounded-t-lg flex items-center justify-between">
                 <div className="flex items-center gap-3">
+                  {/*
                   <div className="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                   <div className="w-3 h-3 bg-yellow-500 rounded-full animate-pulse"></div>
                   <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                  */}
                   <div className="w-5 h-5 text-blue-400 ml-2" />
                     <span className="text-white text-sm font-bold">Periodista - Juan Rodriguez</span>
                   </div>
                 <div className="flex items-center gap-4 text-white">
-                  <div className="flex items-center gap-2 bg-blue-600 px-3 py-1 rounded-full">
+                  <div className="flex items-center gap-2 bg-blue-500 px-3 py-1 rounded-full">
                     <Star className="w-4 h-4" />
                     <span className="text-sm font-bold">Nivel {playerStats.level}</span>
                   </div>
-                  <div className="flex items-center gap-2 bg-purple-600 px-3 py-1 rounded-full">
+                  <div className="flex items-center gap-2 bg-blue-800 px-3 py-1 rounded-full">
                     <Zap className="w-4 h-4" />
                     <span className="text-sm font-bold">{playerStats.xp} XP</span>
                   </div>
@@ -1406,20 +1408,29 @@ export default function DeepfakeNewsroom() {
                 {/* Barra de tareas */}
                 <div className="bg-black/50 backdrop-blur-sm rounded-lg p-3 mb-4 flex items-center justify-between border border-white/20">
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant={activeWindow === "desktop" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setActiveWindow("desktop")}
-                      className="text-white bg-blue-600 hover:bg-blue-700"
-                      id="btn-centro-de-comando"
-                    >
-                      <Monitor className="w-4 h-4 mr-1" />Centro de Comando
-                    </Button>
+                  <Button
+                    variant={activeWindow === "desktop" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => setActiveWindow("desktop")}
+                    className={
+                        activeWindow === "desktop"
+                          ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
+                          : "text-white"
+                      }
+                    id="btn-centro-de-comando"
+                  >
+                    <Monitor className="w-4 h-4 mr-1" />
+                    Panel de análisis
+                  </Button>
                     <Button
                       variant={activeWindow === "email" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveWindow("email")}
-                      className="text-white"
+                      className={
+                        activeWindow === "email"
+                          ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
+                          : "text-white"
+                      }
                       id="btn-mail"
                     >
                       <Mail className="w-4 h-4 mr-1" />Mail ({emails.filter((e) => !e.isRead).length})
@@ -1428,7 +1439,11 @@ export default function DeepfakeNewsroom() {
                       variant={activeWindow === "whatsapp" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveWindow("whatsapp")}
-                      className="text-white"
+                      className={
+                        activeWindow === "whatsapp"
+                          ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
+                          : "text-white"
+                      } 
                       id="btn-whatsapp"
                     >
                       <MessageCircle className="w-4 h-4 mr-1" />Whatsapp
@@ -1442,7 +1457,11 @@ export default function DeepfakeNewsroom() {
                       variant={activeWindow === "ai" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveWindow("ai")}
-                      className="text-white"
+                      className={
+                        activeWindow === "ai"
+                          ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
+                          : "text-white"
+                      }
                       id="btn-ia-asistente"
                     >
                       <Bot className="w-4 h-4 mr-1" />IA Asistente
@@ -1451,8 +1470,11 @@ export default function DeepfakeNewsroom() {
                       variant={activeWindow === "analysis" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveWindow("analysis")}
-                      className="text-white"
-                    >
+                      className={
+                        activeWindow === "analysis"
+                          ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
+                          : "text-white"
+                      }                    >
                       <Eye className="w-4 h-4 mr-1" />Laboratorio
                     </Button>
                   </div>
@@ -1480,11 +1502,11 @@ export default function DeepfakeNewsroom() {
                   {activeWindow === "desktop" && (
                     <div className="p-6" id="centro-de-comando">
                       <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent flex items-center gap-3">
-                          <div className="w-8 h-8 text-blue-600" />Centro de Comando
+                        <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-800 to-blue-600 bg-clip-text text-transparent flex items-center gap-3">
+                          <div className="w-8 h-8" style={{ color: '#6fcafa' }} />Panel de análisis
                         </h2>
                         <div className="flex items-center gap-4">
-                          <Badge className="text-lg px-4 py-2 bg-gradient-to-r from-purple-500 to-pink-500">
+                          <Badge className="text-lg px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-600">
                             {playerStats.rank}
                           </Badge>
                           <div className="text-right">
@@ -1962,7 +1984,7 @@ export default function DeepfakeNewsroom() {
                             <CardHeader>
                               <CardTitle className="text-yellow-800 flex items-center gap-2">
                                 <AlertTriangle className="w-5 h-5" />
-                                ⚠️ Recomendaciones Especiales
+                                Recomendaciones Especiales
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -2123,7 +2145,7 @@ export default function DeepfakeNewsroom() {
                               onClick={() => setActiveWindow("desktop")}
                               className="mt-4 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
                             >
-                              Ir al Centro de Comando
+                              Ir al Panel de análisis
                             </Button>
                           </CardContent>
                         </Card>
