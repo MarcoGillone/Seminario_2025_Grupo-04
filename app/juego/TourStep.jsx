@@ -43,11 +43,11 @@ const TourStep = ({ targetSelector, text, onNext, onPrev, onFinish, isLastStep, 
       width: targetRect.width + 10,
       height: targetRect.height + 10,
       borderRadius: '10px',
-      border: '3px solid #00337b',
+      /*border: '3px solid #00337b',*/
       backgroundColor: 'rgba(0, 112, 243, 0.1)',
       zIndex: 1000,
       pointerEvents: 'none',
-      boxShadow: '0 0 30px rgba(0, 112, 243, 0.6)',
+      /*boxShadow: '0 0 30px rgba(0, 112, 243, 0.6)',*/
     }} />
 
     {/* Tooltip */}
@@ -55,11 +55,11 @@ const TourStep = ({ targetSelector, text, onNext, onPrev, onFinish, isLastStep, 
       position: 'absolute',
       top,
       left,
-      background: 'linear-gradient(145deg, #001e3c, #003366)',
+      background: 'linear-gradient(145deg, #111827, #111827)',
       padding: '1.2rem 1.5rem',
       borderRadius: '16px',
-      border: '2px solid #0070f3',
-      boxShadow: '0 0 20px #0070f3, 0 0 10px rgba(0, 0, 0, 0.8)',
+      border: '2px solid #111827',
+      /*boxShadow: '0 0 20px #0070f3, 0 0 10px rgba(0, 0, 0, 0.8)',*/
       zIndex: 1001,
       maxWidth: tooltipWidth,
       fontFamily: '"Orbitron", sans-serif',
@@ -97,14 +97,15 @@ const TourStep = ({ targetSelector, text, onNext, onPrev, onFinish, isLastStep, 
       {/* Controles */}
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1.2rem', gap: '0.5rem' }}>
         <button onClick={onFinish} style={{
-          backgroundColor: '#6b7280',
-          color: '#fff',
+          backgroundColor: 'red',
+          color: 'white',
           padding: '6px 12px',
           border: 'none',
           borderRadius: '8px',
           cursor: 'pointer',
-          fontFamily: '"Orbitron", sans-serif',
-          fontSize: '0.8rem',
+          fontFamily: 'sans-serif',
+          fontSize: '0.7rem',
+          fontWeight: 'bold',
         }}>
           Finalizar Tour
         </button>
