@@ -175,19 +175,88 @@ const whatsappContacts: WhatsAppContact[] = [
 ]
 
 const prompts = [
-  "Retrato hiperrealista de un político en conferencia, iluminación cinematográfica, 4k",
-  "Imagen realista de un CEO dando declaraciones, luz de estudio, expresión seria",
-  "Deepfake de un actor en una escena de acción, fondo borroso, enfoque nítido",
-  "Científico en laboratorio hablando a cámara, profundidad de campo, realismo extremo",
-  "Presentador de noticias dando una primicia, estilo CNN, calidad 8K",
-  "Celebridad dando una entrevista, fondo elegante, iluminación suave",
-  "Estudiante en aula universitaria, luz natural, mirada seria",
-  "Político saludando en evento público, crowd blur, enfoque en rostro",
-  "Influencer en TikTok, expresión exagerada, fondo artificial",
-  "Hombre de negocios en llamada por videoconferencia, tonos fríos",
-  "Hombre caminando en la luna, traje espacial, fondo estrellado, capsula espacial, luz tenue, realismo extremo",
-  // ...hasta llegar a 30
+  {
+    prompt: "Hombre astronauta caminando en la luna, planeta Tierra visible al fondo, traje espacial realista, nave de fondo",
+    title: "Astronauta camina en la luna en una nueva misión encubierta que no fue anunciada por ninguna agencia oficial ni registrada en medios internacionales"
+  },
+  {
+    prompt: "Explosión nuclear en el océano, nube en hongo, barcos cercanos, escena cinematográfica",
+    title: "Argentina habría desarrollado en secreto una bomba atómica y la habría detonado en el mar; Chile solicita intervención de EE.UU. ante posible tsunami"
+  },
+  {
+    prompt: "Reunión secreta entre militares, documentos clasificados sobre la mesa, sala oscura con mapas",
+    title: "Altos mandos militares se reúnen en secreto para planificar maniobras encubiertas que podrían alterar el equilibrio político de la región"
+  },
+  {
+    prompt: "Silo de misiles activo con luces encendidas, cielo nocturno estrellado, humo saliendo",
+    title: "Se filtran imágenes de un silo activo en zona restringida: estarían cargando misiles sin autorización del organismo internacional de control"
+  },
+  {
+    prompt: "Contenedor biológico en laboratorio, etiquetas de virus, fondo borroso, guantes quirúrgicos",
+    title: "Laboratorio privado trabaja en una variante de virus potencialmente letal sin supervisión sanitaria ni permisos del Ministerio de Salud"
+  },
+  {
+    prompt: "Grupo de drones sobrevolando ciudad al anochecer, luces encendidas, estilo cinematográfico",
+    title: "Una flotilla de drones sobrevuela zonas residenciales en plena noche sin aviso previo, generando pánico y sospechas de espionaje ciudadano"
+  },
+  {
+    prompt: "Reactor nuclear averiado con humo, personal evacuando, luz de emergencia",
+    title: "Avería crítica en reactor nuclear obliga evacuación urgente; autoridades niegan el hecho y aseguran que fue un simulacro interno de rutina"
+  },
+  {
+    prompt: "Pantalla de computadora con interfaz de hackeo, gráficos complejos, manos masculinas digitando",
+    title: "Capturan en video una intrusión cibernética a servidores estatales: claves gubernamentales fueron vulneradas desde una fuente desconocida"
+  },
+  {
+    prompt: "Tanques cruzando frontera nevada, bandera extranjera, plano aéreo",
+    title: "Columna de tanques de origen extranjero cruza frontera sur sin autorización; gobiernos vecinos piden explicaciones inmediatas"
+  },
+  {
+    prompt: "Satélite militar flotando sobre América del Sur, rayos de escaneo, espacio oscuro",
+    title: "Satélite militar no identificado sobrevuela América del Sur activando sistemas de escaneo; expertos creen que recopila datos sin consentimiento"
+  },
+  {
+    prompt: "Fábrica de armas automatizada, robots ensamblando piezas, luces industriales",
+    title: "Filtran video de fábrica automatizada produciendo armas avanzadas sin licencia; se sospecha que abastece a grupos paramilitares regionales"
+  },
+  {
+    prompt: "Avión militar sin identificación aterrizando de noche, luces apagadas, vista desde drone",
+    title: "Un avión de carga militar sin identificación aterriza de noche en pista clandestina; vecinos reportan movimientos extraños en la zona"
+  },
+  {
+    prompt: "Manifestantes frente a sede gubernamental, pancartas, fuego de fondo, tensión nocturna",
+    title: "Multitudinaria protesta frente al Congreso tras filtración de archivos secretos que comprometen al Poder Ejecutivo y agencias de inteligencia"
+  },
+  {
+    prompt: "Persona encapuchada hablando a cámara, fondo negro, iluminación dramática",
+    title: "Encapuchado anónimo publica video donde amenaza con revelar documentos que podrían desestabilizar a todo el gabinete presidencial"
+  },
+  {
+    prompt: "Contenedor marítimo abriéndose con materiales extraños, cámaras de seguridad desenfocadas",
+    title: "Autoridades interceptan contenedor en puerto con materiales de origen desconocido; imágenes muestran luces, símbolos y estructuras inusuales"
+  },
+  {
+    prompt: "Glaciar derritiéndose con rapidez, nivel del mar subiendo, timelapse extremo",
+    title: "Timelapse revela aceleración alarmante del deshielo en el sur: científicos alertan sobre posible subida catastrófica del nivel del mar"
+  },
+  {
+    prompt: "Camión blindado ingresando a instalación subterránea, vigilancia extrema",
+    title: "Camión militar fuertemente custodiado accede a base subterránea secreta; se especula con transporte de prototipos de tecnología bélica"
+  },
+  {
+    prompt: "Prueba de robot soldado caminando, luz fría, ambiente industrial",
+    title: "Robot bípedo armado es visto en instalaciones militares bajo prueba; filtraciones sugieren que ya ha sido desplegado en zonas de conflicto"
+  },
+  {
+    prompt: "Pantalla de radar detectando objeto no identificado, militares reaccionando",
+    title: "Fuerza aérea detecta objeto no identificado que evade radares convencionales; se baraja posibilidad de dron hipersónico experimental"
+  },
+  {
+    prompt: "Lanzamiento de cohete desde base desértica, cielo despejado, polvo en suspensión",
+    title: "Cohete de carga pesada es lanzado desde base secreta; video despierta sospechas de violación de tratados internacionales de espacio"
+  }
 ]
+
 
 const obtenerParametrosPorNivel = (nivel: number) => {
   // escalar calidad con nivel
@@ -613,12 +682,13 @@ export default function DeepfakeNewsroom() {
       const newCase = generateNewCase(nivel)
 
       if (usarIA) {
-          const prompt = prompts[Math.floor(Math.random() * prompts.length)]
+          const { prompt, title } = prompts[Math.floor(Math.random() * prompts.length)]
           const imageUrl = await generarImagen(prompt, nivel)
           newCase.isDeepfake = true
           newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
           newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
-          newCase.title = prompt // ✅ usar el prompt como título
+          newCase.title = title // ✅ usar el prompt como título
+          newCase.description = ` "${prompt}"`
       } else {
         const apiKey = "2c97d461a1824274bae74e31a41df742"
    
@@ -849,15 +919,15 @@ nuevosCasos.push(newCase)
       const newLevel = 1
 
       for (let i = 0; i < 3; i++) {
-        const prompt = prompts[Math.floor(Math.random() * prompts.length)]
+        const { prompt, title } = prompts[Math.floor(Math.random() * prompts.length)]
         const imageUrl = await generarImagen(prompt, newLevel)
 
         const newCase = generateNewCase(newLevel)
         newCase.isDeepfake = true
         newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
         newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
-        newCase.title = prompt // ✅ Aquí agregás el prompt como título
-        newCase.description = `Imagen IA: "${prompt}"` // Opcional: agregás descripción
+        newCase.title = title // ✅ Aquí agregás el prompt como título
+        newCase.description = `"${title}"` // Opcional: agregás descripción
 
         setMediaCases((prev) => [...prev, newCase])
         setCaseCounter((prev) => prev + 1)
