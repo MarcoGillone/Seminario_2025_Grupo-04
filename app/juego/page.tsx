@@ -955,19 +955,19 @@ nuevosCasos.push(newCase)
 
   // Generar nuevos casos cuando se resuelven
   useEffect(() => {
-    if (solvedCases.length > 0 && solvedCases.length % 3 === 0) {
-      const newLevel = Math.floor(solvedCases.length / 3) + 1
-      const newCase = generateNewCase(newLevel)
-      setMediaCases((prev) => [...prev, newCase])
-      setCaseCounter((prev) => prev + 1)
+  if (solvedCases.length > 0 && solvedCases.length % 3 === 0) {
+    const newLevel = Math.floor(solvedCases.length / 3) + 1
 
-      // Notificación de nuevo caso
-      setNotifications((prev) => [...prev, `¡Nuevo caso desbloqueado! Nivel ${newLevel}`])
-      setTimeout(() => {
-        setNotifications((prev) => prev.slice(1))
-      }, 5000)
-    }
-  }, [solvedCases.length])
+    agregarCasosAleatorios(newLevel)
+
+    // Notificación de nuevo caso
+    setNotifications((prev) => [...prev, `🆕 ¡3 nuevos casos desbloqueados! Nivel ${newLevel}`])
+    setTimeout(() => {
+      setNotifications((prev) => prev.slice(1))
+    }, 5000)
+  }
+}, [solvedCases.length])
+
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
