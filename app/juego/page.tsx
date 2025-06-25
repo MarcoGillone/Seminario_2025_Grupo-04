@@ -135,7 +135,7 @@ interface PlayerStats {
   streak: number
   maxStreak: number
 }
-
+ const imagenesUsadas = new Set<string>()
 const whatsappContacts: WhatsAppContact[] = [
   {
     id: "boss",
@@ -185,6 +185,7 @@ const prompts = [
   "Político saludando en evento público, crowd blur, enfoque en rostro",
   "Influencer en TikTok, expresión exagerada, fondo artificial",
   "Hombre de negocios en llamada por videoconferencia, tonos fríos",
+  "Hombre caminando en la luna, traje espacial, fondo estrellado, capsula espacial, luz tenue, realismo extremo",
   // ...hasta llegar a 30
 ]
 
@@ -215,6 +216,9 @@ const obtenerParametrosPorNivel = (nivel: number) => {
   }
 }
 
+
+
+
 async function generarImagen(prompt: string, nivel: number): Promise<string> {
   const qualityParams = obtenerParametrosPorNivel(nivel)
   console.log(`Generando imagen con prompt: ${prompt}, params: ${JSON.stringify(qualityParams)}`)
@@ -235,7 +239,7 @@ async function fetchNewsImage(): Promise<string | null> {
   const apiKey = "2c97d461a1824274bae74e31a41df742"
   const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
   const query = queries[Math.floor(Math.random() * queries.length)]
-  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`
+  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=es&pageSize=10`
 
   try {
     const res = await fetch(url)
@@ -369,6 +373,11 @@ export default function DeepfakeNewsroom() {
   const [mostrarBriefing, setMostrarBriefing] = useState(true);
   const [mostrarVideoGameOver, setMostrarVideoGameOver] = useState(true);
   const [mostrarVideoVictory, setMostrarVideoVictory] = useState(true);
+  const [backgroundAudio, setBackgroundAudio] = useState<HTMLAudioElement | null>(null)
+  const [isMuted, setIsMuted] = useState(false)
+
+
+
 
 
   const videoFinal =
@@ -582,9 +591,21 @@ export default function DeepfakeNewsroom() {
 
     return newCase
   }
+  
 
   const agregarCasosAleatorios = async (nivel: number) => {
     const nuevosCasos: MediaCase[] = []
+    const queries = [
+        "argentina", "milei", "guerra", "ucrania", "rusia", "nasa", "elon musk", "luna", "inteligencia artificial",
+        "bitcoin", "inflación", "crisis energética", "cambio climático", "siria", "iran", "eeuu", "israel", "hamas",
+        "tecnología", "5g", "ciberseguridad", "hackeo", "fake news", "trump", "biden", "macron", "china", "taiwán",
+        "brics", "corea del norte", "otan", "crimen organizado", "trata de personas", "nuclear", "energía solar",
+        "inteligencia militar", "deepfake", "vacunas", "pandemia", "covid", "amazonas", "incendios forestales",
+        "terremoto", "huracán", "desinformación", "redes sociales", "censura digital", "corte suprema", "europa",
+        "sistema financiero"
+        ]
+   
+
 
     for (let i = 0; i < 2; i++) {
       const usarIA = Math.random() > 0.5
@@ -592,37 +613,61 @@ export default function DeepfakeNewsroom() {
       const newCase = generateNewCase(nivel)
 
       if (usarIA) {
-        const prompt = prompts[Math.floor(Math.random() * prompts.length)]
-        const imageUrl = await generarImagen(prompt, nivel)
-        newCase.isDeepfake = true
-        newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
-        newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
-        newCase.title = prompt // ✅ usar el prompt como título
+          const prompt = prompts[Math.floor(Math.random() * prompts.length)]
+          const imageUrl = await generarImagen(prompt, nivel)
+          newCase.isDeepfake = true
+          newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
+          newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
+          newCase.title = prompt // ✅ usar el prompt como título
       } else {
         const apiKey = "2c97d461a1824274bae74e31a41df742"
-        const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
-        const query = queries[Math.floor(Math.random() * queries.length)]
-        const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`
+   
+  const query = queries[Math.floor(Math.random() * queries.length)]
+  const page = Math.floor(Math.random() * 5) + 1 // entre 1 y 5
 
-        try {
-          const res = await fetch(url)
-          const data = await res.json()
-          console.log("Respuesta de NewsAPI:", data);
-          const articleWithImage = data.articles.find((a: any) => a.urlToImage)
-          if (!articleWithImage) continue
+  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=es&pageSize=10&page=${page}`
 
-          newCase.isDeepfake = false
-          newCase.mediaUrl = articleWithImage.urlToImage
-          newCase.realImageUrl = articleWithImage.urlToImage
-          newCase.title = articleWithImage.description || "Caso de noticia" // ✅ usar description como título
-        } catch (error) {
-          console.error("Error fetching news case:", error)
-          continue
-        }
-      }
+  try {
+    const res = await fetch(url)
+    const data = await res.json()
+    console.log("📰 Respuesta de NewsAPI:", data)
 
-      nuevosCasos.push(newCase)
+    const validArticles = data.articles.filter((a: any) =>
+      a.urlToImage &&
+      a.urlToImage.startsWith("http") &&
+      !a.urlToImage.includes("default") &&
+      !a.urlToImage.includes("logo") &&
+      a.description &&
+      !imagenesUsadas.has(a.urlToImage)
+    )
+
+    if (validArticles.length === 0) {
+      console.warn("❌ No se encontraron artículos válidos o con imágenes no repetidas.")
+      continue
     }
+
+    const selected = validArticles[Math.floor(Math.random() * validArticles.length)]
+
+    // Registrar imagen usada
+    imagenesUsadas.add(selected.urlToImage)
+
+    newCase.isDeepfake = false
+    newCase.mediaUrl = selected.urlToImage
+    newCase.realImageUrl = selected.urlToImage
+    newCase.title = selected.description || selected.title || "Caso de noticia"
+    newCase.description = selected.title || "Noticia generada automáticamente"
+
+  } catch (error) {
+    console.error("❌ Error al obtener noticias desde NewsAPI:", error)
+    continue
+  }
+}
+
+
+nuevosCasos.push(newCase)
+
+
+}
 
     setMediaCases((prev) => [...prev, ...nuevosCasos])
     setCaseCounter((prev) => prev + nuevosCasos.length)
@@ -822,7 +867,7 @@ export default function DeepfakeNewsroom() {
         const apiKey = "2c97d461a1824274bae74e31a41df742"
         const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
         const query = queries[Math.floor(Math.random() * queries.length)]
-        const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`
+        const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=es&pageSize=10`
 
         try {
           const res = await fetch(url)
@@ -1084,6 +1129,18 @@ export default function DeepfakeNewsroom() {
     setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
     showBoss("normal", "¡La misión ha comenzado! Analiza los casos con cuidado.", 4000)
   }
+  
+  const iniciarAudio = () => {
+  if (backgroundAudio) return // evitar múltiples instancias
+
+  const audio = new Audio("/audio/true-detective.mp3")
+  audio.loop = true
+  audio.volume = 0.3
+  audio.play().catch(err => {
+    console.warn("🎵 El navegador bloqueó el audio automático:", err)
+  })
+  setBackgroundAudio(audio)
+}
 
   if (mostrarIntro) {
     return (
@@ -1095,14 +1152,19 @@ export default function DeepfakeNewsroom() {
             controls
             playsInline
             onEnded={() => {
-              setMostrarIntro(false);
-              setMostrarBriefing(true); // ahora muestra el briefing antes del juego
+              setMostrarIntro(false)
+              setMostrarBriefing(true)
+              iniciarAudio()
             }}
 
             className="w-full rounded-lg shadow-xl"
           />
           <button
-            onClick={() => setMostrarIntro(false)}
+            onClick={() => {
+              setMostrarIntro(false)
+              setMostrarBriefing(true)
+              iniciarAudio() // Iniciar audio al omitir introducción
+            }}
             className="absolute top-4 right-4 bg-white text-black px-4 py-2 rounded-md font-bold hover:bg-gray-200 z-50"
           >
             Omitir introducción
@@ -1122,6 +1184,8 @@ export default function DeepfakeNewsroom() {
       />
     );
   }
+
+  
 
   if (loadingInicial && !mostrarIntro) {
     return (
@@ -1402,7 +1466,34 @@ export default function DeepfakeNewsroom() {
               </div>
             </div>
           </div>
+                  
         )}
+        {/* 🎧 Botón de Mute */}
+{backgroundAudio && (
+  <button
+    onClick={() => {
+      if (!backgroundAudio) return
+      backgroundAudio.muted = !isMuted
+      setIsMuted(!isMuted)
+    }}
+    style={{
+      position: "fixed",
+      top: "80px",
+      right: "20px",
+      zIndex: 9999, 
+      backgroundColor: "#000",
+      color: "#fff",
+      padding: "10px 16px",
+      border: "2px solid #555",
+      borderRadius: "8px",
+      fontWeight: "bold",
+      cursor: "pointer",
+      boxShadow: "0 0 6px rgba(0,0,0,0.5)"
+    }}
+  >
+    {isMuted ? "🔇 Activado" : "🔊 Sonando"}
+  </button>
+)}
 
         {/* Notificaciones */}
         <div className="fixed top-4 right-4 z-40 space-y-2">
