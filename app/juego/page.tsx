@@ -109,6 +109,11 @@ interface WhatsAppMessage {
   messageType: "text" | "image" | "urgent"
   isRead: boolean
   targetContact?: string
+  requiereRespuesta?: boolean
+  vencimiento?: number
+  respondido?: boolean
+  respuestaCorrecta?: boolean
+  expirado?: boolean
 }
 
 interface WhatsAppContact {
@@ -304,23 +309,6 @@ async function generarImagen(prompt: string, nivel: number): Promise<string> {
   return data.url
 }
 
-async function fetchNewsImage(): Promise<string | null> {
-  const apiKey = "2c97d461a1824274bae74e31a41df742"
-  const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
-  const query = queries[Math.floor(Math.random() * queries.length)]
-  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=es&pageSize=10`
-
-  try {
-    const res = await fetch(url)
-    const data = await res.json()
-    console.log("Fetched news data:", data)
-    const articleWithImage = data.articles.find((a: any) => a.urlToImage)
-    return articleWithImage?.urlToImage || null
-  } catch (error) {
-    console.error("Error fetching news image:", error)
-    return null
-  }
-}
 
 const initialCases: MediaCase[] = [
   {
@@ -427,7 +415,8 @@ export default function DeepfakeNewsroom() {
   const [solvedCases, setSolvedCases] = useState<string[]>([])
   const [wrongAnswers, setWrongAnswers] = useState<string[]>([])
   const [score, setScore] = useState(0)
-  const [penalties, setPenalties] = useState(0)
+  const [penaltiesPorErrores, setPenaltiesPorErrores] = useState(0)
+  const [penaltiesPorDemora, setPenaltiesPorDemora] = useState(0)
   const [aiResponse, setAiResponse] = useState("")
   const [newMessage, setNewMessage] = useState("")
   const [activeWindow, setActiveWindow] = useState<string>("desktop")
@@ -444,9 +433,19 @@ export default function DeepfakeNewsroom() {
   const [mostrarVideoVictory, setMostrarVideoVictory] = useState(true);
   const [backgroundAudio, setBackgroundAudio] = useState<HTMLAudioElement | null>(null)
   const [isMuted, setIsMuted] = useState(false)
+  
 
 
 
+function marcarMensajesComoLeidos(contactId: string) {
+  setWhatsappMessages((prev) =>
+    prev.map((msg) =>
+      msg.from === contactId && !msg.isRead
+        ? { ...msg, isRead: true }
+        : msg
+    )
+  )
+}
 
 
   const videoFinal =
@@ -505,6 +504,12 @@ export default function DeepfakeNewsroom() {
     oscillator.stop(audioContext.currentTime + 0.5)
   }
 
+  function playWhatsAppSound() {
+    const audio = new Audio("/audio/whatsapp.mp3")
+    audio.volume = 0.5 // opcional
+    audio.play().catch((e) => console.warn("No se pudo reproducir sonido:", e))
+  }
+
   const playErrorSound = () => {
     if (!soundEnabled) return
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -547,6 +552,21 @@ export default function DeepfakeNewsroom() {
     oscillator.stop(audioContext.currentTime + 0.8)
   }
 
+  const responderWhatsapp = (id: string, respuesta: boolean) => {
+  setWhatsappMessages((prev) =>
+    prev.map((m) =>
+      m.id === id ? { ...m, respondido: true, respuestaCorrecta: respuesta } : m
+    )
+  )
+
+  if (respuesta) {
+    setScore((prev) => prev + 10)
+  } else {
+    setScore((prev) => prev - 5)
+  }
+}
+
+
   // Titular de ultimo momento dinamico
 
   const mensajes = [
@@ -558,6 +578,72 @@ export default function DeepfakeNewsroom() {
   ];
 
   const [indiceMensaje, setIndiceMensaje] = useState(0);
+
+  const enviarMensajeDelJefe = (
+  texto: string,
+  segundosParaResponder: number = 15,
+  respuestaCorrecta: boolean = true
+) => {
+  
+  const id = `whatsapp-${Date.now()}`
+  const vencimiento = Date.now() + segundosParaResponder * 1000
+
+  const nuevoMensaje: WhatsAppMessage = {
+    id,
+    from: "boss",
+    fromName: "Roberto Martínez (Jefe)",
+    content: texto,
+    timestamp: new Date().toISOString(),
+    isOwn: false,
+    avatar: "RM",
+    messageType: "urgent",
+    isRead: false,
+    requiereRespuesta: true,
+    vencimiento,
+    respondido: false,
+    respuestaCorrecta,
+    expirado: false
+  }
+
+  setWhatsappMessages((prev) => [...prev, nuevoMensaje])
+  playWhatsAppSound()
+}
+
+
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    const ahora = Date.now()
+
+    setWhatsappMessages((prev) => {
+      let penalizacionAplicada = false
+      const actualizados = prev.map((msg) => {
+        if (
+          msg.requiereRespuesta &&
+          !msg.respondido &&
+          !msg.expirado &&
+          msg.vencimiento &&
+          msg.vencimiento < ahora
+        ) {
+          penalizacionAplicada = true
+          return { ...msg, expirado: true }
+        }
+        return msg
+      })
+
+      // Si al menos una penalización fue aplicada, restamos puntos
+      if (penalizacionAplicada) {
+        setScore((prev) => prev - 100)
+        setPenaltiesPorDemora((prev) => prev + 1)
+      }
+
+      return actualizados
+    })
+  }, 1000) // cada 1 segundo
+
+  return () => clearInterval(interval)
+}, [])
+
 
   useEffect(() => {
     const intervalo = setInterval(() => {
@@ -689,8 +775,9 @@ export default function DeepfakeNewsroom() {
           newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
           newCase.title = title // ✅ usar el prompt como título
           newCase.description = ` "${prompt}"`
+          enviarMensajeDelJefe(`Hola Juan  ¿Revisaste los nuevos casos? ${title}`, 30)
       } else {
-        const apiKey = "2c97d461a1824274bae74e31a41df742"
+        const apiKey = "1156f2ce38be432490c3fec02ffcfb1b"
    
   const query = queries[Math.floor(Math.random() * queries.length)]
   const page = Math.floor(Math.random() * 5) + 1 // entre 1 y 5
@@ -829,6 +916,13 @@ nuevosCasos.push(newCase)
     URL.revokeObjectURL(url)
   }
 
+  useEffect(() => {
+  if (score <= -300 && gameStarted && !isGameOver) {
+    setIsGameOver(true)
+    setGameOverReason("Tu puntaje cayó por debajo del mínimo permitido")
+  }
+}, [score, gameStarted, isGameOver])
+
   // Inicializar emails
   useEffect(() => {
     const initialEmails: Email[] = [
@@ -872,6 +966,12 @@ nuevosCasos.push(newCase)
     setEmails(initialEmails)
   }, [])
 
+  useEffect(() => {
+  if (score <= -300 && gameStarted && !isGameOver) {
+    setIsGameOver(true)
+    setGameOverReason("Tu puntaje cayó por debajo del mínimo permitido")
+  }
+  }, [score, gameStarted, isGameOver])
   // Inicializar mensajes de WhatsApp
   useEffect(() => {
     const initialMessages: WhatsAppMessage[] = [
@@ -934,7 +1034,7 @@ nuevosCasos.push(newCase)
       }
 
       for (let i = 0; i < 3; i++) {
-        const apiKey = "2c97d461a1824274bae74e31a41df742"
+        const apiKey = "1156f2ce38be432490c3fec02ffcfb1b"
         const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
         const query = queries[Math.floor(Math.random() * queries.length)]
         const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=es&pageSize=10`
@@ -994,12 +1094,12 @@ nuevosCasos.push(newCase)
 
   // Verificar game over por penalizaciones
   useEffect(() => {
-    if (penalties >= 2 && !isGameOver) {
+    if (penaltiesPorErrores >= 2 && !isGameOver) {
       setIsGameOver(true)
       setGameOverReason("fired")
       showBoss("furious", "¡MISIÓN FALLIDA! Has sido relevado del servicio.", 8000)
     }
-  }, [penalties, isGameOver])
+  }, [penaltiesPorErrores, isGameOver])
 
   // Temporizador - solo inicia cuando gameStarted es true
   useEffect(() => {
@@ -1081,6 +1181,8 @@ nuevosCasos.push(newCase)
           setNotifications((prevNotifs) => [...prevNotifs, `¡NIVEL ${newPlayerLevel}! Nuevo rango: ${newRank}`])
           setTimeout(() => setNotifications((prev) => prev.slice(1)), 8000)
           showBoss("normal", `¡Felicidades! Has alcanzado el nivel ${newPlayerLevel}: ${newRank}`, 5000)
+          enviarMensajeDelJefe(`Nivel ${newPlayerLevel} habilitado. ¿Revisaste los nuevos casos?`, 30)
+
         }
 
         return {
@@ -1101,7 +1203,7 @@ nuevosCasos.push(newCase)
       playErrorSound()
 
       setWrongAnswers((prev) => [...prev, caseId])
-      setPenalties((prev) => prev + 1)
+      setPenaltiesPorErrores((prev) => prev + 1)
       setScore((prev) => Math.max(0, prev - 50))
 
       // Resetear racha
@@ -1169,7 +1271,7 @@ nuevosCasos.push(newCase)
     setSolvedCases([])
     setWrongAnswers([])
     setScore(0)
-    setPenalties(0)
+    setPenaltiesPorErrores(0)
     setAiResponse("")
     setNewMessage("")
     setActiveWindow("desktop")
@@ -1709,10 +1811,10 @@ nuevosCasos.push(newCase)
                       <Flame className="w-4 h-4" />
                       <span className={`text-sm font-bold ${roboto.className}`}>Racha: {playerStats.streak}</span>
                     </div>
-                    {penalties > 0 && (
+                    {penaltiesPorErrores > 0 && (
                       <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full animate-pulse">
                         <AlertTriangle className="w-4 h-4" />
-                        <span className="text-sm font-bold">Errores: {penalties}/2</span>
+                        <span className="text-sm font-bold">Errores: {penaltiesPorErrores}/2</span>
                       </div>
                     )}
                   </div>
@@ -1747,13 +1849,13 @@ nuevosCasos.push(newCase)
                       </div>
 
                       {/* Alerta de peligro */}
-                      {penalties >= 1 && penalties < 2 && (
+                      {penaltiesPorErrores >= 1 && penaltiesPorErrores < 2 && (
                         <Card className="mb-6 border-red-500 bg-gradient-to-r from-red-50 to-orange-50 animate-pulse">
                           <CardContent className="p-4">
                             <div className="flex items-center gap-3 text-red-800">
                               <AlertTriangle className="w-6 h-6" />
                               <span className="font-bold text-lg">
-                                ALERTA CRÍTICA: Estás cerca de ser desaprobado. Errores: {penalties}/2
+                                ALERTA CRÍTICA: Estás cerca de ser desaprobado. Errores: {penaltiesPorErrores}/2
                               </span>
                             </div>
                           </CardContent>
@@ -1996,7 +2098,10 @@ nuevosCasos.push(newCase)
                                       ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200"
                                       : ""
                                   }`}
-                                  onClick={() => setSelectedContact(contact.id)}
+                                  onClick={() => {
+                                    setSelectedContact(contact.id)
+                                    marcarMensajesComoLeidos(contact.id)
+                                  }}      
                                 >
                                   <div className="flex items-center gap-3">
                                     <div className="relative">
@@ -2078,38 +2183,72 @@ nuevosCasos.push(newCase)
                           <CardContent className="p-0 flex flex-col h-[400px]">
                             {/* Mensajes */}
                             <ScrollArea className="flex-1 p-4 bg-gradient-to-br from-gray-50 to-green-50">
-                              <div className="space-y-2">
-                                {getContactMessages(selectedContact).map((msg) => (
-                                  <div key={msg.id} className={`flex ${msg.isOwn ? "justify-end" : "justify-start"}`}>
-                                    <div
-                                      className={`max-w-xs p-3 rounded-lg cursor-pointer relative transition-all hover:scale-105 ${
-                                        msg.isOwn
-                                          ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg"
-                                          : msg.messageType === "urgent"
-                                            ? "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-300 animate-pulse"
-                                            : "bg-white text-gray-800 shadow-md border border-gray-200"
-                                      }`}
-                                      onClick={() => msg.caseId && openCase(msg.caseId)}
-                                    >
-                                      {msg.messageType === "urgent" && (
-                                        <AlertTriangle className="w-4 h-4 text-red-600 absolute top-1 right-1 animate-bounce" />
-                                      )}
-                                      <p className="text-sm font-medium">{msg.content}</p>
-                                      <div className="flex items-center justify-between mt-1">
-                                        <p className={`text-xs ${msg.isOwn ? "text-green-100" : "text-gray-500"}`}>
-                                          {msg.timestamp}
-                                        </p>
-                                        {msg.isOwn && (
-                                          <div className="flex">
-                                            <CheckCircle className="w-3 h-3 text-green-200" />
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </ScrollArea>
+  <div className="space-y-2">
+    {getContactMessages(selectedContact).map((msg) => (
+      <div key={msg.id} className={`flex ${msg.isOwn ? "justify-end" : "justify-start"}`}>
+        <div
+          className={`max-w-xs p-3 rounded-lg cursor-pointer relative transition-all hover:scale-105 ${
+            msg.isOwn
+              ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg"
+              : msg.messageType === "urgent"
+                ? "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-300 animate-pulse"
+                : "bg-white text-gray-800 shadow-md border border-gray-200"
+          }`}
+          onClick={() => msg.caseId && openCase(msg.caseId)}
+        >
+          {msg.messageType === "urgent" && (
+            <AlertTriangle className="w-4 h-4 text-red-600 absolute top-1 right-1 animate-bounce" />
+          )}
+
+          {/* Contenido del mensaje */}
+          <p className="text-sm font-medium">{msg.content}</p>
+
+          {/* Interacción por checkbox si requiere respuesta */}
+          {msg.requiereRespuesta && !msg.respondido && !msg.expirado && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                responderWhatsapp(msg.id, true)
+              }}
+              className="mt-2"
+            >
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" required />
+                Confirmo lo solicitado
+              </label>
+              <button
+                type="submit"
+                className="mt-1 bg-green-600 text-white px-3 py-1 rounded text-sm"
+              >
+                Enviar
+              </button>
+            </form>
+          )}
+
+          {/* Estados visuales */}
+          {msg.respondido && (
+            <p className="text-green-600 text-xs mt-1">✅ Respondido</p>
+          )}
+          {msg.expirado && (
+            <p className="text-red-600 text-xs mt-1">⏰ No respondiste a tiempo</p>
+          )}
+
+          <div className="flex items-center justify-between mt-1">
+            <p className={`text-xs ${msg.isOwn ? "text-green-100" : "text-gray-500"}`}>
+              {msg.timestamp}
+            </p>
+            {msg.isOwn && (
+              <div className="flex">
+                <CheckCircle className="w-3 h-3 text-green-200" />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</ScrollArea>
+
 
                             {/* Input de mensaje */}
                             <div className="p-4 bg-white border-t border-gray-200">
