@@ -290,7 +290,11 @@ const obtenerParametrosPorNivel = (nivel: number) => {
   }
 }
 
-
+function playPenaltySound() {
+  const audio = new Audio("/audio/penalidad.mp3")
+  audio.volume = 1
+  audio.play().catch((e) => console.warn("⚠️ No se pudo reproducir el sonido de penalización:", e))
+}
 
 
 async function generarImagen(prompt: string, nivel: number): Promise<string> {
@@ -635,6 +639,7 @@ useEffect(() => {
       if (penalizacionAplicada) {
         setScore((prev) => prev - 100)
         setPenaltiesPorDemora((prev) => prev + 1)
+        playPenaltySound()
       }
 
       return actualizados
@@ -777,7 +782,7 @@ useEffect(() => {
           newCase.description = ` "${prompt}"`
           enviarMensajeDelJefe(`Hola Juan  ¿Revisaste los nuevos casos? ${title}`, 30)
       } else {
-        const apiKey = "1156f2ce38be432490c3fec02ffcfb1b"
+        const apiKey = "6dd659fc00ee4febb2de5608ba4dc6b4"
    
   const query = queries[Math.floor(Math.random() * queries.length)]
   const page = Math.floor(Math.random() * 5) + 1 // entre 1 y 5
@@ -839,7 +844,7 @@ nuevosCasos.push(newCase)
         "Revisa los bordes del rostro",
         "Busca artefactos de compresión",
       ],
-      medium: ["Analiza la sincronización labial", "Examina las micro-expresiones", "Verifica la coherencia temporal"],
+      medium: ["Busca artefactos de IA generativa", "Analiza patrones de píxeles anómalos", "Revisa metadatos de creación"],
       hard: [
         "Busca artefactos de IA generativa",
         "Analiza patrones de píxeles anómalos",
@@ -923,48 +928,6 @@ nuevosCasos.push(newCase)
   }
 }, [score, gameStarted, isGameOver])
 
-  // Inicializar emails
-  useEffect(() => {
-    const initialEmails: Email[] = [
-      {
-        id: "email1",
-        from: "fuente.anonima@protonmail.com",
-        subject: "MISIÓN: Ronaldo y Herbalife",
-        content:
-          "Sen, detectamos una posible promoción de Herbalife por parte de Cristiano Ronaldo. Verificá autenticidad de la imagen. Hay sospechas de montaje.",
-        timestamp: "10:30",
-        hasAttachment: true,
-        caseId: "case1", // Ronaldo y Herbalife
-        isRead: false,
-        priority: "normal",
-      },
-      {
-        id: "email2",
-        from: "inteligencia.global@newsintel.org",
-        subject: "ALERTA: Trump detenido",
-        content:
-          "Juan, circula una imagen de Trump siendo arrestado. Sospechamos deepfake. La difusión está aumentando. Necesitamos verificación urgente.",
-        timestamp: "09:45",
-        hasAttachment: true,
-        caseId: "case2", // Trump espía ruso
-        isRead: false,
-        priority: "urgent",
-      },
-      {
-        id: "email3",
-        from: "cinefilos.latam@filtrados.com",
-        subject: "🎬 Francella en Hollywood",
-        content:
-          "Juan, nos llegó esta imagen de Francella como Rambo. ¿Real o montaje publicitario? Urge verificar antes de publicar en primicia.",
-        timestamp: "09:00",
-        hasAttachment: true,
-        caseId: "case3", // Francella-Rambo
-        isRead: false,
-        priority: "normal",
-      },
-    ]
-    setEmails(initialEmails)
-  }, [])
 
   useEffect(() => {
   if (score <= -300 && gameStarted && !isGameOver) {
@@ -1231,9 +1194,7 @@ nuevosCasos.push(newCase)
     }
   }
 
-  const markEmailAsRead = (emailId: string) => {
-    setEmails((prev) => prev.map((email) => (email.id === emailId ? { ...email, isRead: true } : email)))
-  }
+
 
   const sendWhatsAppMessage = () => {
     if (!newMessage.trim() || isGameOver) return
@@ -1746,19 +1707,6 @@ nuevosCasos.push(newCase)
                       Panel de análisis
                     </Button>
                     <Button
-                      variant={activeWindow === "email" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setActiveWindow("email")}
-                      className={`${roboto.className} ${
-                        activeWindow === "email"
-                          ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
-                          : "text-white"
-                      }`}
-                      id="btn-mail"
-                    >
-                      <Mail className="w-4 h-4 mr-1" />Mail ({emails.filter((e) => !e.isRead).length})
-                    </Button>
-                    <Button
                       variant={activeWindow === "whatsapp" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveWindow("whatsapp")}
@@ -1939,7 +1887,9 @@ nuevosCasos.push(newCase)
 
                       {/* Casos/Misiones */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {mediaCases.map((case_) => (
+                        {mediaCases
+                        .filter((case_) => !solvedCases.includes(case_.id) && !wrongAnswers.includes(case_.id))
+                        .map((case_) => (
                           <Card
                             key={case_.id}
                             className={`cursor-pointer transition-all hover:shadow-xl hover:scale-105 transform ${
@@ -2006,77 +1956,7 @@ nuevosCasos.push(newCase)
                     </div>
                   )}
 
-                  {activeWindow === "email" && (
-                    <div className="p-6">
-                      <h2 className={`text-3xl font-bold mb-4 flex items-center gap-2 bg-gradient-to-r from-[#111827] to-blue-800 bg-clip-text text-transparent ${anton.className}`}>
-                        <Mail className="w-7 h-7 text-blue-600" />Bandeja de Entrada
-                        {emails.some((e) => e.priority === "legal") && (
-                          <Badge variant="destructive" className="ml-2 animate-pulse">
-                            <Scale className="w-3 h-3 mr-1" />
-                            LEGAL
-                          </Badge>
-                        )}
-                      </h2>
-                      <ScrollArea className="h-96">
-                        <div className="space-y-3">
-                          {emails.map((email) => (
-                            <Card
-                              key={email.id}
-                              className={`cursor-pointer transition-all hover:shadow-lg ${
-                                !email.isRead
-                                  ? email.priority === "legal"
-                                    ? "bg-gradient-to-r from-red-100 to-pink-100 border-red-300 animate-pulse"
-                                    : email.priority === "urgent"
-                                      ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200"
-                                      : "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200"
-                                  : ""
-                              }`}
-                              onClick={() => {
-                                markEmailAsRead(email.id)
-                                if (email.caseId) openCase(email.caseId)
-                              }}
-                            >
-                              <CardContent className="p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <Avatar className="w-8 h-8">
-                                      <AvatarFallback
-                                        className={
-                                          email.priority === "legal"
-                                            ? "bg-red-600 text-white"
-                                            : email.priority === "urgent"
-                                              ? "bg-yellow-600 text-white"
-                                              : "bg-blue-600 text-white"
-                                        }
-                                      >
-                                        {email.from.charAt(0).toUpperCase()}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                      <p className="font-medium text-sm">{email.from}</p>
-                                      <p className="text-xs text-gray-500">{email.timestamp}</p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    {email.priority === "legal" && <Scale className="w-4 h-4 text-red-600" />}
-                                    {email.priority === "urgent" && (
-                                      <AlertTriangle className="w-4 h-4 text-yellow-600" />
-                                    )}
-                                    {email.hasAttachment && <Paperclip className="w-4 h-4 text-gray-400" />}
-                                    {!email.isRead && (
-                                      <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse" />
-                                    )}
-                                  </div>
-                                </div>
-                                <h3 className="font-bold mb-1">{email.subject}</h3>
-                                <p className="text-sm text-gray-600 whitespace-pre-line">{email.content}</p>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  )}
+                  
 
                   {activeWindow === "whatsapp" && (
                     <div className="p-6">
