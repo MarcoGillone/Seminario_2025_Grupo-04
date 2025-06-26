@@ -109,6 +109,11 @@ interface WhatsAppMessage {
   messageType: "text" | "image" | "urgent"
   isRead: boolean
   targetContact?: string
+  requiereRespuesta?: boolean
+  vencimiento?: number
+  respondido?: boolean
+  respuestaCorrecta?: boolean
+  expirado?: boolean
 }
 
 interface WhatsAppContact {
@@ -135,7 +140,7 @@ interface PlayerStats {
   streak: number
   maxStreak: number
 }
-
+ const imagenesUsadas = new Set<string>()
 const whatsappContacts: WhatsAppContact[] = [
   {
     id: "boss",
@@ -175,18 +180,88 @@ const whatsappContacts: WhatsAppContact[] = [
 ]
 
 const prompts = [
-  "Retrato hiperrealista de un político en conferencia, iluminación cinematográfica, 4k",
-  "Imagen realista de un CEO dando declaraciones, luz de estudio, expresión seria",
-  "Deepfake de un actor en una escena de acción, fondo borroso, enfoque nítido",
-  "Científico en laboratorio hablando a cámara, profundidad de campo, realismo extremo",
-  "Presentador de noticias dando una primicia, estilo CNN, calidad 8K",
-  "Celebridad dando una entrevista, fondo elegante, iluminación suave",
-  "Estudiante en aula universitaria, luz natural, mirada seria",
-  "Político saludando en evento público, crowd blur, enfoque en rostro",
-  "Influencer en TikTok, expresión exagerada, fondo artificial",
-  "Hombre de negocios en llamada por videoconferencia, tonos fríos",
-  // ...hasta llegar a 30
+  {
+    prompt: "Hombre astronauta caminando en la luna, planeta Tierra visible al fondo, traje espacial realista, nave de fondo",
+    title: "Astronauta camina en la luna en una nueva misión encubierta que no fue anunciada por ninguna agencia oficial ni registrada en medios internacionales"
+  },
+  {
+    prompt: "Explosión nuclear en el océano, nube en hongo, barcos cercanos, escena cinematográfica",
+    title: "Argentina habría desarrollado en secreto una bomba atómica y la habría detonado en el mar; Chile solicita intervención de EE.UU. ante posible tsunami"
+  },
+  {
+    prompt: "Reunión secreta entre militares, documentos clasificados sobre la mesa, sala oscura con mapas",
+    title: "Altos mandos militares se reúnen en secreto para planificar maniobras encubiertas que podrían alterar el equilibrio político de la región"
+  },
+  {
+    prompt: "Silo de misiles activo con luces encendidas, cielo nocturno estrellado, humo saliendo",
+    title: "Se filtran imágenes de un silo activo en zona restringida: estarían cargando misiles sin autorización del organismo internacional de control"
+  },
+  {
+    prompt: "Contenedor biológico en laboratorio, etiquetas de virus, fondo borroso, guantes quirúrgicos",
+    title: "Laboratorio privado trabaja en una variante de virus potencialmente letal sin supervisión sanitaria ni permisos del Ministerio de Salud"
+  },
+  {
+    prompt: "Grupo de drones sobrevolando ciudad al anochecer, luces encendidas, estilo cinematográfico",
+    title: "Una flotilla de drones sobrevuela zonas residenciales en plena noche sin aviso previo, generando pánico y sospechas de espionaje ciudadano"
+  },
+  {
+    prompt: "Reactor nuclear averiado con humo, personal evacuando, luz de emergencia",
+    title: "Avería crítica en reactor nuclear obliga evacuación urgente; autoridades niegan el hecho y aseguran que fue un simulacro interno de rutina"
+  },
+  {
+    prompt: "Pantalla de computadora con interfaz de hackeo, gráficos complejos, manos masculinas digitando",
+    title: "Capturan en video una intrusión cibernética a servidores estatales: claves gubernamentales fueron vulneradas desde una fuente desconocida"
+  },
+  {
+    prompt: "Tanques cruzando frontera nevada, bandera extranjera, plano aéreo",
+    title: "Columna de tanques de origen extranjero cruza frontera sur sin autorización; gobiernos vecinos piden explicaciones inmediatas"
+  },
+  {
+    prompt: "Satélite militar flotando sobre América del Sur, rayos de escaneo, espacio oscuro",
+    title: "Satélite militar no identificado sobrevuela América del Sur activando sistemas de escaneo; expertos creen que recopila datos sin consentimiento"
+  },
+  {
+    prompt: "Fábrica de armas automatizada, robots ensamblando piezas, luces industriales",
+    title: "Filtran video de fábrica automatizada produciendo armas avanzadas sin licencia; se sospecha que abastece a grupos paramilitares regionales"
+  },
+  {
+    prompt: "Avión militar sin identificación aterrizando de noche, luces apagadas, vista desde drone",
+    title: "Un avión de carga militar sin identificación aterriza de noche en pista clandestina; vecinos reportan movimientos extraños en la zona"
+  },
+  {
+    prompt: "Manifestantes frente a sede gubernamental, pancartas, fuego de fondo, tensión nocturna",
+    title: "Multitudinaria protesta frente al Congreso tras filtración de archivos secretos que comprometen al Poder Ejecutivo y agencias de inteligencia"
+  },
+  {
+    prompt: "Persona encapuchada hablando a cámara, fondo negro, iluminación dramática",
+    title: "Encapuchado anónimo publica video donde amenaza con revelar documentos que podrían desestabilizar a todo el gabinete presidencial"
+  },
+  {
+    prompt: "Contenedor marítimo abriéndose con materiales extraños, cámaras de seguridad desenfocadas",
+    title: "Autoridades interceptan contenedor en puerto con materiales de origen desconocido; imágenes muestran luces, símbolos y estructuras inusuales"
+  },
+  {
+    prompt: "Glaciar derritiéndose con rapidez, nivel del mar subiendo, timelapse extremo",
+    title: "Timelapse revela aceleración alarmante del deshielo en el sur: científicos alertan sobre posible subida catastrófica del nivel del mar"
+  },
+  {
+    prompt: "Camión blindado ingresando a instalación subterránea, vigilancia extrema",
+    title: "Camión militar fuertemente custodiado accede a base subterránea secreta; se especula con transporte de prototipos de tecnología bélica"
+  },
+  {
+    prompt: "Prueba de robot soldado caminando, luz fría, ambiente industrial",
+    title: "Robot bípedo armado es visto en instalaciones militares bajo prueba; filtraciones sugieren que ya ha sido desplegado en zonas de conflicto"
+  },
+  {
+    prompt: "Pantalla de radar detectando objeto no identificado, militares reaccionando",
+    title: "Fuerza aérea detecta objeto no identificado que evade radares convencionales; se baraja posibilidad de dron hipersónico experimental"
+  },
+  {
+    prompt: "Lanzamiento de cohete desde base desértica, cielo despejado, polvo en suspensión",
+    title: "Cohete de carga pesada es lanzado desde base secreta; video despierta sospechas de violación de tratados internacionales de espacio"
+  }
 ]
+
 
 const obtenerParametrosPorNivel = (nivel: number) => {
   // escalar calidad con nivel
@@ -215,6 +290,13 @@ const obtenerParametrosPorNivel = (nivel: number) => {
   }
 }
 
+function playPenaltySound() {
+  const audio = new Audio("/audio/penalidad.mp3")
+  audio.volume = 1
+  audio.play().catch((e) => console.warn("⚠️ No se pudo reproducir el sonido de penalización:", e))
+}
+
+
 async function generarImagen(prompt: string, nivel: number): Promise<string> {
   const qualityParams = obtenerParametrosPorNivel(nivel)
   console.log(`Generando imagen con prompt: ${prompt}, params: ${JSON.stringify(qualityParams)}`)
@@ -231,23 +313,6 @@ async function generarImagen(prompt: string, nivel: number): Promise<string> {
   return data.url
 }
 
-async function fetchNewsImage(): Promise<string | null> {
-  const apiKey = "2c97d461a1824274bae74e31a41df742"
-  const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
-  const query = queries[Math.floor(Math.random() * queries.length)]
-  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`
-
-  try {
-    const res = await fetch(url)
-    const data = await res.json()
-    console.log("Fetched news data:", data)
-    const articleWithImage = data.articles.find((a: any) => a.urlToImage)
-    return articleWithImage?.urlToImage || null
-  } catch (error) {
-    console.error("Error fetching news image:", error)
-    return null
-  }
-}
 
 const initialCases: MediaCase[] = [
   {
@@ -354,7 +419,8 @@ export default function DeepfakeNewsroom() {
   const [solvedCases, setSolvedCases] = useState<string[]>([])
   const [wrongAnswers, setWrongAnswers] = useState<string[]>([])
   const [score, setScore] = useState(0)
-  const [penalties, setPenalties] = useState(0)
+  const [penaltiesPorErrores, setPenaltiesPorErrores] = useState(0)
+  const [penaltiesPorDemora, setPenaltiesPorDemora] = useState(0)
   const [aiResponse, setAiResponse] = useState("")
   const [newMessage, setNewMessage] = useState("")
   const [activeWindow, setActiveWindow] = useState<string>("desktop")
@@ -369,6 +435,21 @@ export default function DeepfakeNewsroom() {
   const [mostrarBriefing, setMostrarBriefing] = useState(true);
   const [mostrarVideoGameOver, setMostrarVideoGameOver] = useState(true);
   const [mostrarVideoVictory, setMostrarVideoVictory] = useState(true);
+  const [backgroundAudio, setBackgroundAudio] = useState<HTMLAudioElement | null>(null)
+  const [isMuted, setIsMuted] = useState(false)
+  
+
+
+
+function marcarMensajesComoLeidos(contactId: string) {
+  setWhatsappMessages((prev) =>
+    prev.map((msg) =>
+      msg.from === contactId && !msg.isRead
+        ? { ...msg, isRead: true }
+        : msg
+    )
+  )
+}
 
 
   const videoFinal =
@@ -427,6 +508,12 @@ export default function DeepfakeNewsroom() {
     oscillator.stop(audioContext.currentTime + 0.5)
   }
 
+  function playWhatsAppSound() {
+    const audio = new Audio("/audio/whatsapp.mp3")
+    audio.volume = 0.5 // opcional
+    audio.play().catch((e) => console.warn("No se pudo reproducir sonido:", e))
+  }
+
   const playErrorSound = () => {
     if (!soundEnabled) return
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
@@ -469,6 +556,21 @@ export default function DeepfakeNewsroom() {
     oscillator.stop(audioContext.currentTime + 0.8)
   }
 
+  const responderWhatsapp = (id: string, respuesta: boolean) => {
+  setWhatsappMessages((prev) =>
+    prev.map((m) =>
+      m.id === id ? { ...m, respondido: true, respuestaCorrecta: respuesta } : m
+    )
+  )
+
+  if (respuesta) {
+    setScore((prev) => prev + 10)
+  } else {
+    setScore((prev) => prev - 5)
+  }
+}
+
+
   // Titular de ultimo momento dinamico
 
   const mensajes = [
@@ -480,6 +582,73 @@ export default function DeepfakeNewsroom() {
   ];
 
   const [indiceMensaje, setIndiceMensaje] = useState(0);
+
+  const enviarMensajeDelJefe = (
+  texto: string,
+  segundosParaResponder: number = 15,
+  respuestaCorrecta: boolean = true
+) => {
+  
+  const id = `whatsapp-${Date.now()}`
+  const vencimiento = Date.now() + segundosParaResponder * 1000
+
+  const nuevoMensaje: WhatsAppMessage = {
+    id,
+    from: "boss",
+    fromName: "Roberto Martínez (Jefe)",
+    content: texto,
+    timestamp: new Date().toISOString(),
+    isOwn: false,
+    avatar: "RM",
+    messageType: "urgent",
+    isRead: false,
+    requiereRespuesta: true,
+    vencimiento,
+    respondido: false,
+    respuestaCorrecta,
+    expirado: false
+  }
+
+  setWhatsappMessages((prev) => [...prev, nuevoMensaje])
+  playWhatsAppSound()
+}
+
+
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    const ahora = Date.now()
+
+    setWhatsappMessages((prev) => {
+      let penalizacionAplicada = false
+      const actualizados = prev.map((msg) => {
+        if (
+          msg.requiereRespuesta &&
+          !msg.respondido &&
+          !msg.expirado &&
+          msg.vencimiento &&
+          msg.vencimiento < ahora
+        ) {
+          penalizacionAplicada = true
+          return { ...msg, expirado: true }
+        }
+        return msg
+      })
+
+      // Si al menos una penalización fue aplicada, restamos puntos
+      if (penalizacionAplicada) {
+        setScore((prev) => prev - 100)
+        setPenaltiesPorDemora((prev) => prev + 1)
+        playPenaltySound()
+      }
+
+      return actualizados
+    })
+  }, 1000) // cada 1 segundo
+
+  return () => clearInterval(interval)
+}, [])
+
 
   useEffect(() => {
     const intervalo = setInterval(() => {
@@ -582,9 +751,21 @@ export default function DeepfakeNewsroom() {
 
     return newCase
   }
+  
 
   const agregarCasosAleatorios = async (nivel: number) => {
     const nuevosCasos: MediaCase[] = []
+    const queries = [
+        "argentina", "milei", "guerra", "ucrania", "rusia", "nasa", "elon musk", "luna", "inteligencia artificial",
+        "bitcoin", "inflación", "crisis energética", "cambio climático", "siria", "iran", "eeuu", "israel", "hamas",
+        "tecnología", "5g", "ciberseguridad", "hackeo", "fake news", "trump", "biden", "macron", "china", "taiwán",
+        "brics", "corea del norte", "otan", "crimen organizado", "trata de personas", "nuclear", "energía solar",
+        "inteligencia militar", "deepfake", "vacunas", "pandemia", "covid", "amazonas", "incendios forestales",
+        "terremoto", "huracán", "desinformación", "redes sociales", "censura digital", "corte suprema", "europa",
+        "sistema financiero"
+        ]
+   
+
 
     for (let i = 0; i < 2; i++) {
       const usarIA = Math.random() > 0.5
@@ -592,37 +773,63 @@ export default function DeepfakeNewsroom() {
       const newCase = generateNewCase(nivel)
 
       if (usarIA) {
-        const prompt = prompts[Math.floor(Math.random() * prompts.length)]
-        const imageUrl = await generarImagen(prompt, nivel)
-        newCase.isDeepfake = true
-        newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
-        newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
-        newCase.title = prompt // ✅ usar el prompt como título
+          const { prompt, title } = prompts[Math.floor(Math.random() * prompts.length)]
+          const imageUrl = await generarImagen(prompt, nivel)
+          newCase.isDeepfake = true
+          newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
+          newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
+          newCase.title = title // ✅ usar el prompt como título
+          newCase.description = ` "${prompt}"`
+          enviarMensajeDelJefe(`Hola Juan  ¿Revisaste los nuevos casos? ${title}`, 30)
       } else {
-        const apiKey = "2c97d461a1824274bae74e31a41df742"
-        const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
-        const query = queries[Math.floor(Math.random() * queries.length)]
-        const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`
+        const apiKey = "6dd659fc00ee4febb2de5608ba4dc6b4"
+   
+  const query = queries[Math.floor(Math.random() * queries.length)]
+  const page = Math.floor(Math.random() * 5) + 1 // entre 1 y 5
 
-        try {
-          const res = await fetch(url)
-          const data = await res.json()
-          console.log("Respuesta de NewsAPI:", data);
-          const articleWithImage = data.articles.find((a: any) => a.urlToImage)
-          if (!articleWithImage) continue
+  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=es&pageSize=10&page=${page}`
 
-          newCase.isDeepfake = false
-          newCase.mediaUrl = articleWithImage.urlToImage
-          newCase.realImageUrl = articleWithImage.urlToImage
-          newCase.title = articleWithImage.description || "Caso de noticia" // ✅ usar description como título
-        } catch (error) {
-          console.error("Error fetching news case:", error)
-          continue
-        }
-      }
+  try {
+    const res = await fetch(url)
+    const data = await res.json()
+    console.log("📰 Respuesta de NewsAPI:", data)
 
-      nuevosCasos.push(newCase)
+    const validArticles = data.articles.filter((a: any) =>
+      a.urlToImage &&
+      a.urlToImage.startsWith("http") &&
+      !a.urlToImage.includes("default") &&
+      !a.urlToImage.includes("logo") &&
+      a.description &&
+      !imagenesUsadas.has(a.urlToImage)
+    )
+
+    if (validArticles.length === 0) {
+      console.warn("❌ No se encontraron artículos válidos o con imágenes no repetidas.")
+      continue
     }
+
+    const selected = validArticles[Math.floor(Math.random() * validArticles.length)]
+
+    // Registrar imagen usada
+    imagenesUsadas.add(selected.urlToImage)
+
+    newCase.isDeepfake = false
+    newCase.mediaUrl = selected.urlToImage
+    newCase.realImageUrl = selected.urlToImage
+    newCase.title = selected.description || selected.title || "Caso de noticia"
+    newCase.description = selected.title || "Noticia generada automáticamente"
+
+  } catch (error) {
+    console.error("❌ Error al obtener noticias desde NewsAPI:", error)
+    continue
+  }
+}
+
+
+nuevosCasos.push(newCase)
+
+
+}
 
     setMediaCases((prev) => [...prev, ...nuevosCasos])
     setCaseCounter((prev) => prev + nuevosCasos.length)
@@ -637,7 +844,7 @@ export default function DeepfakeNewsroom() {
         "Revisa los bordes del rostro",
         "Busca artefactos de compresión",
       ],
-      medium: ["Analiza la sincronización labial", "Examina las micro-expresiones", "Verifica la coherencia temporal"],
+      medium: ["Busca artefactos de IA generativa", "Analiza patrones de píxeles anómalos", "Revisa metadatos de creación"],
       hard: [
         "Busca artefactos de IA generativa",
         "Analiza patrones de píxeles anómalos",
@@ -714,49 +921,20 @@ export default function DeepfakeNewsroom() {
     URL.revokeObjectURL(url)
   }
 
-  // Inicializar emails
   useEffect(() => {
-    const initialEmails: Email[] = [
-      {
-        id: "email1",
-        from: "fuente.anonima@protonmail.com",
-        subject: "MISIÓN: Ronaldo y Herbalife",
-        content:
-          "Sen, detectamos una posible promoción de Herbalife por parte de Cristiano Ronaldo. Verificá autenticidad de la imagen. Hay sospechas de montaje.",
-        timestamp: "10:30",
-        hasAttachment: true,
-        caseId: "case1", // Ronaldo y Herbalife
-        isRead: false,
-        priority: "normal",
-      },
-      {
-        id: "email2",
-        from: "inteligencia.global@newsintel.org",
-        subject: "ALERTA: Trump detenido",
-        content:
-          "Juan, circula una imagen de Trump siendo arrestado. Sospechamos deepfake. La difusión está aumentando. Necesitamos verificación urgente.",
-        timestamp: "09:45",
-        hasAttachment: true,
-        caseId: "case2", // Trump espía ruso
-        isRead: false,
-        priority: "urgent",
-      },
-      {
-        id: "email3",
-        from: "cinefilos.latam@filtrados.com",
-        subject: "🎬 Francella en Hollywood",
-        content:
-          "Juan, nos llegó esta imagen de Francella como Rambo. ¿Real o montaje publicitario? Urge verificar antes de publicar en primicia.",
-        timestamp: "09:00",
-        hasAttachment: true,
-        caseId: "case3", // Francella-Rambo
-        isRead: false,
-        priority: "normal",
-      },
-    ]
-    setEmails(initialEmails)
-  }, [])
+  if (score <= -300 && gameStarted && !isGameOver) {
+    setIsGameOver(true)
+    setGameOverReason("Tu puntaje cayó por debajo del mínimo permitido")
+  }
+}, [score, gameStarted, isGameOver])
 
+
+  useEffect(() => {
+  if (score <= -300 && gameStarted && !isGameOver) {
+    setIsGameOver(true)
+    setGameOverReason("Tu puntaje cayó por debajo del mínimo permitido")
+  }
+  }, [score, gameStarted, isGameOver])
   // Inicializar mensajes de WhatsApp
   useEffect(() => {
     const initialMessages: WhatsAppMessage[] = [
@@ -804,25 +982,25 @@ export default function DeepfakeNewsroom() {
       const newLevel = 1
 
       for (let i = 0; i < 3; i++) {
-        const prompt = prompts[Math.floor(Math.random() * prompts.length)]
+        const { prompt, title } = prompts[Math.floor(Math.random() * prompts.length)]
         const imageUrl = await generarImagen(prompt, newLevel)
 
         const newCase = generateNewCase(newLevel)
         newCase.isDeepfake = true
         newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
         newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
-        newCase.title = prompt // ✅ Aquí agregás el prompt como título
-        newCase.description = `Imagen IA: "${prompt}"` // Opcional: agregás descripción
+        newCase.title = title // ✅ Aquí agregás el prompt como título
+        newCase.description = `"${title}"` // Opcional: agregás descripción
 
         setMediaCases((prev) => [...prev, newCase])
         setCaseCounter((prev) => prev + 1)
       }
 
       for (let i = 0; i < 3; i++) {
-        const apiKey = "2c97d461a1824274bae74e31a41df742"
+        const apiKey = "1156f2ce38be432490c3fec02ffcfb1b"
         const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
         const query = queries[Math.floor(Math.random() * queries.length)]
-        const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=en&pageSize=10`
+        const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=es&pageSize=10`
 
         try {
           const res = await fetch(url)
@@ -879,12 +1057,12 @@ export default function DeepfakeNewsroom() {
 
   // Verificar game over por penalizaciones
   useEffect(() => {
-    if (penalties >= 2 && !isGameOver) {
+    if (penaltiesPorErrores >= 2 && !isGameOver) {
       setIsGameOver(true)
       setGameOverReason("fired")
       showBoss("furious", "¡MISIÓN FALLIDA! Has sido relevado del servicio.", 8000)
     }
-  }, [penalties, isGameOver])
+  }, [penaltiesPorErrores, isGameOver])
 
   // Temporizador - solo inicia cuando gameStarted es true
   useEffect(() => {
@@ -910,19 +1088,19 @@ export default function DeepfakeNewsroom() {
 
   // Generar nuevos casos cuando se resuelven
   useEffect(() => {
-    if (solvedCases.length > 0 && solvedCases.length % 3 === 0) {
-      const newLevel = Math.floor(solvedCases.length / 3) + 1
-      const newCase = generateNewCase(newLevel)
-      setMediaCases((prev) => [...prev, newCase])
-      setCaseCounter((prev) => prev + 1)
+  if (solvedCases.length > 0 && solvedCases.length % 3 === 0) {
+    const newLevel = Math.floor(solvedCases.length / 3) + 1
 
-      // Notificación de nuevo caso
-      setNotifications((prev) => [...prev, `¡Nuevo caso desbloqueado! Nivel ${newLevel}`])
-      setTimeout(() => {
-        setNotifications((prev) => prev.slice(1))
-      }, 5000)
-    }
-  }, [solvedCases.length])
+    agregarCasosAleatorios(newLevel)
+
+    // Notificación de nuevo caso
+    setNotifications((prev) => [...prev, `🆕 ¡3 nuevos casos desbloqueados! Nivel ${newLevel}`])
+    setTimeout(() => {
+      setNotifications((prev) => prev.slice(1))
+    }, 5000)
+  }
+}, [solvedCases.length])
+
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -966,6 +1144,8 @@ export default function DeepfakeNewsroom() {
           setNotifications((prevNotifs) => [...prevNotifs, `¡NIVEL ${newPlayerLevel}! Nuevo rango: ${newRank}`])
           setTimeout(() => setNotifications((prev) => prev.slice(1)), 8000)
           showBoss("normal", `¡Felicidades! Has alcanzado el nivel ${newPlayerLevel}: ${newRank}`, 5000)
+          enviarMensajeDelJefe(`Nivel ${newPlayerLevel} habilitado. ¿Revisaste los nuevos casos?`, 30)
+
         }
 
         return {
@@ -986,7 +1166,7 @@ export default function DeepfakeNewsroom() {
       playErrorSound()
 
       setWrongAnswers((prev) => [...prev, caseId])
-      setPenalties((prev) => prev + 1)
+      setPenaltiesPorErrores((prev) => prev + 1)
       setScore((prev) => Math.max(0, prev - 50))
 
       // Resetear racha
@@ -1014,9 +1194,7 @@ export default function DeepfakeNewsroom() {
     }
   }
 
-  const markEmailAsRead = (emailId: string) => {
-    setEmails((prev) => prev.map((email) => (email.id === emailId ? { ...email, isRead: true } : email)))
-  }
+
 
   const sendWhatsAppMessage = () => {
     if (!newMessage.trim() || isGameOver) return
@@ -1054,7 +1232,7 @@ export default function DeepfakeNewsroom() {
     setSolvedCases([])
     setWrongAnswers([])
     setScore(0)
-    setPenalties(0)
+    setPenaltiesPorErrores(0)
     setAiResponse("")
     setNewMessage("")
     setActiveWindow("desktop")
@@ -1084,6 +1262,18 @@ export default function DeepfakeNewsroom() {
     setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
     showBoss("normal", "¡La misión ha comenzado! Analiza los casos con cuidado.", 4000)
   }
+  
+  const iniciarAudio = () => {
+  if (backgroundAudio) return // evitar múltiples instancias
+
+  const audio = new Audio("/audio/true-detective.mp3")
+  audio.loop = true
+  audio.volume = 0.3
+  audio.play().catch(err => {
+    console.warn("🎵 El navegador bloqueó el audio automático:", err)
+  })
+  setBackgroundAudio(audio)
+}
 
   if (mostrarIntro) {
     return (
@@ -1095,14 +1285,19 @@ export default function DeepfakeNewsroom() {
             controls
             playsInline
             onEnded={() => {
-              setMostrarIntro(false);
-              setMostrarBriefing(true); // ahora muestra el briefing antes del juego
+              setMostrarIntro(false)
+              setMostrarBriefing(true)
+              iniciarAudio()
             }}
 
             className="w-full rounded-lg shadow-xl"
           />
           <button
-            onClick={() => setMostrarIntro(false)}
+            onClick={() => {
+              setMostrarIntro(false)
+              setMostrarBriefing(true)
+              iniciarAudio() // Iniciar audio al omitir introducción
+            }}
             className="absolute top-4 right-4 bg-white text-black px-4 py-2 rounded-md font-bold hover:bg-gray-200 z-50"
           >
             Omitir introducción
@@ -1122,6 +1317,8 @@ export default function DeepfakeNewsroom() {
       />
     );
   }
+
+  
 
   if (loadingInicial && !mostrarIntro) {
     return (
@@ -1402,7 +1599,34 @@ export default function DeepfakeNewsroom() {
               </div>
             </div>
           </div>
+                  
         )}
+        {/* 🎧 Botón de Mute */}
+{backgroundAudio && (
+  <button
+    onClick={() => {
+      if (!backgroundAudio) return
+      backgroundAudio.muted = !isMuted
+      setIsMuted(!isMuted)
+    }}
+    style={{
+      position: "fixed",
+      top: "80px",
+      right: "20px",
+      zIndex: 9999, 
+      backgroundColor: "#000",
+      color: "#fff",
+      padding: "10px 16px",
+      border: "2px solid #555",
+      borderRadius: "8px",
+      fontWeight: "bold",
+      cursor: "pointer",
+      boxShadow: "0 0 6px rgba(0,0,0,0.5)"
+    }}
+  >
+    {isMuted ? "🔇 Activado" : "🔊 Sonando"}
+  </button>
+)}
 
         {/* Notificaciones */}
         <div className="fixed top-4 right-4 z-40 space-y-2">
@@ -1483,19 +1707,6 @@ export default function DeepfakeNewsroom() {
                       Panel de análisis
                     </Button>
                     <Button
-                      variant={activeWindow === "email" ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => setActiveWindow("email")}
-                      className={`${roboto.className} ${
-                        activeWindow === "email"
-                          ? "bg-[#6fcafa] text-[#111827] hover:bg-[#5bc0f5]"
-                          : "text-white"
-                      }`}
-                      id="btn-mail"
-                    >
-                      <Mail className="w-4 h-4 mr-1" />Mail ({emails.filter((e) => !e.isRead).length})
-                    </Button>
-                    <Button
                       variant={activeWindow === "whatsapp" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => setActiveWindow("whatsapp")}
@@ -1548,10 +1759,10 @@ export default function DeepfakeNewsroom() {
                       <Flame className="w-4 h-4" />
                       <span className={`text-sm font-bold ${roboto.className}`}>Racha: {playerStats.streak}</span>
                     </div>
-                    {penalties > 0 && (
+                    {penaltiesPorErrores > 0 && (
                       <div className="flex items-center gap-2 bg-red-600 px-3 py-1 rounded-full animate-pulse">
                         <AlertTriangle className="w-4 h-4" />
-                        <span className="text-sm font-bold">Errores: {penalties}/2</span>
+                        <span className="text-sm font-bold">Errores: {penaltiesPorErrores}/2</span>
                       </div>
                     )}
                   </div>
@@ -1586,13 +1797,13 @@ export default function DeepfakeNewsroom() {
                       </div>
 
                       {/* Alerta de peligro */}
-                      {penalties >= 1 && penalties < 2 && (
+                      {penaltiesPorErrores >= 1 && penaltiesPorErrores < 2 && (
                         <Card className="mb-6 border-red-500 bg-gradient-to-r from-red-50 to-orange-50 animate-pulse">
                           <CardContent className="p-4">
                             <div className="flex items-center gap-3 text-red-800">
                               <AlertTriangle className="w-6 h-6" />
                               <span className="font-bold text-lg">
-                                ALERTA CRÍTICA: Estás cerca de ser desaprobado. Errores: {penalties}/2
+                                ALERTA CRÍTICA: Estás cerca de ser desaprobado. Errores: {penaltiesPorErrores}/2
                               </span>
                             </div>
                           </CardContent>
@@ -1676,7 +1887,9 @@ export default function DeepfakeNewsroom() {
 
                       {/* Casos/Misiones */}
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {mediaCases.map((case_) => (
+                        {mediaCases
+                        .filter((case_) => !solvedCases.includes(case_.id) && !wrongAnswers.includes(case_.id))
+                        .map((case_) => (
                           <Card
                             key={case_.id}
                             className={`cursor-pointer transition-all hover:shadow-xl hover:scale-105 transform ${
@@ -1743,77 +1956,7 @@ export default function DeepfakeNewsroom() {
                     </div>
                   )}
 
-                  {activeWindow === "email" && (
-                    <div className="p-6">
-                      <h2 className={`text-3xl font-bold mb-4 flex items-center gap-2 bg-gradient-to-r from-[#111827] to-blue-800 bg-clip-text text-transparent ${anton.className}`}>
-                        <Mail className="w-7 h-7 text-blue-600" />Bandeja de Entrada
-                        {emails.some((e) => e.priority === "legal") && (
-                          <Badge variant="destructive" className="ml-2 animate-pulse">
-                            <Scale className="w-3 h-3 mr-1" />
-                            LEGAL
-                          </Badge>
-                        )}
-                      </h2>
-                      <ScrollArea className="h-96">
-                        <div className="space-y-3">
-                          {emails.map((email) => (
-                            <Card
-                              key={email.id}
-                              className={`cursor-pointer transition-all hover:shadow-lg ${
-                                !email.isRead
-                                  ? email.priority === "legal"
-                                    ? "bg-gradient-to-r from-red-100 to-pink-100 border-red-300 animate-pulse"
-                                    : email.priority === "urgent"
-                                      ? "bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200"
-                                      : "bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200"
-                                  : ""
-                              }`}
-                              onClick={() => {
-                                markEmailAsRead(email.id)
-                                if (email.caseId) openCase(email.caseId)
-                              }}
-                            >
-                              <CardContent className="p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center gap-2">
-                                    <Avatar className="w-8 h-8">
-                                      <AvatarFallback
-                                        className={
-                                          email.priority === "legal"
-                                            ? "bg-red-600 text-white"
-                                            : email.priority === "urgent"
-                                              ? "bg-yellow-600 text-white"
-                                              : "bg-blue-600 text-white"
-                                        }
-                                      >
-                                        {email.from.charAt(0).toUpperCase()}
-                                      </AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                      <p className="font-medium text-sm">{email.from}</p>
-                                      <p className="text-xs text-gray-500">{email.timestamp}</p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    {email.priority === "legal" && <Scale className="w-4 h-4 text-red-600" />}
-                                    {email.priority === "urgent" && (
-                                      <AlertTriangle className="w-4 h-4 text-yellow-600" />
-                                    )}
-                                    {email.hasAttachment && <Paperclip className="w-4 h-4 text-gray-400" />}
-                                    {!email.isRead && (
-                                      <div className="w-3 h-3 bg-blue-600 rounded-full animate-pulse" />
-                                    )}
-                                  </div>
-                                </div>
-                                <h3 className="font-bold mb-1">{email.subject}</h3>
-                                <p className="text-sm text-gray-600 whitespace-pre-line">{email.content}</p>
-                              </CardContent>
-                            </Card>
-                          ))}
-                        </div>
-                      </ScrollArea>
-                    </div>
-                  )}
+                  
 
                   {activeWindow === "whatsapp" && (
                     <div className="p-6">
@@ -1835,7 +1978,10 @@ export default function DeepfakeNewsroom() {
                                       ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200"
                                       : ""
                                   }`}
-                                  onClick={() => setSelectedContact(contact.id)}
+                                  onClick={() => {
+                                    setSelectedContact(contact.id)
+                                    marcarMensajesComoLeidos(contact.id)
+                                  }}      
                                 >
                                   <div className="flex items-center gap-3">
                                     <div className="relative">
@@ -1917,38 +2063,72 @@ export default function DeepfakeNewsroom() {
                           <CardContent className="p-0 flex flex-col h-[400px]">
                             {/* Mensajes */}
                             <ScrollArea className="flex-1 p-4 bg-gradient-to-br from-gray-50 to-green-50">
-                              <div className="space-y-2">
-                                {getContactMessages(selectedContact).map((msg) => (
-                                  <div key={msg.id} className={`flex ${msg.isOwn ? "justify-end" : "justify-start"}`}>
-                                    <div
-                                      className={`max-w-xs p-3 rounded-lg cursor-pointer relative transition-all hover:scale-105 ${
-                                        msg.isOwn
-                                          ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg"
-                                          : msg.messageType === "urgent"
-                                            ? "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-300 animate-pulse"
-                                            : "bg-white text-gray-800 shadow-md border border-gray-200"
-                                      }`}
-                                      onClick={() => msg.caseId && openCase(msg.caseId)}
-                                    >
-                                      {msg.messageType === "urgent" && (
-                                        <AlertTriangle className="w-4 h-4 text-red-600 absolute top-1 right-1 animate-bounce" />
-                                      )}
-                                      <p className="text-sm font-medium">{msg.content}</p>
-                                      <div className="flex items-center justify-between mt-1">
-                                        <p className={`text-xs ${msg.isOwn ? "text-green-100" : "text-gray-500"}`}>
-                                          {msg.timestamp}
-                                        </p>
-                                        {msg.isOwn && (
-                                          <div className="flex">
-                                            <CheckCircle className="w-3 h-3 text-green-200" />
-                                          </div>
-                                        )}
-                                      </div>
-                                    </div>
-                                  </div>
-                                ))}
-                              </div>
-                            </ScrollArea>
+  <div className="space-y-2">
+    {getContactMessages(selectedContact).map((msg) => (
+      <div key={msg.id} className={`flex ${msg.isOwn ? "justify-end" : "justify-start"}`}>
+        <div
+          className={`max-w-xs p-3 rounded-lg cursor-pointer relative transition-all hover:scale-105 ${
+            msg.isOwn
+              ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg"
+              : msg.messageType === "urgent"
+                ? "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-300 animate-pulse"
+                : "bg-white text-gray-800 shadow-md border border-gray-200"
+          }`}
+          onClick={() => msg.caseId && openCase(msg.caseId)}
+        >
+          {msg.messageType === "urgent" && (
+            <AlertTriangle className="w-4 h-4 text-red-600 absolute top-1 right-1 animate-bounce" />
+          )}
+
+          {/* Contenido del mensaje */}
+          <p className="text-sm font-medium">{msg.content}</p>
+
+          {/* Interacción por checkbox si requiere respuesta */}
+          {msg.requiereRespuesta && !msg.respondido && !msg.expirado && (
+            <form
+              onSubmit={(e) => {
+                e.preventDefault()
+                responderWhatsapp(msg.id, true)
+              }}
+              className="mt-2"
+            >
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" required />
+                Confirmo lo solicitado
+              </label>
+              <button
+                type="submit"
+                className="mt-1 bg-green-600 text-white px-3 py-1 rounded text-sm"
+              >
+                Enviar
+              </button>
+            </form>
+          )}
+
+          {/* Estados visuales */}
+          {msg.respondido && (
+            <p className="text-green-600 text-xs mt-1">✅ Respondido</p>
+          )}
+          {msg.expirado && (
+            <p className="text-red-600 text-xs mt-1">⏰ No respondiste a tiempo</p>
+          )}
+
+          <div className="flex items-center justify-between mt-1">
+            <p className={`text-xs ${msg.isOwn ? "text-green-100" : "text-gray-500"}`}>
+              {msg.timestamp}
+            </p>
+            {msg.isOwn && (
+              <div className="flex">
+                <CheckCircle className="w-3 h-3 text-green-200" />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    ))}
+  </div>
+</ScrollArea>
+
 
                             {/* Input de mensaje */}
                             <div className="p-4 bg-white border-t border-gray-200">
