@@ -12,6 +12,8 @@ import Briefing from "./briefing/page"
 
 import { Oswald, Anton, Merriweather, Roboto } from 'next/font/google'
 
+import { NoticiasReales } from './NoticiasReales';
+
 const oswald = Oswald({
   subsets: ['latin'],
   weight: ['400', '700'], // podés ajustar los pesos según necesites
@@ -262,6 +264,8 @@ const prompts = [
   }
 ]
 
+// Para llevar el orden de cosnultas de las distintas Apis
+let ApiOrden = 0
 
 const obtenerParametrosPorNivel = (nivel: number) => {
   // escalar calidad con nivel
@@ -751,7 +755,122 @@ useEffect(() => {
 
     return newCase
   }
-  
+
+// CASOS ALEATORIOS
+// Consulta las Apis de noticias, si alguna devuelte error se prueba con otra.
+// Si todas devuelven error (nos comimos todas las request gratis) se devuelve vacio
+const apiHandlers = [
+  // Api NewsApi
+  async (query: string, apiKey: string, page: number) => {
+    console.log("Usando NewsApi");
+    const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=es&pageSize=10&page=${page}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    
+    // Si dio error retonra vacio
+    if (data.status !== "ok" || !Array.isArray(data.articles)) {
+      console.warn(`⚠️ NewsAPI devolvió advertencia: ${data.message || "estructura inválida"}`);
+      return [];
+    }
+    // Si esta todo bien retorna la noticia
+    return data.articles.map((a: any) => ({
+      image: a.urlToImage,
+      title: a.title,
+      description: a.description
+    }));
+  },
+
+  async (query: string, apiKey: string) => {
+    // Api GNews
+    console.log("Usando Gnews");
+    const url = `https://gnews.io/api/v4/search?q=${query}&lang=es&token=${apiKey}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    // Si dio error retonra vacio
+    if (!Array.isArray(data.articles)) {
+      console.warn(`⚠️ GNews devolvió advertencia: ${data.message || "estructura inválida"}`);
+      return [];
+    }
+
+    // Si esta todo bien retorna la noticia
+    return data.articles.map((a: any) => ({
+      image: a.image,
+      title: a.title,
+      description: a.description
+    }));
+  },
+
+  async (query: string, apiKey: string) => {
+    // Api NewsData
+    console.log("Usando NewsData");
+    const url = `https://newsdata.io/api/1/news?apikey=${apiKey}&language=es&q=${query}`;
+    const res = await fetch(url);
+    const data = await res.json();
+
+    // Si dio error retonra vacio
+    if (!Array.isArray(data.results)) {
+      console.warn(`⚠️ NewsData devolvió advertencia: ${data.message || "estructura inválida"}`);
+      return [];
+    }
+    // Si esta todo bien retorna la noticia
+    return data.results.map((a: any) => ({
+      image: a.image_url,
+      title: a.title,
+      description: a.description
+    }));
+  }
+];
+
+  const ApisNoticiasKeys = [
+    "2c97d461a1824274bae74e31a41df742", // NewsAPI
+    "e32ee9c040ba92805d15d7379f3aceec", // GNews
+    "pub_73960f1b56a349cb89fb0484090abcb9" // NewsData
+  ]
+
+// CASOS INICIALES
+// Utiliza la funcion apiHandlers para traer las noticias.
+// Si todas devuelven error (nos comimos todas las request gratis) se usa el Json con noticias estaticas
+  const obtenerNoticiaDesdeApis = async (queries: string[]) => {
+    const query = queries[Math.floor(Math.random() * queries.length)]
+    const page = Math.floor(Math.random() * 5) + 1
+
+    for (let intento = 0; intento < apiHandlers.length; intento++) {
+      const i = (ApiOrden + intento) % apiHandlers.length
+      try {
+        const noticias = await apiHandlers[i](query, ApisNoticiasKeys[i], page)
+        const validas = noticias.filter(n =>
+          n.image && n.image.startsWith("http") && (n.title || n.description))
+
+        if (validas.length > 0) {
+          ApiOrden = (i + 1) % apiHandlers.length // avanzamos al próximo para la próxima llamada
+          return validas[Math.floor(Math.random() * validas.length)]
+        }
+      } catch (error) {
+        console.error(`❌ Error en API handler ${i}:`, error)
+      }
+    }
+
+    // Si todas las APIs fallaron
+    console.warn("⚠️ Todas las APIs fallaron. Usando noticia local.");
+
+    // Filtrá las que no se usaron todavia
+    const disponibles = NoticiasReales.filter(n =>
+      n.image &&
+      n.image.startsWith("http") &&
+      !imagenesUsadas.has(n.image)
+    );
+
+    if (disponibles.length === 0) {
+      console.warn("⚠️ No quedan noticias locales sin repetir. Usando cualquiera.");
+      return NoticiasReales[Math.floor(Math.random() * NoticiasReales.length)];
+    }
+
+    // Toma una noticia que no se haya usado
+    const seleccionada = disponibles[Math.floor(Math.random() * disponibles.length)];
+    imagenesUsadas.add(seleccionada.image); // Agrega a la lista de usadas
+    return seleccionada;
+  }
 
   const agregarCasosAleatorios = async (nivel: number) => {
     const nuevosCasos: MediaCase[] = []
@@ -764,9 +883,13 @@ useEffect(() => {
         "terremoto", "huracán", "desinformación", "redes sociales", "censura digital", "corte suprema", "europa",
         "sistema financiero"
         ]
-   
-
-
+    
+    // Posiciones 
+    //  0 -NewsAPI   1 -GNews    2 -NewsData.io 
+    const ApisNoticiasKeys = [ ["2c97d461a1824274bae74e31a41df742"],["e32ee9c040ba92805d15d7379f3aceec"],["pub_73960f1b56a349cb89fb0484090abcb9"] ]
+    let url = ``
+        
+   if (ApiOrden > 2) {ApiOrden= 0 }     
     for (let i = 0; i < 2; i++) {
       const usarIA = Math.random() > 0.5
 
@@ -782,54 +905,82 @@ useEffect(() => {
           newCase.description = ` "${prompt}"`
           enviarMensajeDelJefe(`Hola Juan  ¿Revisaste los nuevos casos? ${title}`, 30)
       } else {
-        const apiKey = "6dd659fc00ee4febb2de5608ba4dc6b4"
-   
-  const query = queries[Math.floor(Math.random() * queries.length)]
-  const page = Math.floor(Math.random() * 5) + 1 // entre 1 y 5
 
-  const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=es&pageSize=10&page=${page}`
+        console.log("Api orden: " + ApiOrden)
+        const apiKey = ApisNoticiasKeys[ApiOrden][0];
+        const query = queries[Math.floor(Math.random() * queries.length)];
+        const page = Math.floor(Math.random() * 5) + 1;
 
-  try {
-    const res = await fetch(url)
-    const data = await res.json()
-    console.log("📰 Respuesta de NewsAPI:", data)
+        let success = false;
+        let intentos = 0;
+        let ordenInicial = ApiOrden;
 
-    const validArticles = data.articles.filter((a: any) =>
-      a.urlToImage &&
-      a.urlToImage.startsWith("http") &&
-      !a.urlToImage.includes("default") &&
-      !a.urlToImage.includes("logo") &&
-      a.description &&
-      !imagenesUsadas.has(a.urlToImage)
-    )
+        while (intentos < apiHandlers.length && !success) {
+          const apiIndex = (ordenInicial + intentos) % apiHandlers.length;
+          const apiKey = ApisNoticiasKeys[apiIndex][0];
 
-    if (validArticles.length === 0) {
-      console.warn("❌ No se encontraron artículos válidos o con imágenes no repetidas.")
-      continue
+          try {
+            const results = await apiHandlers[apiIndex](query, apiKey, page);
+            const validArticles = results.filter((a: any) =>
+              a.image &&
+              a.image.startsWith("http") &&
+              !a.image.includes("default") &&
+              !a.image.includes("logo") &&
+              a.description &&
+              !imagenesUsadas.has(a.image)
+            );
+
+            if (validArticles.length === 0) throw new Error("Sin artículos válidos");
+
+            const selected = validArticles[Math.floor(Math.random() * validArticles.length)];
+            imagenesUsadas.add(selected.image);
+
+            newCase.isDeepfake = false;
+            newCase.mediaUrl = selected.image;
+            newCase.realImageUrl = selected.image;
+            newCase.title = selected.description || selected.title || "Caso de noticia";
+            newCase.description = selected.title || "Noticia generada automáticamente";
+
+            success = true;
+            ApiOrden = (apiIndex + 1) % apiHandlers.length; // Avanza a la siguiente API
+          } catch (err) {
+            console.warn(`API ${apiIndex} falló:`, err);
+            intentos++;
+          }
+        }
+
+        // Si ninguna API sirvió (apiHandlers devolvio vacio) se usan los  datos de noticiasReales.js
+        if (!success) {
+          console.log("Obteniendo casos de JSON de auxilio");
+
+          const disponibles = NoticiasReales.filter(n =>
+            n.image &&
+            n.image.startsWith("http") &&
+            !imagenesUsadas.has(n.image)
+          );
+
+          let noticia;
+
+          if (disponibles.length === 0) {
+            console.warn("⚠️ No quedan noticias locales sin repetir. Usando cualquiera.");
+            noticia = NoticiasReales[Math.floor(Math.random() * NoticiasReales.length)];
+          } else {
+            noticia = disponibles[Math.floor(Math.random() * disponibles.length)];
+            imagenesUsadas.add(noticia.image); // Agrega a la lista de usadas
+          }
+
+          newCase.isDeepfake = false;
+          newCase.mediaUrl = noticia.image;
+          newCase.realImageUrl = noticia.image;
+          newCase.title = noticia.description || noticia.title || "Caso local";
+          newCase.description = noticia.title || "Noticia cargada localmente";
+          ApiOrden = (ordenInicial + 1) % apiHandlers.length;
+        }
+
+      }
+
+      nuevosCasos.push(newCase)
     }
-
-    const selected = validArticles[Math.floor(Math.random() * validArticles.length)]
-
-    // Registrar imagen usada
-    imagenesUsadas.add(selected.urlToImage)
-
-    newCase.isDeepfake = false
-    newCase.mediaUrl = selected.urlToImage
-    newCase.realImageUrl = selected.urlToImage
-    newCase.title = selected.description || selected.title || "Caso de noticia"
-    newCase.description = selected.title || "Noticia generada automáticamente"
-
-  } catch (error) {
-    console.error("❌ Error al obtener noticias desde NewsAPI:", error)
-    continue
-  }
-}
-
-
-nuevosCasos.push(newCase)
-
-
-}
 
     setMediaCases((prev) => [...prev, ...nuevosCasos])
     setCaseCounter((prev) => prev + nuevosCasos.length)
@@ -981,6 +1132,16 @@ nuevosCasos.push(newCase)
     const generarCasosIniciales = async () => {
       const newLevel = 1
 
+      const queries = [
+      "argentina", "milei", "guerra", "ucrania", "rusia", "nasa", "elon musk", "luna", "inteligencia artificial",
+      "bitcoin", "inflación", "crisis energética", "cambio climático", "siria", "iran", "eeuu", "israel", "hamas",
+      "tecnología", "5g", "ciberseguridad", "hackeo", "fake news", "trump", "biden", "macron", "china", "taiwán",
+      "brics", "corea del norte", "otan", "crimen organizado", "trata de personas", "nuclear", "energía solar",
+      "inteligencia militar", "deepfake", "vacunas", "pandemia", "covid", "amazonas", "incendios forestales",
+      "terremoto", "huracán", "desinformación", "redes sociales", "censura digital", "corte suprema", "europa",
+      "sistema financiero"
+      ]
+
       for (let i = 0; i < 3; i++) {
         const { prompt, title } = prompts[Math.floor(Math.random() * prompts.length)]
         const imageUrl = await generarImagen(prompt, newLevel)
@@ -997,30 +1158,18 @@ nuevosCasos.push(newCase)
       }
 
       for (let i = 0; i < 3; i++) {
-        const apiKey = "1156f2ce38be432490c3fec02ffcfb1b"
-        const queries = ["milei", "argentina", "fake news", "ai", "politics", "president"]
-        const query = queries[Math.floor(Math.random() * queries.length)]
-        const url = `https://newsapi.org/v2/everything?q=${query}&apiKey=${apiKey}&language=es&pageSize=10`
+        const articulo = await obtenerNoticiaDesdeApis(queries)
 
-        try {
-          const res = await fetch(url)
-          const data = await res.json()
-          const articleWithImage = data.articles.find((a: any) => a.urlToImage)
-          if (!articleWithImage) continue
+        const newCase = generateNewCase(newLevel)
+        newCase.isDeepfake = false
+        newCase.realImageUrl = articulo.image
+        newCase.mediaUrl = articulo.image
+        newCase.title = articulo.title || "Noticia sin título"
+        newCase.description = articulo.description || "Generada automáticamente"
 
-          const newCase = generateNewCase(newLevel)
-          newCase.isDeepfake = false
-          newCase.realImageUrl = articleWithImage.urlToImage
-          newCase.mediaUrl = articleWithImage.urlToImage
-          newCase.title = articleWithImage.description || "Noticia sin descripción" // ✅ Aquí usás la descripción
-          newCase.description = articleWithImage.title || "Noticia generada automáticamente" // Opcional
+        setMediaCases((prev) => [...prev, newCase])
+        setCaseCounter((prev) => prev + 1)
 
-          setMediaCases((prev) => [...prev, newCase])
-          setCaseCounter((prev) => prev + 1)
-        } catch (error) {
-          console.error("Error fetching initial news case:", error)
-          continue
-        }
       }
 
       setNotifications((prev) => [...prev, "Casos generados desde IA y noticias reales"])
