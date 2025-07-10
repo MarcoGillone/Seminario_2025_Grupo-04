@@ -9,6 +9,8 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Progress } from "@/components/ui/progress"
 import Tour from "./TourContainer"
 import Briefing from "./briefing/page"
+import { prompts_p1, prompts_p2, prompts_p3, prompts_p4, prompts_p5, prompts_p6, prompts_p7, prompts_p8, prompts_p9, prompts_p10  } from "./prompts";
+
 
 import { Oswald, Anton, Merriweather, Roboto } from 'next/font/google'
 
@@ -180,7 +182,7 @@ const whatsappContacts: WhatsAppContact[] = [
     isOnline: false,
   },
 ]
-
+/*
 const prompts = [
   {
     prompt: "Hombre astronauta caminando en la luna, planeta Tierra visible al fondo, traje espacial realista, nave de fondo",
@@ -262,6 +264,19 @@ const prompts = [
     prompt: "Lanzamiento de cohete desde base desértica, cielo despejado, polvo en suspensión",
     title: "Cohete de carga pesada es lanzado desde base secreta; video despierta sospechas de violación de tratados internacionales de espacio"
   }
+]*/
+
+const prompts = [
+  ...prompts_p1,
+  ...prompts_p2,
+  ...prompts_p3,
+  ...prompts_p4,
+  ...prompts_p5,
+  ...prompts_p6,
+  ...prompts_p7,
+  ...prompts_p8,
+  ...prompts_p9,
+  ...prompts_p10
 ]
 
 // Para llevar el orden de cosnultas de las distintas Apis
@@ -896,13 +911,13 @@ const apiHandlers = [
       const newCase = generateNewCase(nivel)
 
       if (usarIA) {
-          const { prompt, title } = prompts[Math.floor(Math.random() * prompts.length)]
+          const { prompt, title, description } = prompts[Math.floor(Math.random() * prompts.length)]
           const imageUrl = await generarImagen(prompt, nivel)
           newCase.isDeepfake = true
           newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
           newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
           newCase.title = title // ✅ usar el prompt como título
-          newCase.description = ` "${prompt}"`
+          newCase.description = ` "${description}"`
           enviarMensajeDelJefe(`Hola Juan  ¿Revisaste los nuevos casos? ${title}`, 30)
       } else {
 
@@ -1143,7 +1158,7 @@ const apiHandlers = [
       ]
 
       for (let i = 0; i < 3; i++) {
-        const { prompt, title } = prompts[Math.floor(Math.random() * prompts.length)]
+        const { prompt, title, description } = prompts[Math.floor(Math.random() * prompts.length)]
         const imageUrl = await generarImagen(prompt, newLevel)
 
         const newCase = generateNewCase(newLevel)
@@ -1151,7 +1166,7 @@ const apiHandlers = [
         newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
         newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
         newCase.title = title // ✅ Aquí agregás el prompt como título
-        newCase.description = `"${title}"` // Opcional: agregás descripción
+        newCase.description = `"${description}"` // Opcional: agregás descripción
 
         setMediaCases((prev) => [...prev, newCase])
         setCaseCounter((prev) => prev + 1)
@@ -2560,6 +2575,16 @@ const apiHandlers = [
                                     </p>
                                   </div>
                                 )}
+                                
+                                {wrongAnswers.includes(currentCase.id) && (
+                                  <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-300 rounded-lg">
+                                    <p className="text-orange-800 text-sm font-bold">
+                                      <strong>Motivos del error:</strong>
+                                      <br />• XXXXX
+                                    </p>
+                                  </div>
+                                )}
+
                               </div>
                             </CardContent>
                           </Card>
