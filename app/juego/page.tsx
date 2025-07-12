@@ -417,20 +417,37 @@ const rankTitles = [
 ]
 
 const bossMessages = [
-  "Alex, necesito esos análisis YA! ⏰",
+  "Juan, necesito esos análisis YA! ⏰",
   "La competencia nos está pisando los talones 😤",
   "¿Cuánto tiempo más necesitas? El director está preguntando...",
   "URGENTE: Tenemos que publicar en 30 minutos!",
   "¿Ya verificaste las imágenes? No podemos permitirnos errores!",
-  "Alex, responde por favor. Esto es crítico! 🚨",
+  "Juan, responde por favor. Esto es crítico! 🚨",
   "Si no tenemos esto listo, perdemos la exclusiva",
   "¿Estás ahí? Necesito una actualización AHORA",
   "Tiempo límite: 15 minutos para el primer análisis",
-  "Alex, esto puede definir tu carrera. ¡Concéntrate!",
-  "¡ALEX! ¿Dónde están los resultados? 😡",
+  "Juan, esto puede definir tu carrera. ¡Concéntrate!",
+  "¡JUAN! ¿Dónde están los resultados? 😡",
   "El director quiere verte en su oficina...",
   "Esto es inaceptable. Demasiados errores.",
 ]
+
+const motivosErrorReales = [
+  "Está publicada en varios medios reconocidos.",
+  "Las imágenes coinciden con las difundidas en medios confiables.",
+  "No presenta indicios visuales de manipulación digital para desinformar.",
+  "El lenguaje es objetivo y sin sensacionalismo.",
+  "Existen registros oficiales que avalan los hechos.",
+  "Expertos reconocidos han validado la información.",
+  "Datos abiertos respaldan los hechos narrados.",
+  "Verificada por múltiples entidades independientes.",
+  "No existen contradicciones en las fuentes oficiales."
+]
+
+function tomarMotivoErrorAleatorio(pool: string[], count: number): string[] {
+  const shuffled = [...pool].sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, count)
+}
 
 export default function DeepfakeNewsroom() {
   // aca tienen que ir todos los componentes que queremos resaltar
@@ -461,9 +478,7 @@ export default function DeepfakeNewsroom() {
   const [mostrarVideoVictory, setMostrarVideoVictory] = useState(true);
   const [backgroundAudio, setBackgroundAudio] = useState<HTMLAudioElement | null>(null)
   const [isMuted, setIsMuted] = useState(false)
-  
-
-
+  const [casosYaGenerados, setCasosYaGenerados] = useState(false)
 
 function marcarMensajesComoLeidos(contactId: string) {
   setWhatsappMessages((prev) =>
@@ -983,6 +998,7 @@ const apiHandlers = [
             newCase.realImageUrl = selected.image;
             newCase.title = selected.description || selected.title || "Caso de noticia";
             newCase.description = selected.title || "Noticia generada automáticamente";
+            newCase.clues = tomarMotivoErrorAleatorio(motivosErrorReales, 2)
 
             success = true;
             ApiOrden = (apiIndex + 1) % apiHandlers.length; // Avanza a la siguiente API
@@ -1017,6 +1033,7 @@ const apiHandlers = [
           newCase.realImageUrl = noticia.image;
           newCase.title = noticia.description || noticia.title || "Caso local";
           newCase.description = noticia.title || "Noticia cargada localmente";
+          newCase.clues = tomarMotivoErrorAleatorio(motivosErrorReales, 2)
           ApiOrden = (ordenInicial + 1) % apiHandlers.length;
         }
 
@@ -1137,7 +1154,7 @@ const apiHandlers = [
         from: "boss",
         fromName: "Roberto Martínez (Jefe)",
         content:
-          "¡Bienvenido al Centro de Operaciones, Juan Tienes varios casos urgentes que analizar hoy. ¡Que comience la misión!",
+          "¡Bienvenido al Panel de Análisis, Juan Tienes varios casos urgentes que analizar hoy. ¡Que comience la Evaluación!",
         timestamp: "09:00",
         isOwn: false,
         avatar: "RM",
@@ -1160,7 +1177,7 @@ const apiHandlers = [
         id: "wa3",
         from: "colleague",
         fromName: "María García (Colega)",
-        content: "¿Cómo vas con la misión? Si necesitas backup, avísame. ¡Somos un equipo!",
+        content: "¿Cómo vas con los análisis? Si necesitas backup, avísame. ¡Somos un equipo!",
         timestamp: "10:50",
         isOwn: false,
         avatar: "MG",
@@ -1233,6 +1250,7 @@ const apiHandlers = [
         newCase.mediaUrl = articulo.image
         newCase.title = articulo.title || "Noticia sin título"
         newCase.description = articulo.description || "Generada automáticamente"
+        newCase.clues = tomarMotivoErrorAleatorio(motivosErrorReales, 2)
 
         setMediaCases((prev) => [...prev, newCase])
         setCaseCounter((prev) => prev + 1)
@@ -1245,8 +1263,11 @@ const apiHandlers = [
       setMostrarTour(true)
     }
 
-    generarCasosIniciales()
-  }, [])
+    if (loadingInicial && !mostrarIntro && !casosYaGenerados) {
+      generarCasosIniciales()
+      setCasosYaGenerados(true)
+    }
+  }, [loadingInicial, mostrarIntro, casosYaGenerados])
 
   // Verificar victoria
   useEffect(() => {
@@ -1276,7 +1297,7 @@ const apiHandlers = [
     if (penaltiesPorErrores >= 2 && !isGameOver) {
       setIsGameOver(true)
       setGameOverReason("fired")
-      showBoss("furious", "¡MISIÓN FALLIDA! Has sido relevado del servicio.", 8000)
+      showBoss("furious", "¡MISIÓN FALLIDA! Has sido eliminado de la prueba.", 8000)
     }
   }, [penaltiesPorErrores, isGameOver])
 
@@ -1291,7 +1312,7 @@ const apiHandlers = [
           if (!isGameOver) {
             setIsGameOver(true)
             setGameOverReason("timeout")
-            showBoss("angry", "¡Tiempo agotado! La misión ha fallado.", 6000)
+            showBoss("angry", "¡Tiempo agotado! La evaluación ha terminado.", 6000)
           }
           return 0
         }
@@ -1442,9 +1463,9 @@ const apiHandlers = [
 
   const restartGame = () => {
     setTimeLeft(300) // Timer de 5 minutos
-    setGameStarted(false) // Resetear estado del juego
+    setGameStarted(false)
     setCurrentCase(null)
-    setMediaCases(initialCases)
+    setMediaCases([]) // eliminiar casos que hayan quedado en el panel
     setSolvedCases([])
     setWrongAnswers([])
     setScore(0)
@@ -1469,14 +1490,19 @@ const apiHandlers = [
       streak: 0,
       maxStreak: 0,
     })
+    setMostrarVideoVictory(true) // tengo que mostrar el video de victoria
+    setMostrarVideoGameOver(true) // tengo que mostrar los video de game over
     setMostrarTour(true) // Mostrar tour nuevamente
+    setWhatsappMessages([]) // tengo que reiniciar los mensajes de WhatsApp
+    setCasosYaGenerados(false) // Reiniciar el estado de generación de casos
+    setLoadingInicial(true) // Reiniciar el estado de carga inicial
   }
 
   const startGame = () => {
     setGameStarted(true)
     setNotifications((prev) => [...prev, "¡Misión iniciada! El tiempo corre..."])
     setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
-    showBoss("normal", "¡La misión ha comenzado! Analiza los casos con cuidado.", 4000)
+    showBoss("normal", "¡La evaluación ha comenzado! Analiza los casos con cuidado.", 4000)
   }
   
   const iniciarAudio = () => {
@@ -1647,7 +1673,7 @@ const apiHandlers = [
                 Descargar Certificado
               </Button>
               <Button onClick={restartGame} variant="outline" size="lg">
-                Nueva Misión
+                Jugar de Nuevo
               </Button>
             </div>
           </CardContent>
@@ -2722,13 +2748,16 @@ const apiHandlers = [
               setMostrarTour(false)
 
               if (!tourYaFinalizado) {
-                setTourYaFinalizado(true) // marcar como ya finalizado
-                startGame() // mostrar el mensaje del jefe SOLO la primera vez
+                setTourYaFinalizado(true)
+                startGame()          // primera vez: muestra mensaje del jefe
+              } else {
+                setGameStarted(true) // reinicio: arranca el timer de nuevo sin mostrar mensaje
               }
             }}
             setActiveWindow={setActiveWindow}
           />
         )}
+
 
       </div>
     </div>
