@@ -10,6 +10,7 @@ import { Progress } from "@/components/ui/progress"
 import Tour from "./TourContainer"
 import Briefing from "./briefing/page"
 import { prompts_p1, prompts_p2, prompts_p3, prompts_p4, prompts_p5, prompts_p6, prompts_p7, prompts_p8, prompts_p9, prompts_p10  } from "./prompts";
+import { noticiasFalsas } from './NoticiasFalsas'
 
 
 import { Oswald, Anton, Merriweather, Roboto } from 'next/font/google'
@@ -87,6 +88,7 @@ interface MediaCase {
   xpReward: number
   complexity: string[]
   status?: "pending" | "solved" | "wrong"
+  clues: string[]
 }
 
 interface Email {
@@ -347,6 +349,7 @@ const initialCases: MediaCase[] = [
       "Revisa la calidad de imagen alrededor del rostro",
       "Los bordes del cabello parecen artificiales",
     ],
+    clues: [],
     mediaUrl: "img/CR7 Herbalife.jpg",
     realImageUrl: "img/CR7 Herbalife.jpg",
     xpReward: 100,
@@ -367,6 +370,7 @@ const initialCases: MediaCase[] = [
       "Micro-expresiones faciales inconsistentes",
       "Calidad de audio superior a la del video",
     ],
+    clues: [],
     mediaUrl: "img/Trump IA.jpg",
     realImageUrl: "img/Trump IA.jpg",
     xpReward: 100,
@@ -386,6 +390,7 @@ const initialCases: MediaCase[] = [
       "No hay artefactos digitales visibles",
       "Metadatos de la cámara son coherentes",
     ],
+    clues: [],
     mediaUrl: "img/Francella_Rambo.jpg",
     realImageUrl: "img/Francella_Rambo.jpg",
     xpReward: 100,
@@ -706,7 +711,7 @@ useEffect(() => {
           "Científico en laboratorio",
           "Artista en estudio de grabación",
         ],
-        sources: ["Filtración interna", "Paparazzi", "Redes sociales", "Fuente confidencial"],
+        sources: ["Filtración interna", "Paparazzi", "Redes sociales", "Fuente confidencial", "Foto filtrada", "Vigilancia", "Testimonio anónimo", "Hackeo"],
         descriptions: [
           "Imagen comprometedora que podría cambiar la opinión pública",
           "Fotografía que contradice declaraciones oficiales",
@@ -723,7 +728,7 @@ useEffect(() => {
           "Admisión de culpabilidad",
           "Conversación comprometedora",
         ],
-        sources: ["Grabación filtrada", "Vigilancia", "Testimonio anónimo", "Hackeo"],
+        sources: ["Filtración interna", "Paparazzi", "Redes sociales", "Fuente confidencial", "Foto filtrada", "Vigilancia", "Testimonio anónimo", "Hackeo"],
         descriptions: [
           "Imagen que muestra comportamiento contradictorio",
           "Grabación de conversación privada reveladora",
@@ -764,6 +769,7 @@ useEffect(() => {
       xpReward: xpRewards[difficulty],
       complexity: complexityByDifficulty[difficulty],
       hints: generateHints(difficulty, isDeepfake),
+      clues: [],
       mediaUrl: `/placeholder.svg?height=300&width=400&text=${encodeURIComponent(template.titles[0])}`,
       realImageUrl: `/placeholder.svg?height=300&width=400&text=${encodeURIComponent(template.titles[0])}`,
     }
@@ -911,14 +917,36 @@ const apiHandlers = [
       const newCase = generateNewCase(nivel)
 
       if (usarIA) {
-          const { prompt, title, description } = prompts[Math.floor(Math.random() * prompts.length)]
-          const imageUrl = await generarImagen(prompt, nivel)
-          newCase.isDeepfake = true
-          newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
-          newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
-          newCase.title = title // ✅ usar el prompt como título
-          newCase.description = ` "${description}"`
-          enviarMensajeDelJefe(`Hola Juan  ¿Revisaste los nuevos casos? ${title}`, 30)
+          const { prompt, title, description, clues } = prompts[Math.floor(Math.random() * prompts.length)]
+          let imageUrl = null;
+
+          try {
+            imageUrl = await generarImagen(prompt, nivel)
+          } catch (err) {
+            console.error("Error generando imagen con la API de imagenes IA:", err)
+          }
+
+          if (imageUrl) {
+            newCase.isDeepfake = true
+            newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
+            newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
+            newCase.title = title
+            newCase.description = ` "${description}"`
+            newCase.clues = clues
+          }
+          else {
+            console.log("Usando caso local de deepfake.")
+            const index = Math.floor(Math.random() * noticiasFalsas.length)
+            const [localCase] = noticiasFalsas.splice(index, 1)
+
+            newCase.isDeepfake = true
+            newCase.mediaUrl = localCase.urlImg
+            newCase.realImageUrl = localCase.urlImg
+            newCase.title = localCase.title
+            newCase.description = localCase.description
+            newCase.clues = localCase.clues
+          }
+          enviarMensajeDelJefe(`Hola Juan  ¿Revisaste el nuevo caso? con titulo: ${title}`, 30)
       } else {
 
         console.log("Api orden: " + ApiOrden)
@@ -1007,8 +1035,8 @@ const apiHandlers = [
     const deepfakeHints: Record<Difficulty, string[]> = {
       easy: [
         "Observa inconsistencias en la iluminación",
-        "Revisa los bordes del rostro",
-        "Busca artefactos de compresión",
+        "Revisa los rostros si los hay",
+        "Busca tipografia extraña",
       ],
       medium: ["Busca artefactos de IA generativa", "Analiza patrones de píxeles anómalos", "Revisa metadatos de creación"],
       hard: [
@@ -1158,15 +1186,39 @@ const apiHandlers = [
       ]
 
       for (let i = 0; i < 3; i++) {
-        const { prompt, title, description } = prompts[Math.floor(Math.random() * prompts.length)]
-        const imageUrl = await generarImagen(prompt, newLevel)
+        const { prompt, title, description, clues } = prompts[Math.floor(Math.random() * prompts.length)]
+        
+        let imageUrl = null;
 
-        const newCase = generateNewCase(newLevel)
-        newCase.isDeepfake = true
-        newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
-        newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
-        newCase.title = title // ✅ Aquí agregás el prompt como título
-        newCase.description = `"${description}"` // Opcional: agregás descripción
+        try {
+          imageUrl = await generarImagen(prompt, newLevel)
+        } catch (err) {
+          console.error("Error generando imagen con la API del modelo de IA:", err)
+        }
+
+        let newCase = generateNewCase(newLevel)
+
+        if (imageUrl) {
+          newCase.isDeepfake = true
+          newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
+          newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
+          newCase.title = title
+          newCase.description = `"${description}"`
+          newCase.clues = clues
+        }
+        else {
+          console.log("Usando caso local de deepfake.")
+          // Si no se pudo generar la imagen, usar un caso local de deepfake
+          const index = Math.floor(Math.random() * noticiasFalsas.length)
+          const [localCase] = noticiasFalsas.splice(index, 1)
+
+          newCase.isDeepfake = true
+          newCase.mediaUrl = localCase.urlImg
+          newCase.realImageUrl = localCase.urlImg
+          newCase.title = localCase.title
+          newCase.description = localCase.description
+          newCase.clues = localCase.clues
+        }
 
         setMediaCases((prev) => [...prev, newCase])
         setCaseCounter((prev) => prev + 1)
@@ -2105,13 +2157,7 @@ const apiHandlers = [
                                   </Badge>
                                   <span className={`text-xs text-gray-500 text-bold font-medium ${roboto.className}`}>{case_.source}</span>
                                 </div>
-                                <div className="flex flex-wrap gap-1">
-                                  {case_.complexity.map((comp, idx) => (
-                                    <Badge key={idx} variant="secondary" className="text-xs">
-                                      {comp}
-                                    </Badge>
-                                  ))}
-                                </div>
+
                               </div>
                             </CardContent>
                           </Card>
@@ -2484,22 +2530,11 @@ const apiHandlers = [
                                   </Badge>
                                 </div>
 
-                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                  <h4 className={`font-bold text-blue-800 mb-2 ${roboto.className}`}>Complejidad del Caso:</h4>
-                                  <div className="flex flex-wrap gap-1">
-                                    {currentCase.complexity.map((comp, idx) => (
-                                      <Badge key={idx} variant="secondary" className="text-xs">
-                                        {comp}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                </div>
-
                                 {wrongAnswers.includes(currentCase.id) && (
                                   <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-300 rounded-lg animate-pulse">
                                     <p className="text-red-800 text-sm font-bold">
-                                      ❌ Ya analizaste este caso incorrectamente. Revisa las pistas antes de intentar de
-                                      nuevo.
+                                      ❌ Ya analizaste este caso incorrectamente. Revisa los motivos antes de intentar con
+                                      otro caso.
                                     </p>
                                   </div>
                                 )}
@@ -2575,13 +2610,23 @@ const apiHandlers = [
                                     </p>
                                   </div>
                                 )}
-                                
+
                                 {wrongAnswers.includes(currentCase.id) && (
                                   <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-300 rounded-lg">
                                     <p className="text-orange-800 text-sm font-bold">
                                       <strong>Motivos del error:</strong>
-                                      <br />• XXXXX
                                     </p>
+                                    {currentCase.clues?.length > 0 ? (
+                                      <ul className="mt-2 list-disc list-inside text-orange-800 text-sm">
+                                        {currentCase.clues.map((clue, index) => (
+                                          <li key={index}>{clue}</li>
+                                        ))}
+                                      </ul>
+                                    ) : (
+                                      <p className="text-orange-800 text-sm mt-2">
+                                        No hay pistas disponibles.
+                                      </p>
+                                    )}
                                   </div>
                                 )}
 
