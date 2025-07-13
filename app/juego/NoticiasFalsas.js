@@ -3,7 +3,7 @@
 export const noticiasFalsas = [
   {
     title: "¿Está Martín López detrás de un esquema de evasión millonaria?",
-    description: "En Argentina, se investiga a Martín López, un empresario del sector tecnológico, por supuestas maniobras de evasión fiscal en contratos con firmas extranjeras. Aunque la noticia circuló en medios digitales, no existen documentos judiciales ni denuncias formales que lo involucren. Voceros del empresario califican las versiones como malintencionadas y sin sustento.",
+    description: "Versiones difundidas en portales digitales vinculan a Martín López, empresario tecnológico argentino, con presuntas maniobras de evasión fiscal a través de contratos internacionales. Hasta ahora, no han surgido procesos judiciales ni pruebas documentadas que respalden estas afirmaciones. Desde su entorno aseguran que se trata de especulaciones infundadas para dañar su imagen.",
     prompt: "Portrait of a fictitious Argentinian male businessman wearing a blue suit and glasses, standing in a modern office, looking concerned, holding documents, background with city skyline, realistic lighting, cinematic composition.",
     clues: [
       "Edificios repetitivos y deformes en el fondo urbano.",
@@ -14,7 +14,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Obras urbanas en Valparaíso salpican a la alcaldesa Ana Guzmán",
-    description: "Medios locales han divulgado que Ana Guzmán, alcaldesa de Valparaíso, estaría vinculada a supuestas irregularidades en proyectos de urbanización. Según versiones, existirían contratos adjudicados a empresas cercanas. Hasta el momento, no se han presentado pruebas ni documentos oficiales. Desde la municipalidad niegan cualquier acto indebido y aseguran transparencia total.",
+    description: "Algunos medios chilenos señalan que la alcaldesa Ana Guzmán podría haber favorecido a empresas allegadas en contratos de urbanización en Valparaíso. No hay, por el momento, documentos oficiales ni denuncias formales que sustenten la acusación. La autoridad local rechaza cualquier implicación y sostiene que todo el proceso ha sido transparente.",
     prompt: "Portrait of a fictitious Chilean female politician wearing a red jacket, speaking at a podium outdoors, surrounded by microphones, looking serious, city buildings blurred in the background, realistic photo style, natural daylight.",
     clues: [
       "Fondo borroso y sin detalles arquitectónicos definidos.",
@@ -25,7 +25,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Exposiciones de Jorge Valdez bajo lupa por presuntas obras falsificadas",
-    description: "Circula en redes la versión de que el artista peruano Jorge Valdez habría expuesto obras falsas atribuidas a pintores europeos en importantes ferias de arte. No existe ninguna investigación oficial ni denuncia judicial que sustente estas acusaciones. Colegas y galeristas han defendido la trayectoria del artista y califican la noticia como un ataque sin fundamentos.",
+    description: "Publicaciones en redes sociales afirman que Jorge Valdez, artista peruano, habría presentado cuadros falsificados atribuidos a pintores europeos en prestigiosas ferias de arte. Sin embargo, no hay procesos judiciales ni evidencias concretas que confirmen estos señalamientos. Figuras del ambiente artístico han defendido su trayectoria, calificando el rumor de infundado.",
     prompt: "Portrait of a fictitious Peruvian male artist wearing a paint-stained apron, standing in front of a colorful abstract painting, holding paintbrushes, looking pensive, art studio background, realistic lighting, vibrant colors.",
     clues: [
       "Pintura del fondo demasiado uniforme, sin relieve ni textura real.",
@@ -36,7 +36,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Escándalo político en Uruguay: apuntan contra el diputado Sergio Duarte",
-    description: "Un portal digital publicó que el diputado uruguayo Sergio Duarte estaría implicado en maniobras de tráfico de influencias para beneficiar empresas amigas en licitaciones estatales. No hay documentos oficiales ni denuncias judiciales que lo relacionen con tales prácticas. El legislador negó rotundamente las acusaciones y advirtió que tomará acciones legales por difamación.",
+    description: "Sergio Duarte, actual diputado uruguayo, ha sido señalado en publicaciones digitales que lo acusan de participar en maniobras de tráfico de influencias para beneficiar a empresas allegadas en procesos de licitación estatal. Estas versiones han generado revuelo político y han sido replicadas en redes sociales, alimentando especulaciones sobre corrupción en el ámbito público. No obstante, hasta el presente, ninguna dependencia judicial ha iniciado actuaciones ni se han presentado pruebas sólidas que vinculen a Duarte con estas prácticas. El legislador ha calificado las denuncias como “calumnias” y aseguró que se reserva el derecho de iniciar acciones legales contra los responsables de difundir información falsa.",
     prompt: "Portrait of a fictitious Uruguayan male politician in a gray suit, speaking at a press conference, making hand gestures, crowd of journalists and cameras in front, government building backdrop, realistic style, daylight.",
     clues: [
       "Dedos rígidos y proporciones algo antinaturales.",
@@ -58,7 +58,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Influencer colombiano Nicolás Ramos vinculado a supuesta red de lavado de dinero utilizando plataformas de donaciones en internet",
-    description: "Diversas páginas de noticias publicaron que Nicolás Ramos, un influencer colombiano con miles de seguidores, estaría involucrado en una red que utiliza donaciones online para lavar dinero. Sin embargo, hasta ahora no existen investigaciones oficiales ni procesos judiciales en curso. El influencer niega las acusaciones y anuncia acciones legales.",
+    description: "Nicolás Ramos, influencer colombiano con una comunidad creciente en redes sociales, ha quedado en el ojo de la tormenta tras la aparición de versiones en sitios digitales que lo vinculan con una supuesta red de lavado de dinero operando a través de plataformas de donaciones online. La noticia, que ha captado la atención de usuarios y seguidores, carece por ahora de sustento en documentos oficiales o causas judiciales abiertas. El joven creador de contenido desmintió rotundamente las acusaciones y anunció que tomará medidas legales para limpiar su nombre y proteger su carrera profesional.",
     prompt: "Portrait of a fictitious Colombian male social media influencer wearing trendy casual clothes, sitting in front of a ring light and smartphone on tripod, looking anxious, neon colors in the background, realistic modern photography style.",
     clues: [
       "Piel perfecta y expresión rígida, sin imperfecciones reales.",
@@ -69,7 +69,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Gobernador paraguayo investigado por supuesta compra de terrenos sobrevaluados con fondos públicos",
-    description: "Se ha viralizado que un gobernador paraguayo habría comprado terrenos sobrevaluados utilizando fondos públicos destinados a obras sociales. Hasta el momento, no hay documentos oficiales ni denuncias judiciales que sustenten las acusaciones. Desde el gobierno local calificaron las versiones como rumores sin fundamento alguno.",
+    description: "n los últimos días, distintas plataformas digitales han divulgado informaciones que vinculan a un gobernador paraguayo con la presunta compra de terrenos a valores inflados, operación que habría sido financiada con fondos públicos originalmente destinados a programas sociales. Estas publicaciones, que se han viralizado rápidamente y suscitado intensos debates en redes, no han sido acompañadas hasta el momento por documentos oficiales, investigaciones judiciales ni pronunciamientos formales de las autoridades competentes. Desde el entorno gubernamental se ha calificado la noticia como parte de una maniobra política para desprestigiar la gestión, asegurando que todas las adquisiciones de tierras se realizaron conforme a los procesos legales y administrativos vigentes. Mientras tanto, sectores de la oposición exigen claridad y transparencia, manteniendo el tema en el centro de la agenda pública.",
     prompt: "Portrait of a fictitious Paraguayan male politician wearing a light-colored suit, standing outdoors in front of a large map or urban plan, pointing with his hand, reporters around, realistic daylight scene, photojournalistic style.",
     clues: [
       "Mapa de fondo ilegible y parcialmente borroso.",
@@ -80,7 +80,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Periodista acusada de recibir sobornos para favorecer a empresas en reportajes televisivos",
-    description: "Circula en redes sociales la versión de que Gabriela Castro, periodista ecuatoriana, habría recibido pagos de empresas privadas para emitir reportajes televisivos favorables. No existen denuncias judiciales ni pruebas sólidas que vinculen a la comunicadora con tales prácticas. La periodista calificó la información como una difamación sin fundamentos.",
+    description: "Gabriela Castro, figura reconocida del periodismo televisivo en Ecuador, ha sido blanco de publicaciones en redes sociales que la acusan de recibir pagos de empresas privadas para elaborar reportajes periodísticos con contenido favorable hacia sus intereses. Hasta el momento, no existen documentos oficiales ni procesos judiciales que avalen estas denuncias. La periodista, a través de un comunicado, rechazó enérgicamente las acusaciones, asegurando que su trabajo se rige por principios éticos y advirtiendo que no dudará en iniciar acciones legales para proteger su trayectoria profesional.",
     prompt: "Portrait of a fictitious Ecuadorian female journalist wearing a stylish blazer, standing in front of a TV studio camera, holding a microphone, looking serious but calm, bright studio lights behind, realistic photo style.",
     clues: [
       "Piel excesivamente lisa, sin texturas naturales.",
@@ -277,7 +277,7 @@ export const noticiasFalsas = [
     urlImg: "./fakenews/actriz-peruana-secretos.png"
   },
   {
-    title: "Influencer argentina inventó una relación amorosa con un famoso futbolista Alemán Joan Kimmich para obtener seguidores",
+    title: "Influencer argentina inventó una relación amorosa con el famoso futbolista Alemán Joan Kimmich para obtener seguidores",
     description: "Se ha viralizado que la influencer argentina Mariana López habría inventado una relación sentimental con el futbolista 'Joan Kimmich' para aumentar su popularidad en redes sociales. No hay pruebas ni declaraciones del deportista implicado. La joven negó las acusaciones y aseguró que su carrera no se basa en escándalos inventados.",
     prompt: "Portrait of a fictitious Argentinian female influencer wearing trendy casual clothes, holding a smartphone, sitting in a bright modern café, looking slightly embarrassed but defiant, neon wall decor in the background, realistic photo style.",
     clues: [
@@ -333,7 +333,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Investigador argentino acusado de ocultar datos sobre efectos adversos de nuevo tratamiento contra el cáncer",
-    description: "Circula en varios portales que el investigador argentino Nicolás Franco habría ocultado datos sobre posibles efectos adversos de un innovador tratamiento experimental contra el cáncer. Hasta el momento, no existen denuncias judiciales ni publicaciones científicas que respalden tales afirmaciones. El científico negó rotundamente cualquier irregularidad en sus investigaciones.",
+    description: "Se multiplican las versiones sobre que el investigador argentino Nicolás Franco habría ocultado datos sobre posibles efectos adversos de un innovador tratamiento experimental contra el cáncer. Hasta el momento, no existen denuncias judiciales ni publicaciones científicas que respalden tales afirmaciones. El científico negó rotundamente cualquier irregularidad en sus investigaciones.",
     prompt: "Portrait of a fictitious Argentinian male scientist wearing a white lab coat, standing in a laboratory, looking worried while reviewing medical charts, lab equipment and chemical flasks in the background, realistic photography style, clean lighting.",
     clues: [
       "Logo ilegible o deformado en la bata.",
@@ -465,7 +465,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Rumores sobre hallazgo de manuscritos antiguos en cuevas mexicanas que reescribirían la historia prehispánica",
-    description: "Circula en redes la versión de que arqueólogos habrían hallado manuscritos en cuevas mexicanas con datos que cambiarían lo conocido sobre las culturas prehispánicas. No existen publicaciones académicas ni pruebas materiales sobre estos supuestos textos. Investigadores especializados señalaron que se trata de información sin evidencia concreta.",
+    description: "Portales de noticias replican que arqueólogos habrían hallado manuscritos en cuevas mexicanas con datos que cambiarían lo conocido sobre las culturas prehispánicas. No existen publicaciones académicas ni pruebas materiales sobre estos supuestos textos. Investigadores especializados señalaron que se trata de información sin evidencia concreta.",
     prompt: "Photo of a dark cave interior with ancient parchment scrolls partially visible among rocks, archaeologists wearing helmets shining lanterns, hieroglyphic markings faintly seen on walls, realistic archaeological photo style.",
     clues: [
       "Formas de objetos imprecisas.",
