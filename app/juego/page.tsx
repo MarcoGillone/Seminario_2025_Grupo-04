@@ -726,7 +726,7 @@ useEffect(() => {
           "Científico en laboratorio",
           "Artista en estudio de grabación",
         ],
-        sources: ["Filtración interna", "Paparazzi", "Redes sociales", "Fuente confidencial", "Foto filtrada", "Vigilancia", "Testimonio anónimo", "Hackeo"],
+        sources: ["Filtración interna", "Paparazzi", "Redes sociales", "Fuente confidencial", "Foto filtrada", "Testimonio anónimo", "Hackeo"],
         descriptions: [
           "Imagen comprometedora que podría cambiar la opinión pública",
           "Fotografía que contradice declaraciones oficiales",
@@ -1257,7 +1257,7 @@ const apiHandlers = [
 
       }
 
-      setNotifications((prev) => [...prev, "Casos generados desde IA y noticias reales"])
+      setNotifications((prev) => [...prev, "Casos generados para su evaluación. ¡Buena suerte!"])
       setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
       setLoadingInicial(false)
       setMostrarTour(true)
@@ -1500,7 +1500,7 @@ const apiHandlers = [
 
   const startGame = () => {
     setGameStarted(true)
-    setNotifications((prev) => [...prev, "¡Misión iniciada! El tiempo corre..."])
+    setNotifications((prev) => [...prev, "Evaluación iniciada! El tiempo corre..."])
     setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
     showBoss("normal", "¡La evaluación ha comenzado! Analiza los casos con cuidado.", 4000)
   }
@@ -2408,7 +2408,7 @@ const apiHandlers = [
                   {activeWindow === "ai" && (
                     <div className="p-6">
                       <h2 className={`text-3xl font-bold mb-4 flex items-center gap-2 bg-gradient-to-r from-[#111827] to-blue-800 bg-clip-text text-transparent ${anton.className}`}>
-                        <Bot className="w-7 h-7 text-blue-600" />Asistente IA - DeepDetect Pro
+                        Asistente IA - DeepDetect Pro
                       </h2>
                       <div className="space-y-4">
                         {aiResponse && (
@@ -2433,13 +2433,6 @@ const apiHandlers = [
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <Button
-                                variant="outline"
-                                className="w-full justify-start hover:bg-blue-50 border-blue-200"
-                                id="btn-analisis-metadatos"
-                              >
-                                <Eye className="w-4 h-4 mr-2" />Análisis de Metadatos
-                              </Button>
-                              <Button
                                 onClick={() => {
                                   window.open("https://undetectable.ai/es/ai-image-detector", "_blank")
                                 }}
@@ -2448,21 +2441,46 @@ const apiHandlers = [
                                 data-tour="ai-tool-detect"
                                 id="btn-deteccion-imagenes"
                               >
-                                <Zap className="w-4 h-4 mr-2" />Detección de Imágenes
+                                <Zap className="w-4 h-4 mr-2" />Detección de IA en Imágenes
+                              </Button>
+                              <Button
+                                variant="outline"
+                                className="w-full justify-start hover:bg-blue-50 border-blue-200"
+                                id="btn-analisis-metadatos"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  <span>Análisis de Metadatos</span>
+                                </div>
+                                <span className="text-xs font-bold text-red-600 animate-pulse">
+                                  Próximamente
+                                </span>
                               </Button>
                               <Button
                                 variant="outline"
                                 className="w-full justify-start hover:bg-green-50 border-green-200"
                                 id="btn-analisis-facial"
                               >
-                                <Target className="w-4 h-4 mr-2" />Análisis Facial
+                                <div className="flex items-center gap-2">
+                                  <Target className="w-4 h-4 mr-2" />
+                                  <span>Análisis Facial</span>
+                                </div>
+                                <span className="text-xs font-bold text-red-600 animate-pulse">
+                                  Próximamente
+                                </span>
                               </Button>
                               <Button
                                 variant="outline"
                                 className="w-full justify-start hover:bg-orange-50 border-orange-200"
                                 id="btn-sincronizacion"
                               >
-                                <Video className="w-4 h-4 mr-2" />Sincronización Audio-Video
+                                <div className="flex items-center gap-2">
+                                  <Video className="w-4 h-4" />
+                                  <span>Sincronización Audio-Video</span>
+                                </div>
+                                <span className="text-xs font-bold text-red-600 animate-pulse">
+                                  Próximamente
+                                </span>
                               </Button>
                             </CardContent>
                           </Card>
@@ -2470,13 +2488,13 @@ const apiHandlers = [
                           <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
                             <CardHeader>
                               <CardTitle className="text-lg flex items-center gap-2">
-                                <Sparkles className="w-5 h-5 text-green-600" />Consejos del Experto
+                                <span>Consejos del Experto</span>
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
                               <ul className="text-sm space-y-2 text-gray-700">
                                 <li className="flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                   Revisa inconsistencias en iluminación
                                 </li>
                                 <li className="flex items-center gap-2">
@@ -2484,19 +2502,19 @@ const apiHandlers = [
                                   Observa bordes borrosos o pixelados
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                   Analiza sincronización audio-video
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                   Busca artefactos de compresión
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                   Verifica coherencia temporal
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                   Examina micro-expresiones faciales
                                 </li>
                               </ul>
@@ -2528,7 +2546,7 @@ const apiHandlers = [
                   {activeWindow === "analysis" && (
                     <div className="p-6">
                       {currentCase ? (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
                           <Card className="bg-gradient-to-br from-gray-50 to-blue-50 border-blue-200">
                             <CardHeader>
                               <CardTitle className={`flex items-center gap-2 ${merriweather.className}`}>
@@ -2571,7 +2589,7 @@ const apiHandlers = [
                           <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
                             <CardHeader>
                               <CardTitle className={`flex items-center gap-2 ${roboto.className}`}>
-                                Laboratorio de Análisis
+                                Análisis de Evidencia
                               </CardTitle>
                               <CardDescription className={`font-medium ${roboto.className}`}>
                                 ¿Es este contenido auténtico o un deepfake?

@@ -25,7 +25,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Exposiciones de Jorge Valdez bajo lupa por presuntas obras falsificadas",
-    description: "Circula en redes la versión de que el artista peruano Jorge Valdez habría expuesto obras falsas atribuidas a pintores europeos en importantes ferias de arte. Hasta ahora, no existe ninguna investigación oficial ni denuncia judicial que sustente estas acusaciones. Colegas y galeristas han defendido la trayectoria del artista y califican la noticia como un ataque sin fundamentos.",
+    description: "Circula en redes la versión de que el artista peruano Jorge Valdez habría expuesto obras falsas atribuidas a pintores europeos en importantes ferias de arte. No existe ninguna investigación oficial ni denuncia judicial que sustente estas acusaciones. Colegas y galeristas han defendido la trayectoria del artista y califican la noticia como un ataque sin fundamentos.",
     prompt: "Portrait of a fictitious Peruvian male artist wearing a paint-stained apron, standing in front of a colorful abstract painting, holding paintbrushes, looking pensive, art studio background, realistic lighting, vibrant colors.",
     clues: [
       "Pintura del fondo demasiado uniforme, sin relieve ni textura real.",
@@ -443,7 +443,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Se habla de supuestas irregularidades en fichaje millonario de futbolista colombiano hacia club europeo",
-    description: "Ha circulado que el fichaje de un futbolista colombiano hacia un club europeo habría estado marcado por irregularidades económicas y comisiones no declaradas. Hasta ahora, no existen pruebas ni documentos oficiales. La federación colombiana de fútbol negó cualquier conocimiento de irregularidades en transferencias recientes.",
+    description: "Ha circulado que el fichaje de un futbolista colombiano hacia un club europeo habría estado marcado por irregularidades económicas y comisiones no declaradas. La federación colombiana de fútbol negó cualquier conocimiento de irregularidades en transferencias recientes.",
     prompt: "Portrait of a fictitious Colombian male football player wearing a European club jersey, holding a scarf of the team, smiling slightly but looking cautious, stadium crowd blurred in the background, bright daylight, realistic sports photography style.",
     clues: [
       "Palabras ininteligibles.",
@@ -454,7 +454,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Supuestas amenazas entre barras bravas argentinas habrían obligado a suspender partido clave del campeonato local",
-    description: "Diversos portales informaron que supuestas amenazas entre barras bravas habrían llevado a suspender un partido clave del campeonato argentino. Hasta ahora, no existen documentos policiales ni declaraciones oficiales que confirmen esta versión. Autoridades de seguridad desmintieron la existencia de amenazas directas.",
+    description: "Diversos portales informaron que supuestas amenazas entre barras bravas habrían llevado a suspender un partido clave del campeonato argentino. Sin embargo, no existen documentos policiales ni declaraciones oficiales que confirmen esta versión. Autoridades de seguridad desmintieron la existencia de amenazas directas.",
     prompt: "Photo of football stadium stands partially empty, security forces in riot gear standing on field, players leaving the pitch, atmosphere tense and somber, overcast daylight, realistic sports photography style.",
     clues: [
       "Gradas con formas poco coherentes.",
@@ -520,7 +520,7 @@ export const noticiasFalsas = [
   },
   {
     title: "Rumores apuntan a fábrica argentina de galletas por supuesta presencia de fragmentos metálicos en algunos lotes",
-    description: "Diversos medios digitales han publicado que una fábrica argentina de galletas habría producido lotes contaminados con fragmentos metálicos, poniendo en riesgo la salud de los consumidores. Hasta ahora, no existen alertas sanitarias ni retiros oficiales de productos. La empresa negó los hechos y aseguró la seguridad de su producción.",
+    description: "Diversos medios digitales han publicado que una fábrica argentina de galletas habría producido lotes contaminados con fragmentos metálicos, poniendo en riesgo la salud de los consumidores. La empresa negó los hechos y aseguró la seguridad de su producción.",
     prompt: "Photo of packages of cookies displayed in a supermarket aisle in Argentina, close-up of one package being opened by a customer, bright lights reflecting on shelves, realistic food photography style.",
     clues: [
       "Paquetes con simbolos y letras extrañas.",
