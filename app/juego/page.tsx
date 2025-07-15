@@ -186,7 +186,7 @@ const whatsappContacts: WhatsAppContact[] = [
     isOnline: false,
   },
 ]
-
+/*
 const prompts = [
   {
     prompt: "Hombre astronauta caminando en la luna, planeta Tierra visible al fondo, traje espacial realista, nave de fondo",
@@ -269,7 +269,19 @@ const prompts = [
     title: "Cohete de carga pesada es lanzado desde base secreta; video despierta sospechas de violación de tratados internacionales de espacio"
   }
 ]
-
+*/
+const prompts = [
+  ...prompts_p1,
+  ...prompts_p2,
+  ...prompts_p3,
+  ...prompts_p4,
+  ...prompts_p5,
+  ...prompts_p6,
+  ...prompts_p7,
+  ...prompts_p8,
+  ...prompts_p9,
+  ...prompts_p10
+]
 // Para llevar el orden de cosnultas de las distintas Apis
 let ApiOrden = 0
 
