@@ -13,14 +13,21 @@ const pasos = [
     id: 'whatsapp',
     selector: '#btn-whatsapp',
     titulo: 'Sección WhatsApp',
-    descripcion: 'Acá podes revisar los mensajes que te vayan llegando de diversas fuentes.',
+    descripcion: 'Acá podes revisar los mensajes que te vayan llegando de tu jefe. No te olvides de responder a tiempo!',
     ventana: 'whatsapp',
   },
   {
     id: 'ia-asistente',
     selector: '#btn-ia-asistente',
     titulo: 'IA Asistente',
-    descripcion: 'Interactuá con la IA para obtener consejos sobre el caso y herramientas de análisis.',
+    descripcion: 'Acá podes interactuar con herramientas de IA para obtener consejos sobre el caso.',
+    ventana: 'ai',
+  },/*
+  {
+    id: 'btn-deteccion-imagenes',
+    selector: '#btn-deteccion-imagenes',
+    titulo: 'Detección de Imágenes Generadas por IA',
+    descripcion: 'Usá esta herramienta para verificar si una imagen fue creada o modificada por inteligencia artificial.',
     ventana: 'ai',
   },
   {
@@ -30,13 +37,7 @@ const pasos = [
     descripcion: 'Esta herramienta te permite examinar los metadatos ocultos en archivos multimedia para detectar manipulaciones.',
     ventana: 'ai',
   },
-  {
-    id: 'btn-deteccion-imagenes',
-    selector: '#btn-deteccion-imagenes',
-    titulo: 'Detección de Imágenes Generadas por IA',
-    descripcion: 'Usá esta herramienta para verificar si una imagen fue creada o modificada por inteligencia artificial.',
-    ventana: 'ai',
-  },
+  
   {
     id: 'btn-analisis-facial',
     selector: '#btn-analisis-facial',
@@ -50,7 +51,7 @@ const pasos = [
     titulo: 'Sincronización Audio-Video',
     descripcion: 'Detectá posibles desajustes entre el audio y el video, útil para evidenciar manipulaciones.',
     ventana: 'ai',
-  },
+  },*/
   {
     id: 'timer-del-juego',
     selector: '#timer-del-juego',
@@ -105,6 +106,8 @@ const Tour = ({ onFinish, setActiveWindow }) => {
       onFinish={finalizar}
       isLastStep={index === pasos.length - 1}
       isFirstStep={index === 0}
+      currentStep={index + 1}
+      totalSteps={pasos.length}
     />
   );
 };
