@@ -28,7 +28,7 @@ export default function Component() {
     {
       id: 1,
       titulo: "Investigación de Deepfakes",
-      descripcion: "Descubre la verdad detrás de medios manipulados en esta experiencia de detective",
+      descripcion: "Analiza noticias y determina si son auténticas o si son deepfakes generados mediante IA",
       imagen: "/img/deepfake_detection.png",
       categoria: "Investigación",
       dificultad: "Avanzado",
@@ -49,7 +49,7 @@ export default function Component() {
       id: 1,
       titulo: "Detección de Deepfakes Básico",
       descripcion: "Aprende los fundamentos para identificar contenido manipulado",
-      duracion: "4 semanas",
+      duracion: "1 semana",
       nivel: "Principiante",
       estudiantes: 1250,
     },
@@ -155,7 +155,7 @@ export default function Component() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       {/* Header */}
-      <header className="border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
+      <header className="sticky top-0 z-50 border-b border-slate-800 bg-slate-900/50 backdrop-blur-sm">
         <div className="container mx-auto px-4 py-4">
           <nav className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -170,10 +170,7 @@ export default function Component() {
                 Cursos
               </Link>
               <Link href="#recursos" className="text-slate-300 hover:text-purple-400 transition-colors">
-                Recursos
-              </Link>
-              <Link href="#acerca" className="text-slate-300 hover:text-purple-400 transition-colors">
-                Acerca
+                Recursos útiles
               </Link>
               <Button
                 variant="outline"
@@ -190,7 +187,7 @@ export default function Component() {
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <div className="max-w-4xl mx-auto">
-            <Badge className="mb-4 bg-purple-600 text-white">Experiencia de Juego de Nueva Generación</Badge>
+            <Badge className="mb-4 bg-purple-600 text-white">Experiencia educativa de Nueva Generación</Badge>
             <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
               Descubre el Engaño
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-pink-400">
@@ -199,9 +196,10 @@ export default function Component() {
               </span>
             </h1>
             <p className="text-xl text-slate-300 mb-8 max-w-2xl mx-auto">
-              Sumérgete en juegos inmersivos que desafían tu percepción de la realidad. Domina el arte de detectar
+              Sumérgete en cursos y juegos inmersivos que desafían tu percepción de la realidad. Domina el arte de detectar
               deepfakes y manipulación digital.
             </p>
+            {/*
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 size="lg"
@@ -215,10 +213,11 @@ export default function Component() {
                 size="lg"
                 variant="outline"
                 className="border-slate-600 text-slate-300 hover:bg-slate-800 bg-transparent"
+                onClick={() => (window.location.href = "/curso-deepfake")}
               >
                 Explorar Cursos
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>
@@ -245,7 +244,8 @@ export default function Component() {
                       alt={juego.titulo}
                       width={300}
                       height={200}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-auto object-contain group-hover:scale-105 transition-transform duration-300"
+
                     />
                     <div className="absolute top-4 left-4">
                       <Badge
@@ -265,30 +265,25 @@ export default function Component() {
                 <CardContent className="p-6">
                   <CardTitle className="text-white mb-2 text-xl">{juego.titulo}</CardTitle>
                   <CardDescription className="text-slate-400 mb-4">{juego.descripcion}</CardDescription>
-                  <Button
-                    className={`w-full ${
-                      juego.esPrincipal
-                        ? "bg-purple-600 hover:bg-purple-700 text-white"
-                        : "bg-slate-700 hover:bg-slate-600 text-white"
-                    }`}
-                    onClick={() => {
-                      if (juego.esPrincipal) {
+
+                  {juego.esPrincipal ? (
+                    <Button
+                      className="w-full bg-purple-600 hover:bg-purple-700 text-white"
+                      onClick={() => {
                         window.location.href = "/juego"
-                      }
-                    }}
-                  >
-                    {juego.esPrincipal ? (
-                      <>
-                        <ExternalLink className="mr-2 h-4 w-4" />
-                        Jugar Investigación
-                      </>
-                    ) : (
-                      <>
-                        <Play className="mr-2 h-4 w-4" />
-                        Jugar Ahora
-                      </>
-                    )}
-                  </Button>
+                      }}
+                    >
+                      <ExternalLink className="mr-2 h-4 w-4" />
+                      Jugar Investigación
+                    </Button>
+                  ) : (
+                    <Button
+                      className="w-full bg-gray-600 cursor-not-allowed text-white"
+                      disabled
+                    >
+                      Próximamente
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -296,12 +291,17 @@ export default function Component() {
         </div>
       </section>
 
+
       {/* Cursos Section */}
       <section id="cursos" className="py-20 px-4 bg-slate-900/30">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-white mb-4">Cursos Especializados</h2>
-            <p className="text-slate-300 text-lg">Aprende de expertos en seguridad digital y detección de deepfakes</p>
+            <h2 className="text-4xl font-bold text-white mb-4">
+              Cursos Especializados
+            </h2>
+            <p className="text-slate-300 text-lg">
+              Aprende de expertos en seguridad digital y detección de deepfakes
+            </p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
             {cursos.map((curso) => (
@@ -311,7 +311,10 @@ export default function Component() {
               >
                 <CardHeader>
                   <div className="flex items-center justify-between mb-2">
-                    <Badge variant="outline" className="border-purple-400 text-purple-400">
+                    <Badge
+                      variant="outline"
+                      className="border-purple-400 text-purple-400"
+                    >
                       {curso.nivel}
                     </Badge>
                     <div className="flex items-center text-slate-400 text-sm">
@@ -319,18 +322,36 @@ export default function Component() {
                       {curso.estudiantes}
                     </div>
                   </div>
-                  <CardTitle className="text-white text-xl">{curso.titulo}</CardTitle>
-                  <CardDescription className="text-slate-400">{curso.descripcion}</CardDescription>
+                  <CardTitle className="text-white text-xl">
+                    {curso.titulo}
+                  </CardTitle>
+                  <CardDescription className="text-slate-400">
+                    {curso.descripcion}
+                  </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-slate-300 text-sm">Duración: {curso.duracion}</span>
+                    <span className="text-slate-300 text-sm">
+                      Duración: {curso.duracion}
+                    </span>
                     <Award className="h-5 w-5 text-purple-400" />
                   </div>
-                  <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
-                    <BookOpen className="mr-2 h-4 w-4" />
-                    Inscribirse
-                  </Button>
+
+                  {curso.id === 1 ? (
+                    <Link href="/curso-deepfake">
+                      <Button className="w-full bg-purple-600 hover:bg-purple-700 text-white">
+                        <BookOpen className="mr-2 h-4 w-4" />
+                        Ingresar
+                      </Button>
+                    </Link>
+                  ) : (
+                    <Button
+                      className="w-full bg-gray-600 cursor-not-allowed text-white"
+                      disabled
+                    >
+                      Próximamente
+                    </Button>
+                  )}
                 </CardContent>
               </Card>
             ))}
@@ -342,7 +363,7 @@ export default function Component() {
       <section id="recursos" className="py-20 px-4">
         <div className="container mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl font-bold text-white mb-4">Recursos</h2>
+            <h2 className="text-4xl font-bold text-white mb-4">Recursos útiles</h2>
             <p className="text-slate-300 text-lg max-w-3xl mx-auto">
               Accede a las mejores herramientas online para detección de deepfakes, verificación de contenido y análisis
               forense digital
@@ -610,7 +631,7 @@ export default function Component() {
         <div className="container mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-4xl font-bold text-white mb-4">¿Por Qué Elegir Nuestra Plataforma?</h2>
-            <p className="text-slate-300 text-lg">Tecnología avanzada se encuentra con jugabilidad atractiva</p>
+            <p className="text-slate-300 text-lg">Porque te enseñamos a detectar engaños digitales de forma práctica y entretenida</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             <div className="text-center group">
@@ -619,8 +640,7 @@ export default function Component() {
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Detección Avanzada</h3>
               <p className="text-slate-400">
-                Algoritmos de última generación para identificar los deepfakes y manipulaciones digitales más
-                sofisticados
+                Aprende a reconocer señales y patrones que revelan imágenes, videos o audios manipulados mediante inteligencia artificial.
               </p>
             </div>
             <div className="text-center group">
@@ -629,7 +649,7 @@ export default function Component() {
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Análisis en Tiempo Real</h3>
               <p className="text-slate-400">
-                Retroalimentación y análisis instantáneo mientras investigas medios sospechosos y evidencia digital
+                Desarrolla habilidades para analizar contenidos digitales y detectar posibles fraudes o falsificaciones en el momento.
               </p>
             </div>
             <div className="text-center group">
@@ -638,14 +658,14 @@ export default function Component() {
               </div>
               <h3 className="text-xl font-semibold text-white mb-2">Experiencia Inmersiva</h3>
               <p className="text-slate-400">
-                Historias atractivas y escenarios realistas que hacen divertido aprender sobre seguridad digital
+                Participa en casos prácticos y ejercicios interactivos que te ayudarán a comprender y prevenir este tipo de engaños.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* CTA Section 
       <section className="py-20 px-4">
         <div className="container mx-auto text-center">
           <div className="max-w-3xl mx-auto">
@@ -663,11 +683,12 @@ export default function Component() {
             </Button>
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Footer */}
       <footer className="border-t border-slate-800 bg-slate-900/50 py-8 px-4">
         <div className="container mx-auto">
+          {/*
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-2 mb-4 md:mb-0">
               <Eye className="h-6 w-6 text-purple-400" />
@@ -684,9 +705,9 @@ export default function Component() {
                 Soporte
               </Link>
             </div>
-          </div>
+          </div> */}
           <div className="mt-4 pt-4 border-t border-slate-800 text-center text-slate-500">
-            <p>&copy; 2024 TechCheck. Todos los derechos reservados.</p>
+            <p>&copy; 2025 TechCheck. Todos los derechos reservados.</p>
           </div>
         </div>
       </footer>
