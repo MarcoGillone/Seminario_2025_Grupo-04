@@ -10,13 +10,6 @@ const pasos = [
     ventana: 'desktop',
   },
   {
-    id: 'mail',
-    selector: '#btn-mail',
-    titulo: 'Sección Mail',
-    descripcion: 'Acá podes leer los correos relevantes que ponen en contexto al caso.',
-    ventana: 'email',
-  },
-  {
     id: 'whatsapp',
     selector: '#btn-whatsapp',
     titulo: 'Sección WhatsApp',
