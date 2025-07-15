@@ -17,6 +17,8 @@ import { Oswald, Anton, Merriweather, Roboto } from 'next/font/google'
 
 import { NoticiasReales } from './NoticiasReales';
 
+const nivelesYaAnunciados = new Set<number>()
+
 const oswald = Oswald({
   subsets: ['latin'],
   weight: ['400', '700'], // podés ajustar los pesos según necesites
@@ -151,35 +153,35 @@ const whatsappContacts: WhatsAppContact[] = [
   {
     id: "boss",
     name: "Roberto Martínez (Jefe)",
-    avatar: "RM",
+    avatar: "/personajes/Roberto-perfil-feliz.png",
     lastSeen: "en línea",
     isOnline: true,
   },
   {
     id: "source1",
     name: "Fuente Anónima",
-    avatar: "FA",
+    avatar: "/personajes/Fuente-Anonima.jpg",
     lastSeen: "hace 2 min",
     isOnline: true,
   },
   {
     id: "colleague",
     name: "María García (Colega)",
-    avatar: "MG",
+    avatar: "/personajes/MariaGarcia.jpg",
     lastSeen: "hace 5 min",
     isOnline: false,
   },
   {
     id: "tech",
     name: "Soporte Técnico",
-    avatar: "ST",
+    avatar: "/personajes/SoporteTecnico.jpg",
     lastSeen: "hace 1 hora",
     isOnline: false,
   },
   {
     id: "lawyer",
     name: "Bufete Legal Sánchez",
-    avatar: "BL",
+    avatar: "/personajes/Bufete-Legal-Sanchez.jpg",
     lastSeen: "hace 3 horas",
     isOnline: false,
   },
@@ -266,8 +268,8 @@ const prompts = [
     prompt: "Lanzamiento de cohete desde base desértica, cielo despejado, polvo en suspensión",
     title: "Cohete de carga pesada es lanzado desde base secreta; video despierta sospechas de violación de tratados internacionales de espacio"
   }
-]*/
-
+]
+*/
 const prompts = [
   ...prompts_p1,
   ...prompts_p2,
@@ -280,9 +282,11 @@ const prompts = [
   ...prompts_p9,
   ...prompts_p10
 ]
-
 // Para llevar el orden de cosnultas de las distintas Apis
 let ApiOrden = 0
+
+// Para llevar el Conteo de los mensajes del jefe para los nuevos casos
+let NuevosCasosMensaje = 13
 
 const obtenerParametrosPorNivel = (nivel: number) => {
   // escalar calidad con nivel
@@ -315,6 +319,16 @@ function playPenaltySound() {
   const audio = new Audio("/audio/penalidad.mp3")
   audio.volume = 1
   audio.play().catch((e) => console.warn("⚠️ No se pudo reproducir el sonido de penalización:", e))
+}
+
+function esPrimo(n: number): boolean {
+  if (n <= 1) return false
+  if (n === 2) return true
+  if (n % 2 === 0) return false
+  for (let i = 3; i <= Math.sqrt(n); i += 2) {
+    if (n % i === 0) return false
+  }
+  return true
 }
 
 
@@ -506,6 +520,7 @@ function marcarMensajesComoLeidos(contactId: string) {
   })
   const [soundEnabled, setSoundEnabled] = useState(true)
   const [notifications, setNotifications] = useState<string[]>([])
+  const [notificationsWpp, setNotificationsWpp] = useState<string[]>([])
   const [playerStats, setPlayerStats] = useState<PlayerStats>({
     level: 1,
     xp: 0,
@@ -595,6 +610,7 @@ function marcarMensajesComoLeidos(contactId: string) {
     oscillator.stop(audioContext.currentTime + 0.8)
   }
 
+
   const responderWhatsapp = (id: string, respuesta: boolean) => {
   setWhatsappMessages((prev) =>
     prev.map((m) =>
@@ -604,6 +620,7 @@ function marcarMensajesComoLeidos(contactId: string) {
 
   if (respuesta) {
     setScore((prev) => prev + 10)
+    sendWhatsAppMessage()
   } else {
     setScore((prev) => prev - 5)
   }
@@ -638,13 +655,45 @@ function marcarMensajesComoLeidos(contactId: string) {
     content: texto,
     timestamp: new Date().toISOString(),
     isOwn: false,
-    avatar: "RM",
+    avatar: "/personajes/1oberto-perfil-feliz.png",
     messageType: "urgent",
     isRead: false,
     requiereRespuesta: true,
     vencimiento,
     respondido: false,
     respuestaCorrecta,
+    expirado: false
+  }
+
+  setWhatsappMessages((prev) => [...prev, nuevoMensaje])
+  playWhatsAppSound()
+}
+
+  const enviarMensajeDelJefeEnojado = (
+) => {
+  const MensajeJefe = [
+  "¡Tenés que responderle a tu jefe! 😡 Así no vas a llegar a ningún lado... Se te descontaron puntos. 👎",
+  "¿Te pensás que esto es un juego? ¡Respondeme YA! 😤 Perdiste puntos.",
+  "¡No me ignores! 😠 Cada segundo cuenta... Puntos descontados.",
+  "¿Dónde estabas? 😡 ¡Esto no se hace! Se te restaron puntos por desobedecer.",
+  "¡Eh! ¡Estoy hablando! 😤 No contestar tiene consecuencias: menos puntos para vos."
+  ];
+  const id = `whatsapp-${Date.now()}`
+  const vencimiento = Date.now() + 15 * 1000
+
+  const nuevoMensaje: WhatsAppMessage = {
+    id,
+    from: "boss",
+    fromName: "Roberto Martínez (Jefe)",
+    content: MensajeJefe[Math.floor(Math.random() * MensajeJefe.length)],
+    timestamp: new Date().toISOString(),
+    isOwn: false,
+    avatar: "/personajes/Roberto-perfil-feliz.png",
+    messageType: "text",
+    isRead: false,
+    requiereRespuesta: true,
+    vencimiento,
+    respondido: false,
     expirado: false
   }
 
@@ -676,9 +725,11 @@ useEffect(() => {
 
       // Si al menos una penalización fue aplicada, restamos puntos
       if (penalizacionAplicada) {
-        setScore((prev) => prev - 100)
+        setScore((prev) => prev - 25)
         setPenaltiesPorDemora((prev) => prev + 1)
         playPenaltySound()
+        enviarMensajeDelJefeEnojado()
+        setNotificationsWpp((prevNotifs) => [...prevNotifs, `Tienes un nuevo mensaje`])
       }
 
       return actualizados
@@ -687,7 +738,6 @@ useEffect(() => {
 
   return () => clearInterval(interval)
 }, [])
-
 
   useEffect(() => {
     const intervalo = setInterval(() => {
@@ -910,15 +960,14 @@ const apiHandlers = [
 
   const agregarCasosAleatorios = async (nivel: number) => {
     const nuevosCasos: MediaCase[] = []
-    const queries = [
-        "argentina", "milei", "guerra", "ucrania", "rusia", "nasa", "elon musk", "luna", "inteligencia artificial",
-        "bitcoin", "inflación", "crisis energética", "cambio climático", "siria", "iran", "eeuu", "israel", "hamas",
-        "tecnología", "5g", "ciberseguridad", "hackeo", "fake news", "trump", "biden", "macron", "china", "taiwán",
-        "brics", "corea del norte", "otan", "crimen organizado", "trata de personas", "nuclear", "energía solar",
-        "inteligencia militar", "deepfake", "vacunas", "pandemia", "covid", "amazonas", "incendios forestales",
-        "terremoto", "huracán", "desinformación", "redes sociales", "censura digital", "corte suprema", "europa",
-        "sistema financiero"
-        ]
+      const queries = [
+      "argentina", "milei", "guerra", "ucrania", "rusia", "elon musk","eeuu", "israel", "hamas",
+      "trump", "china", "taiwán",
+      "corea del norte","trata de personas", "energía solar",
+      "pandemia", "covid", "amazonas", "incendios forestales",
+      "terremoto", "huracán", "corte suprema", "europa"
+      ]
+
     
     // Posiciones 
     //  0 -NewsAPI   1 -GNews    2 -NewsData.io 
@@ -961,7 +1010,14 @@ const apiHandlers = [
             newCase.description = localCase.description
             newCase.clues = localCase.clues
           }
-          enviarMensajeDelJefe(`Hola Juan  ¿Revisaste el nuevo caso? con titulo: ${title}`, 30)
+
+          NuevosCasosMensaje++
+
+          // Solo enviar mensaje si el contador es primo
+          if (esPrimo(NuevosCasosMensaje)) {
+            enviarMensajeDelJefe(`Hola Juan ¿Revisaste el nuevo caso? con titulo: ${newCase.title}`, 30)
+            setNotificationsWpp((prevNotifs) => [...prevNotifs, `Tienes un nuevo mensaje`])
+          }
       } else {
 
         console.log("Api orden: " + ApiOrden)
@@ -1157,32 +1213,9 @@ const apiHandlers = [
           "¡Bienvenido al Panel de Análisis, Juan Tienes varios casos urgentes que analizar hoy. ¡Que comience la Evaluación!",
         timestamp: "09:00",
         isOwn: false,
-        avatar: "RM",
+        avatar: "/personajes/Roberto-perfil-feliz.png",
         messageType: "text",
         isRead: true,
-      },
-      {
-        id: "wa2",
-        from: "source1",
-        fromName: "Fuente Anónima",
-        content: "Tengo algo que te va a interesar... Nivel de amenaza: ALTO 👀",
-        timestamp: "10:45",
-        isOwn: false,
-        caseId: "case2",
-        avatar: "FA",
-        messageType: "text",
-        isRead: false,
-      },
-      {
-        id: "wa3",
-        from: "colleague",
-        fromName: "María García (Colega)",
-        content: "¿Cómo vas con los análisis? Si necesitas backup, avísame. ¡Somos un equipo!",
-        timestamp: "10:50",
-        isOwn: false,
-        avatar: "MG",
-        messageType: "text",
-        isRead: false,
       },
     ]
     setWhatsappMessages(initialMessages)
@@ -1193,13 +1226,11 @@ const apiHandlers = [
       const newLevel = 1
 
       const queries = [
-      "argentina", "milei", "guerra", "ucrania", "rusia", "nasa", "elon musk", "luna", "inteligencia artificial",
-      "bitcoin", "inflación", "crisis energética", "cambio climático", "siria", "iran", "eeuu", "israel", "hamas",
-      "tecnología", "5g", "ciberseguridad", "hackeo", "fake news", "trump", "biden", "macron", "china", "taiwán",
-      "brics", "corea del norte", "otan", "crimen organizado", "trata de personas", "nuclear", "energía solar",
-      "inteligencia militar", "deepfake", "vacunas", "pandemia", "covid", "amazonas", "incendios forestales",
-      "terremoto", "huracán", "desinformación", "redes sociales", "censura digital", "corte suprema", "europa",
-      "sistema financiero"
+      "argentina", "milei", "guerra", "ucrania", "rusia", "elon musk","eeuu", "israel", "hamas",
+      "trump", "china", "taiwán",
+      "corea del norte","trata de personas", "energía solar",
+      "pandemia", "covid", "amazonas", "incendios forestales",
+      "terremoto", "huracán", "corte suprema", "europa"
       ]
 
       for (let i = 0; i < 3; i++) {
@@ -1367,6 +1398,8 @@ const apiHandlers = [
       const tiempoExtra = calcularTiempoExtraPorNivel(newLevel)
       setTimeLeft((prev) => prev + tiempoExtra)
 
+      
+
       // Actualizar estadísticas del jugador
       setPlayerStats((prev) => {
         const newXp = prev.xp + case_.xpReward
@@ -1376,13 +1409,17 @@ const apiHandlers = [
 
         // Verificar si subió de nivel
         const leveledUp = newPlayerLevel > prev.level
-        if (leveledUp) {
+        const yaAnunciado = nivelesYaAnunciados.has(newPlayerLevel)
+
+        if (leveledUp && !yaAnunciado ) {
+          nivelesYaAnunciados.add(newPlayerLevel)
+
           playLevelUpSound()
           setNotifications((prevNotifs) => [...prevNotifs, `¡NIVEL ${newPlayerLevel}! Nuevo rango: ${newRank}`])
           setTimeout(() => setNotifications((prev) => prev.slice(1)), 8000)
           showBoss("normal", `¡Felicidades! Has alcanzado el nivel ${newPlayerLevel}: ${newRank}`, 5000)
           enviarMensajeDelJefe(`Nivel ${newPlayerLevel} habilitado. ¿Revisaste los nuevos casos?`, 30)
-
+          setNotificationsWpp((prevNotifs) => [...prevNotifs, `Tienes un nuevo mensaje`])
         }
 
         return {
@@ -1405,6 +1442,7 @@ const apiHandlers = [
       setWrongAnswers((prev) => [...prev, caseId])
       setPenaltiesPorErrores((prev) => prev + 1)
       setScore((prev) => Math.max(0, prev - 50))
+
 
       // Resetear racha
       setPlayerStats((prev) => ({
@@ -1432,15 +1470,18 @@ const apiHandlers = [
   }
 
 
+    const Mensajes = [
+        "Okey Jefe!!", "A la orden!", "Trabajando duro!", "En eso estoy!!", "Ahì los reviso jefe!"
+        ]
 
   const sendWhatsAppMessage = () => {
-    if (!newMessage.trim() || isGameOver) return
+    if (isGameOver) return
 
     const newMsg: WhatsAppMessage = {
       id: `wa${Date.now()}`,
       from: "me",
       fromName: "Tú",
-      content: newMessage,
+      content:  Mensajes[Math.floor(Math.random() * Mensajes.length)],
       timestamp: new Date().toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit" }),
       isOwn: true,
       avatar: "AR",
@@ -1451,6 +1492,7 @@ const apiHandlers = [
 
     setWhatsappMessages((prev) => [...prev, newMsg])
     setNewMessage("")
+    marcarMensajesComoLeidos("wa1")
   }
 
   const getContactMessages = (contactId: string) => {
@@ -1480,6 +1522,7 @@ const apiHandlers = [
     setShowVictory(false)
     setBossAppearance({ isVisible: false, mood: "normal", message: "", duration: 0 })
     setNotifications([])
+    setNotificationsWpp([])
     setCaseCounter(4)
     setPlayerStats({
       level: 1,
@@ -1882,6 +1925,60 @@ const apiHandlers = [
           ))}
         </div>
 
+        {/* Notificaciones  Whastapp*/}
+        <div className="fixed top-1/2 right-4 -translate-y-1/2 z-40 space-y-2">
+          {notificationsWpp.map((notification, index) => (
+            <div
+              key={index}
+              onClick={() => {
+                setActiveWindow("whatsapp")
+                whatsappContacts.forEach((contact) => marcarMensajesComoLeidos(contact.id))
+                setTimeout(() => {
+                  setNotificationsWpp((prev) => prev.filter((_, i) => i !== index))
+                }, 0)
+              }}
+              className="relative bg-white text-black px-4 py-3 rounded-lg shadow-lg max-w-sm flex items-start gap-3 border-2 border-red-600 hover:scale-105 duration-300 cursor-pointer transition transform"
+            >
+              {/* Botón de cierre */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setTimeout(() => {
+                    setNotificationsWpp((prev) => prev.filter((_, i) => i !== index))
+                  }, 0)
+                }}
+                className="absolute top-1 right-1 text-white bg-red-600 rounded-full w-5 h-5 text-xs flex items-center justify-center hover:bg-red-700"
+                title="Cerrar"
+              >
+                ✕
+              </button>
+
+              {/* Signo de exclamación con animación incluida de Tailwind */}
+              <div className="flex items-center justify-center text-red-600 text-2xl font-bold animate-bounce">
+                ❗
+              </div>
+
+              {/* Avatar del contacto */}
+              <img
+                src={notification.avatarUrl || "/personajes/Roberto-perfil-feliz.png"}
+                alt="avatar"
+                className="w-10 h-10 rounded-full object-cover border border-green-500"
+              />
+
+              {/* Texto de notificación */}
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-gray-900">
+                  {notification.sender || "Roberto Martínez"}
+                </p>
+                <p className="text-sm text-gray-700">{notification.message || notification}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+
+
+
         {/* Escritorio del periodista */}
         <div className="relative z-10 min-h-screen p-4">
           {/* Monitor/Pantalla principal */}
@@ -2194,74 +2291,116 @@ const apiHandlers = [
 
                   
 
+
                   {activeWindow === "whatsapp" && (
                     <div className="p-6">
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 h-[500px]">
                         {/* Lista de contactos */}
                         <Card className="lg:col-span-1">
-                          <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
+                          <CardHeader className="bg-[#075E54] text-white rounded-t-lg border-b border-gray-700">
                             <CardTitle className="flex items-center gap-2 text-lg">
-                              <MessageCircle className="w-5 h-5" />Comunicaciones Seguras
+                              <MessageCircle className="w-5 h-5" />Contactos
                             </CardTitle>
                           </CardHeader>
                           <CardContent className="p-0">
                             <ScrollArea className="h-[400px]">
-                              {whatsappContacts.map((contact) => (
-                                <div
-                                  key={contact.id}
-                                  className={`p-4 border-b cursor-pointer hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50 transition-all ${
-                                    selectedContact === contact.id
-                                      ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200"
-                                      : ""
-                                  }`}
-                                  onClick={() => {
-                                    setSelectedContact(contact.id)
-                                    marcarMensajesComoLeidos(contact.id)
-                                  }}      
-                                >
-                                  <div className="flex items-center gap-3">
-                                    <div className="relative">
-                                      <Avatar className="w-12 h-12">
-                                        <AvatarFallback
-                                          className={`${
-                                            contact.id === "lawyer"
-                                              ? "bg-red-600 text-white"
-                                              : contact.id === "boss"
-                                                ? "bg-blue-600 text-white"
-                                                : "bg-green-600 text-white"
-                                          }`}
-                                        >
-                                          {contact.avatar}
-                                        </AvatarFallback>
-                                      </Avatar>
-                                      {contact.isOnline && (
-                                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
-                                      )}
-                                    </div>
-                                    <div className="flex-1">
-                                      <div className="flex items-center justify-between">
-                                        <p className="font-medium text-sm">{contact.name}</p>
-                                        {getUnreadCount(contact.id) > 0 && (
-                                          <Badge variant="destructive" className="px-2 py-0 text-xs animate-bounce">
-                                            {getUnreadCount(contact.id)}
-                                          </Badge>
+                              {whatsappContacts.map((contact, index) => {
+                                const isDisabled = index !== 0
+                                return (
+                                  <div
+                                    key={contact.id}
+                                    className={`p-4 border-b transition-all ${
+                                      selectedContact === contact.id
+                                        ? "bg-gradient-to-r from-green-50 to-emerald-50 border-green-200"
+                                        : ""
+                                    } ${
+                                      isDisabled
+                                        ? "opacity-50 cursor-not-allowed pointer-events-none"
+                                        : "cursor-pointer hover:bg-gradient-to-r hover:from-green-50 hover:to-emerald-50"
+                                    }`}
+                                    onClick={() => {
+                                      if (!isDisabled) {
+                                        setSelectedContact(contact.id)
+                                        marcarMensajesComoLeidos(contact.id)
+                                      }
+                                    }}
+                                  >
+                                    <div className="flex items-center gap-3">
+                                      <div className="relative">
+                                        <Avatar className="w-12 h-12 bg-white">
+                                          {contact.avatar.startsWith("/") ? (
+                                            <img
+                                              src={contact.avatar}
+                                              alt={contact.name}
+                                              className="object-cover w-full h-full rounded-full"
+                                            />
+                                          ) : (
+                                            <AvatarFallback
+                                              className={`${
+                                                contact.id === "lawyer"
+                                                  ? "bg-red-600 text-white"
+                                                  : contact.id === "boss"
+                                                  ? "bg-blue-600 text-white"
+                                                  : "bg-green-600 text-white"
+                                              }`}
+                                            >
+                                              {contact.avatar}
+                                            </AvatarFallback>
+                                          )}
+                                        </Avatar>
+                                        {contact.isOnline && (
+                                          <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white animate-pulse"></div>
                                         )}
                                       </div>
-                                      <p className="text-xs text-gray-500">{contact.lastSeen}</p>
+                                      <div className="flex-1">
+                                        <div className="flex items-center justify-between">
+                                          <p className="font-medium text-sm">{contact.name}</p>
+                                          {getUnreadCount(contact.id) > 0 && (
+                                            <Badge
+                                              variant="destructive"
+                                              className="px-2 py-0 text-xs animate-bounce"
+                                            >
+                                              {getUnreadCount(contact.id)}
+                                            </Badge>
+                                          )}
+                                        </div>
+                                        <p className="text-xs text-gray-500">{contact.lastSeen}</p>
+                                      </div>
                                     </div>
                                   </div>
-                                </div>
-                              ))}
+                                )
+                              })}
                             </ScrollArea>
                           </CardContent>
                         </Card>
-
                         {/* Chat */}
                         <Card className="lg:col-span-2">
-                          <CardHeader className="bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-t-lg">
+                          <CardHeader className="bg-[#075E54] text-white rounded-t-lg border-b border-gray-700">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
-                                <Avatar className="w-10 h-10">
+                                {
+                                <Avatar className="w-10 h-10 bg-white">
+                                  {whatsappContacts.find((c) => c.id === selectedContact)?.avatar.startsWith("/") ? (
+                                    <img
+                                      src={whatsappContacts.find((c) => c.id === selectedContact)?.avatar || ""}
+                                      alt="avatar"
+                                      className="object-cover w-full h-full rounded-full"
+                                    />
+                                  ) : (
+                                    <AvatarFallback
+                                      className={`${
+                                        selectedContact === "lawyer"
+                                          ? "bg-red-700 text-white"
+                                          : selectedContact === "boss"
+                                            ? "bg-blue-700 text-white"
+                                            : "bg-green-700 text-white"
+                                      }`}
+                                    >
+                                      {whatsappContacts.find((c) => c.id === selectedContact)?.avatar}
+                                    </AvatarFallback>
+                                  )}
+                                </Avatar>
+                                /* <Avatar className="w-10 h-10">
                                   <AvatarFallback
                                     className={`${
                                       selectedContact === "lawyer"
@@ -2273,7 +2412,7 @@ const apiHandlers = [
                                   >
                                     {whatsappContacts.find((c) => c.id === selectedContact)?.avatar}
                                   </AvatarFallback>
-                                </Avatar>
+                                </Avatar> */}
                                 <div>
                                   <CardTitle className="text-lg">
                                     {whatsappContacts.find((c) => c.id === selectedContact)?.name}
@@ -2284,7 +2423,7 @@ const apiHandlers = [
                                 </div>
                               </div>
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm" className="text-white hover:bg-green-700">
+                                {/* <Button variant="ghost" size="sm" className="text-white hover:bg-green-700">
                                   <Phone className="w-4 h-4" />
                                 </Button>
                                 <Button variant="ghost" size="sm" className="text-white hover:bg-green-700">
@@ -2292,84 +2431,86 @@ const apiHandlers = [
                                 </Button>
                                 <Button variant="ghost" size="sm" className="text-white hover:bg-green-700">
                                   <MoreVertical className="w-4 h-4" />
-                                </Button>
+                                </Button> */}
                               </div>
                             </div>
                           </CardHeader>
                           <CardContent className="p-0 flex flex-col h-[400px]">
                             {/* Mensajes */}
                             <ScrollArea className="flex-1 p-4 bg-gradient-to-br from-gray-50 to-green-50">
-  <div className="space-y-2">
-    {getContactMessages(selectedContact).map((msg) => (
-      <div key={msg.id} className={`flex ${msg.isOwn ? "justify-end" : "justify-start"}`}>
-        <div
-          className={`max-w-xs p-3 rounded-lg cursor-pointer relative transition-all hover:scale-105 ${
-            msg.isOwn
-              ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg"
-              : msg.messageType === "urgent"
-                ? "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-300 animate-pulse"
-                : "bg-white text-gray-800 shadow-md border border-gray-200"
-          }`}
-          onClick={() => msg.caseId && openCase(msg.caseId)}
-        >
-          {msg.messageType === "urgent" && (
-            <AlertTriangle className="w-4 h-4 text-red-600 absolute top-1 right-1 animate-bounce" />
-          )}
+                              <div className="space-y-2">
+                                {getContactMessages(selectedContact).map((msg) => (
+                                  <div key={msg.id} className={`flex ${msg.isOwn ? "justify-end" : "justify-start"}`}>
+                                    <div
+                                      className={`max-w-xs p-3 rounded-lg cursor-pointer relative transition-all hover:scale-105 ${
+                                        msg.isOwn
+                                          ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white shadow-lg"
+                                          : msg.messageType === "urgent"
+                                            ? "bg-gradient-to-r from-red-100 to-pink-100 text-red-800 border border-red-300 animate-pulse"
+                                            : "bg-white text-gray-800 shadow-md border border-gray-200"
+                                      }`}
+                                      onClick={() => msg.caseId && openCase(msg.caseId)}
+                                    >
+                                      {msg.messageType === "urgent" && (
+                                        <AlertTriangle className="w-4 h-4 text-red-600 absolute top-1 right-1 animate-bounce" />
+                                      )}
 
-          {/* Contenido del mensaje */}
-          <p className="text-sm font-medium">{msg.content}</p>
+                                      {/* Contenido del mensaje */}
+                                      <p className="text-sm font-medium">{msg.content}</p>
 
-          {/* Interacción por checkbox si requiere respuesta */}
-          {msg.requiereRespuesta && !msg.respondido && !msg.expirado && (
-            <form
-              onSubmit={(e) => {
-                e.preventDefault()
-                responderWhatsapp(msg.id, true)
-              }}
-              className="mt-2"
-            >
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" required />
-                Confirmo lo solicitado
-              </label>
-              <button
-                type="submit"
-                className="mt-1 bg-green-600 text-white px-3 py-1 rounded text-sm"
-              >
-                Enviar
-              </button>
-            </form>
-          )}
+                                      {/* Interacción por checkbox si requiere respuesta */}
+                                      {msg.requiereRespuesta && !msg.respondido && !msg.expirado && (
+                                        <form
+                                          onSubmit={(e) => {
+                                            e.preventDefault()
+                                            responderWhatsapp(msg.id, true)
+                                            whatsappContacts.map((contact) => marcarMensajesComoLeidos(contact.id))
+                                          }}
+                                          
+                                          className="mt-2"
+                                        >
+                                          {/* <label className="flex items-center gap-2 text-sm">
+                                            <input type="checkbox" required />
+                                            Confirmo lo solicitado
+                                          </label> */}
+                                          <button
+                                            type="submit"
+                                            className="mt-1 bg-green-600 text-white px-3 py-1 rounded text-sm"
+                                          >
+                                            Responder
+                                          </button>
+                                        </form>
+                                      )}
 
-          {/* Estados visuales */}
-          {msg.respondido && (
-            <p className="text-green-600 text-xs mt-1">✅ Respondido</p>
-          )}
-          {msg.expirado && (
-            <p className="text-red-600 text-xs mt-1">⏰ No respondiste a tiempo</p>
-          )}
+                                      {/* Estados visuales */}
+                                      {msg.respondido && (
+                                        <p className="text-green-600 text-xs mt-1">✅ Respondido</p>
+                                      )}
+                                      {msg.expirado && (
+                                        <p className="text-red-600 text-xs mt-1">⏰ No respondiste a tiempo</p>
+                                      )}
 
-          <div className="flex items-center justify-between mt-1">
-            <p className={`text-xs ${msg.isOwn ? "text-green-100" : "text-gray-500"}`}>
-              {msg.timestamp}
-            </p>
-            {msg.isOwn && (
-              <div className="flex">
-                <CheckCircle className="w-3 h-3 text-green-200" />
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    ))}
-  </div>
-</ScrollArea>
+                                      <div className="flex items-center justify-between mt-1">
+                                        <p className={`text-xs ${msg.isOwn ? "text-green-100" : "text-gray-500"}`}>
+                                          {msg.timestamp}
+                                        </p>
+                                        {msg.isOwn && (
+                                          <div className="flex">
+                                            <CheckCircle className="w-3 h-3 text-green-200" />
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </ScrollArea>
 
 
                             {/* Input de mensaje */}
-                            <div className="p-4 bg-white border-t border-gray-200">
+                            <div className="bg-gray-800 text-white rounded-t-lg border-b border-gray-700">
                               <div className="flex items-center gap-2">
-                                <Button variant="ghost" size="sm" className="text-green-600 hover:bg-green-50">
+                                {/* <Button variant="ghost" size="sm" className="text-green-600 hover:bg-green-50">
                                   <Plus className="w-4 h-4" />
                                 </Button>
                                 <Input
@@ -2396,7 +2537,7 @@ const apiHandlers = [
                                   className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
                                 >
                                   <Send className="w-4 h-4" />
-                                </Button>
+                                </Button> */}
                               </div>
                             </div>
                           </CardContent>
