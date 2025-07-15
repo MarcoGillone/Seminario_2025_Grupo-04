@@ -9,6 +9,9 @@ import { ScrollArea } from "@/components/ui/scroll-area"
 import { Progress } from "@/components/ui/progress"
 import Tour from "./TourContainer"
 import Briefing from "./briefing/page"
+import { prompts_p1, prompts_p2, prompts_p3, prompts_p4, prompts_p5, prompts_p6, prompts_p7, prompts_p8, prompts_p9, prompts_p10  } from "./prompts";
+import { noticiasFalsas } from './NoticiasFalsas'
+
 
 import { Oswald, Anton, Merriweather, Roboto } from 'next/font/google'
 
@@ -87,6 +90,7 @@ interface MediaCase {
   xpReward: number
   complexity: string[]
   status?: "pending" | "solved" | "wrong"
+  clues: string[]
 }
 
 interface Email {
@@ -152,7 +156,35 @@ const whatsappContacts: WhatsAppContact[] = [
     avatar: "/personajes/Roberto-perfil-feliz.png",
     lastSeen: "en línea",
     isOnline: true,
-  }
+  },
+  {
+    id: "source1",
+    name: "Fuente Anónima",
+    avatar: "FA",
+    lastSeen: "hace 2 min",
+    isOnline: true,
+  },
+  {
+    id: "colleague",
+    name: "María García (Colega)",
+    avatar: "MG",
+    lastSeen: "hace 5 min",
+    isOnline: false,
+  },
+  {
+    id: "tech",
+    name: "Soporte Técnico",
+    avatar: "ST",
+    lastSeen: "hace 1 hora",
+    isOnline: false,
+  },
+  {
+    id: "lawyer",
+    name: "Bufete Legal Sánchez",
+    avatar: "BL",
+    lastSeen: "hace 3 horas",
+    isOnline: false,
+  },
 ]
 
 const prompts = [
@@ -238,7 +270,6 @@ const prompts = [
   }
 ]
 
-
 // Para llevar el orden de cosnultas de las distintas Apis
 let ApiOrden = 0
 
@@ -307,6 +338,7 @@ const initialCases: MediaCase[] = [
       "Revisa la calidad de imagen alrededor del rostro",
       "Los bordes del cabello parecen artificiales",
     ],
+    clues: [],
     mediaUrl: "img/CR7 Herbalife.jpg",
     realImageUrl: "img/CR7 Herbalife.jpg",
     xpReward: 100,
@@ -327,6 +359,7 @@ const initialCases: MediaCase[] = [
       "Micro-expresiones faciales inconsistentes",
       "Calidad de audio superior a la del video",
     ],
+    clues: [],
     mediaUrl: "img/Trump IA.jpg",
     realImageUrl: "img/Trump IA.jpg",
     xpReward: 100,
@@ -346,6 +379,7 @@ const initialCases: MediaCase[] = [
       "No hay artefactos digitales visibles",
       "Metadatos de la cámara son coherentes",
     ],
+    clues: [],
     mediaUrl: "img/Francella_Rambo.jpg",
     realImageUrl: "img/Francella_Rambo.jpg",
     xpReward: 100,
@@ -372,20 +406,37 @@ const rankTitles = [
 ]
 
 const bossMessages = [
-  "Alex, necesito esos análisis YA! ⏰",
+  "Juan, necesito esos análisis YA! ⏰",
   "La competencia nos está pisando los talones 😤",
   "¿Cuánto tiempo más necesitas? El director está preguntando...",
   "URGENTE: Tenemos que publicar en 30 minutos!",
   "¿Ya verificaste las imágenes? No podemos permitirnos errores!",
-  "Alex, responde por favor. Esto es crítico! 🚨",
+  "Juan, responde por favor. Esto es crítico! 🚨",
   "Si no tenemos esto listo, perdemos la exclusiva",
   "¿Estás ahí? Necesito una actualización AHORA",
   "Tiempo límite: 15 minutos para el primer análisis",
-  "Alex, esto puede definir tu carrera. ¡Concéntrate!",
-  "¡ALEX! ¿Dónde están los resultados? 😡",
+  "Juan, esto puede definir tu carrera. ¡Concéntrate!",
+  "¡JUAN! ¿Dónde están los resultados? 😡",
   "El director quiere verte en su oficina...",
   "Esto es inaceptable. Demasiados errores.",
 ]
+
+const motivosErrorReales = [
+  "Está publicada en varios medios reconocidos.",
+  "Las imágenes coinciden con las difundidas en medios confiables.",
+  "No presenta indicios visuales de manipulación digital para desinformar.",
+  "El lenguaje es objetivo y sin sensacionalismo.",
+  "Existen registros oficiales que avalan los hechos.",
+  "Expertos reconocidos han validado la información.",
+  "Datos abiertos respaldan los hechos narrados.",
+  "Verificada por múltiples entidades independientes.",
+  "No existen contradicciones en las fuentes oficiales."
+]
+
+function tomarMotivoErrorAleatorio(pool: string[], count: number): string[] {
+  const shuffled = [...pool].sort(() => 0.5 - Math.random())
+  return shuffled.slice(0, count)
+}
 
 export default function DeepfakeNewsroom() {
   // aca tienen que ir todos los componentes que queremos resaltar
@@ -416,9 +467,7 @@ export default function DeepfakeNewsroom() {
   const [mostrarVideoVictory, setMostrarVideoVictory] = useState(true);
   const [backgroundAudio, setBackgroundAudio] = useState<HTMLAudioElement | null>(null)
   const [isMuted, setIsMuted] = useState(false)
-  
-
-
+  const [casosYaGenerados, setCasosYaGenerados] = useState(false)
 
 function marcarMensajesComoLeidos(contactId: string) {
   setWhatsappMessages((prev) =>
@@ -702,7 +751,7 @@ useEffect(() => {
           "Científico en laboratorio",
           "Artista en estudio de grabación",
         ],
-        sources: ["Filtración interna", "Paparazzi", "Redes sociales", "Fuente confidencial"],
+        sources: ["Filtración interna", "Paparazzi", "Redes sociales", "Fuente confidencial", "Foto filtrada", "Testimonio anónimo", "Hackeo"],
         descriptions: [
           "Imagen comprometedora que podría cambiar la opinión pública",
           "Fotografía que contradice declaraciones oficiales",
@@ -719,7 +768,7 @@ useEffect(() => {
           "Admisión de culpabilidad",
           "Conversación comprometedora",
         ],
-        sources: ["Grabación filtrada", "Vigilancia", "Testimonio anónimo", "Hackeo"],
+        sources: ["Filtración interna", "Paparazzi", "Redes sociales", "Fuente confidencial", "Foto filtrada", "Vigilancia", "Testimonio anónimo", "Hackeo"],
         descriptions: [
           "Imagen que muestra comportamiento contradictorio",
           "Grabación de conversación privada reveladora",
@@ -760,6 +809,7 @@ useEffect(() => {
       xpReward: xpRewards[difficulty],
       complexity: complexityByDifficulty[difficulty],
       hints: generateHints(difficulty, isDeepfake),
+      clues: [],
       mediaUrl: `/placeholder.svg?height=300&width=400&text=${encodeURIComponent(template.titles[0])}`,
       realImageUrl: `/placeholder.svg?height=300&width=400&text=${encodeURIComponent(template.titles[0])}`,
     }
@@ -906,14 +956,36 @@ const apiHandlers = [
       const newCase = generateNewCase(nivel)
 
       if (usarIA) {
-          const { prompt, title } = prompts[Math.floor(Math.random() * prompts.length)]
-          const imageUrl = await generarImagen(prompt, nivel)
-          newCase.isDeepfake = true
-          newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
-          newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
-          newCase.title = title // ✅ usar el prompt como título
-          newCase.description = ` "${prompt}"`
-          enviarMensajeDelJefe(`Hola Juan  ¿Revisaste los nuevos casos? ${title}`, 30)
+          const { prompt, title, description, clues } = prompts[Math.floor(Math.random() * prompts.length)]
+          let imageUrl = null;
+
+          try {
+            imageUrl = await generarImagen(prompt, nivel)
+          } catch (err) {
+            console.error("Error generando imagen con la API de imagenes IA:", err)
+          }
+
+          if (imageUrl) {
+            newCase.isDeepfake = true
+            newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
+            newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
+            newCase.title = title
+            newCase.description = ` "${description}"`
+            newCase.clues = clues
+          }
+          else {
+            console.log("Usando caso local de deepfake.")
+            const index = Math.floor(Math.random() * noticiasFalsas.length)
+            const [localCase] = noticiasFalsas.splice(index, 1)
+
+            newCase.isDeepfake = true
+            newCase.mediaUrl = localCase.urlImg
+            newCase.realImageUrl = localCase.urlImg
+            newCase.title = localCase.title
+            newCase.description = localCase.description
+            newCase.clues = localCase.clues
+          }
+          enviarMensajeDelJefe(`Hola Juan  ¿Revisaste el nuevo caso? con titulo: ${title}`, 30)
       } else {
 
         console.log("Api orden: " + ApiOrden)
@@ -950,6 +1022,7 @@ const apiHandlers = [
             newCase.realImageUrl = selected.image;
             newCase.title = selected.description || selected.title || "Caso de noticia";
             newCase.description = selected.title || "Noticia generada automáticamente";
+            newCase.clues = tomarMotivoErrorAleatorio(motivosErrorReales, 2)
 
             success = true;
             ApiOrden = (apiIndex + 1) % apiHandlers.length; // Avanza a la siguiente API
@@ -984,6 +1057,7 @@ const apiHandlers = [
           newCase.realImageUrl = noticia.image;
           newCase.title = noticia.description || noticia.title || "Caso local";
           newCase.description = noticia.title || "Noticia cargada localmente";
+          newCase.clues = tomarMotivoErrorAleatorio(motivosErrorReales, 2)
           ApiOrden = (ordenInicial + 1) % apiHandlers.length;
         }
 
@@ -1002,8 +1076,8 @@ const apiHandlers = [
     const deepfakeHints: Record<Difficulty, string[]> = {
       easy: [
         "Observa inconsistencias en la iluminación",
-        "Revisa los bordes del rostro",
-        "Busca artefactos de compresión",
+        "Revisa los rostros si los hay",
+        "Busca tipografia extraña",
       ],
       medium: ["Busca artefactos de IA generativa", "Analiza patrones de píxeles anómalos", "Revisa metadatos de creación"],
       hard: [
@@ -1104,7 +1178,7 @@ const apiHandlers = [
         from: "boss",
         fromName: "Roberto Martínez (Jefe)",
         content:
-          "¡Bienvenido al Centro de Operaciones, Juan Tienes varios casos urgentes que analizar hoy. ¡Que comience la misión!",
+          "¡Bienvenido al Panel de Análisis, Juan Tienes varios casos urgentes que analizar hoy. ¡Que comience la Evaluación!",
         timestamp: "09:00",
         isOwn: false,
         avatar: "/personajes/Roberto-perfil-feliz.png",
@@ -1128,15 +1202,39 @@ const apiHandlers = [
       ]
 
       for (let i = 0; i < 3; i++) {
-        const { prompt, title } = prompts[Math.floor(Math.random() * prompts.length)]
-        const imageUrl = await generarImagen(prompt, newLevel)
+        const { prompt, title, description, clues } = prompts[Math.floor(Math.random() * prompts.length)]
+        
+        let imageUrl = null;
 
-        const newCase = generateNewCase(newLevel)
-        newCase.isDeepfake = true
-        newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
-        newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
-        newCase.title = title // ✅ Aquí agregás el prompt como título
-        newCase.description = `"${title}"` // Opcional: agregás descripción
+        try {
+          imageUrl = await generarImagen(prompt, newLevel)
+        } catch (err) {
+          console.error("Error generando imagen con la API del modelo de IA:", err)
+        }
+
+        let newCase = generateNewCase(newLevel)
+
+        if (imageUrl) {
+          newCase.isDeepfake = true
+          newCase.realImageUrl = imageUrl ?? newCase.realImageUrl
+          newCase.mediaUrl = imageUrl ?? newCase.mediaUrl
+          newCase.title = title
+          newCase.description = `"${description}"`
+          newCase.clues = clues
+        }
+        else {
+          console.log("Usando caso local de deepfake.")
+          // Si no se pudo generar la imagen, usar un caso local de deepfake
+          const index = Math.floor(Math.random() * noticiasFalsas.length)
+          const [localCase] = noticiasFalsas.splice(index, 1)
+
+          newCase.isDeepfake = true
+          newCase.mediaUrl = localCase.urlImg
+          newCase.realImageUrl = localCase.urlImg
+          newCase.title = localCase.title
+          newCase.description = localCase.description
+          newCase.clues = localCase.clues
+        }
 
         setMediaCases((prev) => [...prev, newCase])
         setCaseCounter((prev) => prev + 1)
@@ -1151,20 +1249,24 @@ const apiHandlers = [
         newCase.mediaUrl = articulo.image
         newCase.title = articulo.title || "Noticia sin título"
         newCase.description = articulo.description || "Generada automáticamente"
+        newCase.clues = tomarMotivoErrorAleatorio(motivosErrorReales, 2)
 
         setMediaCases((prev) => [...prev, newCase])
         setCaseCounter((prev) => prev + 1)
 
       }
 
-      setNotifications((prev) => [...prev, "Casos generados desde IA y noticias reales"])
+      setNotifications((prev) => [...prev, "Casos generados para su evaluación. ¡Buena suerte!"])
       setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
       setLoadingInicial(false)
       setMostrarTour(true)
     }
 
-    generarCasosIniciales()
-  }, [])
+    if (loadingInicial && !mostrarIntro && !casosYaGenerados) {
+      generarCasosIniciales()
+      setCasosYaGenerados(true)
+    }
+  }, [loadingInicial, mostrarIntro, casosYaGenerados])
 
   // Verificar victoria
   useEffect(() => {
@@ -1194,7 +1296,7 @@ const apiHandlers = [
     if (penaltiesPorErrores >= 2 && !isGameOver) {
       setIsGameOver(true)
       setGameOverReason("fired")
-      showBoss("furious", "¡MISIÓN FALLIDA! Has sido relevado del servicio.", 8000)
+      showBoss("furious", "¡MISIÓN FALLIDA! Has sido eliminado de la prueba.", 8000)
     }
   }, [penaltiesPorErrores, isGameOver])
 
@@ -1209,7 +1311,7 @@ const apiHandlers = [
           if (!isGameOver) {
             setIsGameOver(true)
             setGameOverReason("timeout")
-            showBoss("angry", "¡Tiempo agotado! La misión ha fallado.", 6000)
+            showBoss("angry", "¡Tiempo agotado! La evaluación ha terminado.", 6000)
           }
           return 0
         }
@@ -1371,9 +1473,9 @@ const apiHandlers = [
 
   const restartGame = () => {
     setTimeLeft(300) // Timer de 5 minutos
-    setGameStarted(false) // Resetear estado del juego
+    setGameStarted(false)
     setCurrentCase(null)
-    setMediaCases(initialCases)
+    setMediaCases([]) // eliminiar casos que hayan quedado en el panel
     setSolvedCases([])
     setWrongAnswers([])
     setScore(0)
@@ -1399,14 +1501,19 @@ const apiHandlers = [
       streak: 0,
       maxStreak: 0,
     })
+    setMostrarVideoVictory(true) // tengo que mostrar el video de victoria
+    setMostrarVideoGameOver(true) // tengo que mostrar los video de game over
     setMostrarTour(true) // Mostrar tour nuevamente
+    setWhatsappMessages([]) // tengo que reiniciar los mensajes de WhatsApp
+    setCasosYaGenerados(false) // Reiniciar el estado de generación de casos
+    setLoadingInicial(true) // Reiniciar el estado de carga inicial
   }
 
   const startGame = () => {
     setGameStarted(true)
-    setNotifications((prev) => [...prev, "¡Misión iniciada! El tiempo corre..."])
+    setNotifications((prev) => [...prev, "Evaluación iniciada! El tiempo corre..."])
     setTimeout(() => setNotifications((prev) => prev.slice(1)), 5000)
-    showBoss("normal", "¡La misión ha comenzado! Analiza los casos con cuidado.", 4000)
+    showBoss("normal", "¡La evaluación ha comenzado! Analiza los casos con cuidado.", 4000)
   }
   
   const iniciarAudio = () => {
@@ -1577,7 +1684,7 @@ const apiHandlers = [
                 Descargar Certificado
               </Button>
               <Button onClick={restartGame} variant="outline" size="lg">
-                Nueva Misión
+                Jugar de Nuevo
               </Button>
             </div>
           </CardContent>
@@ -2141,13 +2248,7 @@ const apiHandlers = [
                                   </Badge>
                                   <span className={`text-xs text-gray-500 text-bold font-medium ${roboto.className}`}>{case_.source}</span>
                                 </div>
-                                <div className="flex flex-wrap gap-1">
-                                  {case_.complexity.map((comp, idx) => (
-                                    <Badge key={idx} variant="secondary" className="text-xs">
-                                      {comp}
-                                    </Badge>
-                                  ))}
-                                </div>
+
                               </div>
                             </CardContent>
                           </Card>
@@ -2419,7 +2520,7 @@ const apiHandlers = [
                   {activeWindow === "ai" && (
                     <div className="p-6">
                       <h2 className={`text-3xl font-bold mb-4 flex items-center gap-2 bg-gradient-to-r from-[#111827] to-blue-800 bg-clip-text text-transparent ${anton.className}`}>
-                        <Bot className="w-7 h-7 text-blue-600" />Asistente IA - DeepDetect Pro
+                        Asistente IA - DeepDetect Pro
                       </h2>
                       <div className="space-y-4">
                         {aiResponse && (
@@ -2444,13 +2545,6 @@ const apiHandlers = [
                             </CardHeader>
                             <CardContent className="space-y-2">
                               <Button
-                                variant="outline"
-                                className="w-full justify-start hover:bg-blue-50 border-blue-200"
-                                id="btn-analisis-metadatos"
-                              >
-                                <Eye className="w-4 h-4 mr-2" />Análisis de Metadatos
-                              </Button>
-                              <Button
                                 onClick={() => {
                                   window.open("https://undetectable.ai/es/ai-image-detector", "_blank")
                                 }}
@@ -2459,21 +2553,46 @@ const apiHandlers = [
                                 data-tour="ai-tool-detect"
                                 id="btn-deteccion-imagenes"
                               >
-                                <Zap className="w-4 h-4 mr-2" />Detección de Imágenes
+                                <Zap className="w-4 h-4 mr-2" />Detección de IA en Imágenes
+                              </Button>
+                              <Button
+                                variant="outline"
+                                className="w-full justify-start hover:bg-blue-50 border-blue-200"
+                                id="btn-analisis-metadatos"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  <span>Análisis de Metadatos</span>
+                                </div>
+                                <span className="text-xs font-bold text-red-600 animate-pulse">
+                                  Próximamente
+                                </span>
                               </Button>
                               <Button
                                 variant="outline"
                                 className="w-full justify-start hover:bg-green-50 border-green-200"
                                 id="btn-analisis-facial"
                               >
-                                <Target className="w-4 h-4 mr-2" />Análisis Facial
+                                <div className="flex items-center gap-2">
+                                  <Target className="w-4 h-4 mr-2" />
+                                  <span>Análisis Facial</span>
+                                </div>
+                                <span className="text-xs font-bold text-red-600 animate-pulse">
+                                  Próximamente
+                                </span>
                               </Button>
                               <Button
                                 variant="outline"
                                 className="w-full justify-start hover:bg-orange-50 border-orange-200"
                                 id="btn-sincronizacion"
                               >
-                                <Video className="w-4 h-4 mr-2" />Sincronización Audio-Video
+                                <div className="flex items-center gap-2">
+                                  <Video className="w-4 h-4" />
+                                  <span>Sincronización Audio-Video</span>
+                                </div>
+                                <span className="text-xs font-bold text-red-600 animate-pulse">
+                                  Próximamente
+                                </span>
                               </Button>
                             </CardContent>
                           </Card>
@@ -2481,13 +2600,13 @@ const apiHandlers = [
                           <Card className="bg-gradient-to-br from-green-50 to-emerald-50 border-green-200">
                             <CardHeader>
                               <CardTitle className="text-lg flex items-center gap-2">
-                                <Sparkles className="w-5 h-5 text-green-600" />Consejos del Experto
+                                <span>Consejos del Experto</span>
                               </CardTitle>
                             </CardHeader>
                             <CardContent>
                               <ul className="text-sm space-y-2 text-gray-700">
                                 <li className="flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-green-500 rounded-full"></span>
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                   Revisa inconsistencias en iluminación
                                 </li>
                                 <li className="flex items-center gap-2">
@@ -2495,19 +2614,19 @@ const apiHandlers = [
                                   Observa bordes borrosos o pixelados
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                   Analiza sincronización audio-video
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                   Busca artefactos de compresión
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                   Verifica coherencia temporal
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <span className="w-2 h-2 bg-pink-500 rounded-full"></span>
+                                  <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
                                   Examina micro-expresiones faciales
                                 </li>
                               </ul>
@@ -2539,7 +2658,7 @@ const apiHandlers = [
                   {activeWindow === "analysis" && (
                     <div className="p-6">
                       {currentCase ? (
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 lg:grid-cols-[60%_40%] gap-6">
                           <Card className="bg-gradient-to-br from-gray-50 to-blue-50 border-blue-200">
                             <CardHeader>
                               <CardTitle className={`flex items-center gap-2 ${merriweather.className}`}>
@@ -2567,22 +2686,11 @@ const apiHandlers = [
                                   </Badge>
                                 </div>
 
-                                <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                                  <h4 className={`font-bold text-blue-800 mb-2 ${roboto.className}`}>Complejidad del Caso:</h4>
-                                  <div className="flex flex-wrap gap-1">
-                                    {currentCase.complexity.map((comp, idx) => (
-                                      <Badge key={idx} variant="secondary" className="text-xs">
-                                        {comp}
-                                      </Badge>
-                                    ))}
-                                  </div>
-                                </div>
-
                                 {wrongAnswers.includes(currentCase.id) && (
                                   <div className="p-4 bg-gradient-to-r from-red-50 to-pink-50 border-2 border-red-300 rounded-lg animate-pulse">
                                     <p className="text-red-800 text-sm font-bold">
-                                      ❌ Ya analizaste este caso incorrectamente. Revisa las pistas antes de intentar de
-                                      nuevo.
+                                      ❌ Ya analizaste este caso incorrectamente. Revisa los motivos antes de intentar con
+                                      otro caso.
                                     </p>
                                   </div>
                                 )}
@@ -2593,7 +2701,7 @@ const apiHandlers = [
                           <Card className="bg-gradient-to-br from-purple-50 to-pink-50 border-purple-200">
                             <CardHeader>
                               <CardTitle className={`flex items-center gap-2 ${roboto.className}`}>
-                                Laboratorio de Análisis
+                                Análisis de Evidencia
                               </CardTitle>
                               <CardDescription className={`font-medium ${roboto.className}`}>
                                 ¿Es este contenido auténtico o un deepfake?
@@ -2658,6 +2766,26 @@ const apiHandlers = [
                                     </p>
                                   </div>
                                 )}
+
+                                {wrongAnswers.includes(currentCase.id) && (
+                                  <div className="p-4 bg-gradient-to-r from-orange-50 to-red-50 border-2 border-orange-300 rounded-lg">
+                                    <p className="text-orange-800 text-sm font-bold">
+                                      <strong>Motivos del error:</strong>
+                                    </p>
+                                    {currentCase.clues?.length > 0 ? (
+                                      <ul className="mt-2 list-disc list-inside text-orange-800 text-sm">
+                                        {currentCase.clues.map((clue, index) => (
+                                          <li key={index}>{clue}</li>
+                                        ))}
+                                      </ul>
+                                    ) : (
+                                      <p className="text-orange-800 text-sm mt-2">
+                                        No hay pistas disponibles.
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
+
                               </div>
                             </CardContent>
                           </Card>
@@ -2750,13 +2878,16 @@ const apiHandlers = [
               setMostrarTour(false)
 
               if (!tourYaFinalizado) {
-                setTourYaFinalizado(true) // marcar como ya finalizado
-                startGame() // mostrar el mensaje del jefe SOLO la primera vez
+                setTourYaFinalizado(true)
+                startGame()          // primera vez: muestra mensaje del jefe
+              } else {
+                setGameStarted(true) // reinicio: arranca el timer de nuevo sin mostrar mensaje
               }
             }}
             setActiveWindow={setActiveWindow}
           />
         )}
+
 
       </div>
     </div>
