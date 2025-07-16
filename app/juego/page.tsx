@@ -315,11 +315,7 @@ const obtenerParametrosPorNivel = (nivel: number) => {
   }
 }
 
-function playPenaltySound() {
-  const audio = new Audio("/audio/penalidad.mp3")
-  audio.volume = 1
-  audio.play().catch((e) => console.warn("⚠️ No se pudo reproducir el sonido de penalización:", e))
-}
+
 
 function esPrimo(n: number): boolean {
   if (n <= 1) return false
@@ -463,6 +459,8 @@ function tomarMotivoErrorAleatorio(pool: string[], count: number): string[] {
   return shuffled.slice(0, count)
 }
 
+
+
 export default function DeepfakeNewsroom() {
   // aca tienen que ir todos los componentes que queremos resaltar
   const [timeLeft, setTimeLeft] = useState(300) // Timer de 5 minutos
@@ -493,6 +491,13 @@ export default function DeepfakeNewsroom() {
   const [backgroundAudio, setBackgroundAudio] = useState<HTMLAudioElement | null>(null)
   const [isMuted, setIsMuted] = useState(false)
   const [casosYaGenerados, setCasosYaGenerados] = useState(false)
+
+function playPenaltySound() {
+  if (isGameOver) return;
+  const audio = new Audio("/audio/penalidad.mp3")
+  audio.volume = 1
+  audio.play().catch((e) => console.warn("⚠️ No se pudo reproducir el sonido de penalización:", e))
+}
 
 function marcarMensajesComoLeidos(contactId: string) {
   setWhatsappMessages((prev) =>
@@ -563,12 +568,14 @@ function marcarMensajesComoLeidos(contactId: string) {
   }
 
   function playWhatsAppSound() {
+    if (isGameOver) return
     const audio = new Audio("/audio/whatsapp.mp3")
     audio.volume = 0.5 // opcional
     audio.play().catch((e) => console.warn("No se pudo reproducir sonido:", e))
   }
 
   const playErrorSound = () => {
+    if (isGameOver) return
     if (!soundEnabled) return
     const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
     const oscillator = audioContext.createOscillator()
@@ -918,6 +925,7 @@ const apiHandlers = [
 // Utiliza la funcion apiHandlers para traer las noticias.
 // Si todas devuelven error (nos comimos todas las request gratis) se usa el Json con noticias estaticas
   const obtenerNoticiaDesdeApis = async (queries: string[]) => {
+    if (isGameOver) return null;
     const query = queries[Math.floor(Math.random() * queries.length)]
     const page = Math.floor(Math.random() * 5) + 1
 
@@ -925,8 +933,7 @@ const apiHandlers = [
       const i = (ApiOrden + intento) % apiHandlers.length
       try {
         const noticias = await apiHandlers[i](query, ApisNoticiasKeys[i], page)
-        const validas = noticias.filter(n =>
-          n.image && n.image.startsWith("http") && (n.title || n.description))
+        const validas = noticias.filter(n => n.image && n.image.startsWith("http") && (n.title || n.description))
 
         if (validas.length > 0) {
           ApiOrden = (i + 1) % apiHandlers.length // avanzamos al próximo para la próxima llamada
@@ -1549,15 +1556,20 @@ const apiHandlers = [
   }
   
   const iniciarAudio = () => {
-  if (backgroundAudio) return // evitar múltiples instancias
+   if (backgroundAudio) {
+    backgroundAudio.play().catch(err => {
+      console.warn("🎵 No se pudo reanudar el audio:", err);
+    });
+    return;
+  }
 
-  const audio = new Audio("/audio/true-detective.mp3")
-  audio.loop = true
-  audio.volume = 0.3
+  const audio = new Audio("/audio/true-detective.mp3");
+  audio.loop = true;
+  audio.volume = 0.3;
   audio.play().catch(err => {
-    console.warn("🎵 El navegador bloqueó el audio automático:", err)
-  })
-  setBackgroundAudio(audio)
+    console.warn("🎵 El navegador bloqueó el audio automático:", err);
+  });
+  setBackgroundAudio(audio);
 }
 
   if (mostrarIntro) {
@@ -1616,6 +1628,7 @@ const apiHandlers = [
   if (showVictory) {
 
     if (mostrarVideoVictory) {
+      if (backgroundAudio) backgroundAudio.pause();
       return (
         <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
           <div className="relative w-full max-w-5xl">
@@ -1624,11 +1637,15 @@ const apiHandlers = [
               autoPlay
               controls
               playsInline
-              onEnded={() => setMostrarVideoVictory(false)}
+              onEnded={() => {setMostrarVideoVictory(false)
+                             
+              }}
               className="w-full rounded-lg shadow-xl"
             />
             <button
-              onClick={() => setMostrarVideoVictory(false)}
+              onClick={() => {setMostrarVideoVictory(false)
+                iniciarAudio();
+              }}
               className="absolute top-4 right-4 bg-white text-black px-4 py-2 rounded-md font-bold hover:bg-gray-200 z-50"
             >
               Omitir video
@@ -1736,6 +1753,7 @@ const apiHandlers = [
   if (isGameOver && gameOverReason !== "victory") {
     
     if (mostrarVideoGameOver) {
+      if (backgroundAudio) backgroundAudio.pause()
         return (
         <div className="fixed inset-0 bg-black flex items-center justify-center z-50">
           <div className="relative w-full max-w-5xl">
@@ -1744,11 +1762,14 @@ const apiHandlers = [
               autoPlay
               controls
               playsInline
-              onEnded={() => setMostrarVideoGameOver(false)}
+              onEnded={() => {setMostrarVideoGameOver(false)
+                             iniciarAudio()}
+              }
               className="w-full rounded-lg shadow-xl"
             />
             <button
-              onClick={() => setMostrarVideoGameOver(false)}
+              onClick={() => {setMostrarVideoGameOver(false)
+                             iniciarAudio()}}
               className="absolute top-4 right-4 bg-white text-black px-4 py-2 rounded-md font-bold hover:bg-gray-200 z-50"
             >
               Omitir video
